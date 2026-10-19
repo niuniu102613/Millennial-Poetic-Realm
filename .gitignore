@@ -1,0 +1,8 @@
+# build output
+target/
+
+# JVM crash logs
+hs_err_pid*.log
+
+# temporary extracted archives
+META-INF/
