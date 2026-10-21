@@ -21,3 +21,6 @@ META-INF/
 
 # IDEA workspace
 .idea/
+
+# Maven build output
+target/
