@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.poetry</groupId>
+    <artifactId>millennial-poetic-realm</artifactId>
+    <version>1.0.0</version>
+
+    <!-- 聚合工程本身不编译代码，只把各子模块挂起来；
+         每个子模块用自己的 pom（backend 用 Java 21，MR 模块用 Java 8）。 -->
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>backend</module>
+        <module>mr/member1</module>
+        <module>mr/member2</module>
+    </modules>
+
+</project>

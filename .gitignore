@@ -1,0 +1,20 @@
+# IDE
+.idea/
+*.iml
+
+# build output
+target/
+
+# JVM crash logs
+hs_err_pid*.log
+
+# temporary extracted archives
+META-INF/
+
+# temporary files
+.ref/
+*.tmp
+.DS_Store
+
+# logs
+*.log

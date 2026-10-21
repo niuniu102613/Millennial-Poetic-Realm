@@ -1,0 +1,80 @@
+﻿{
+    "poemCount":  [
+                      {
+                          "dynasty":  "宋代",
+                          "count":  59714
+                      },
+                      {
+                          "dynasty":  "唐代",
+                          "count":  39645
+                      },
+                      {
+                          "dynasty":  "元代",
+                          "count":  9984
+                      },
+                      {
+                          "dynasty":  "清代",
+                          "count":  257
+                      },
+                      {
+                          "dynasty":  "东汉",
+                          "count":  26
+                      },
+                      {
+                          "dynasty":  "战国",
+                          "count":  16
+                      }
+                  ],
+    "authorCount":  [
+                        {
+                            "dynasty":  "宋代",
+                            "count":  2548
+                        },
+                        {
+                            "dynasty":  "唐代",
+                            "count":  1911
+                        },
+                        {
+                            "dynasty":  "元代",
+                            "count":  222
+                        },
+                        {
+                            "dynasty":  "清代",
+                            "count":  1
+                        },
+                        {
+                            "dynasty":  "东汉",
+                            "count":  1
+                        },
+                        {
+                            "dynasty":  "战国",
+                            "count":  3
+                        }
+                    ],
+    "avgLen":  [
+                   {
+                       "dynasty":  "宋代",
+                       "avgLen":  67.9
+                   },
+                   {
+                       "dynasty":  "唐代",
+                       "avgLen":  61.4
+                   },
+                   {
+                       "dynasty":  "元代",
+                       "avgLen":  93.3
+                   },
+                   {
+                       "dynasty":  "清代",
+                       "avgLen":  53.8
+                   },
+                   {
+                       "dynasty":  "东汉",
+                       "avgLen":  130
+                   },
+                   {
+                       "dynasty":  "战国",
+                       "avgLen":  3220.9
+                   }
+               ]
+}

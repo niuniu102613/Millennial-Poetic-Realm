@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>千年诗境 · 首页</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* 背景图层（承载水墨背景图，可切换） */
+        .bg-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: url('img/bg-home.jpg') center/cover no-repeat fixed;
+            transition: opacity 0.6s ease;
+        }
+
+        /* 背景轮播诗句 */
+        .bg-poem {
+            position: fixed;
+            top: 64px;
+            left: 0; right: 0;
+            height: calc(100vh - 64px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .bg-poem .line {
+            font-size: clamp(40px, 8vw, 90px);
+            color: #fff;
+            opacity: 0.75;
+            font-family: "STKaiti", "KaiTi", "华文楷体", serif;
+            letter-spacing: 12px;
+            text-align: center;
+            line-height: 1.6;
+            transition: opacity 1s ease;
+            padding: 0 40px;
+            text-shadow: 2px 2px 8px rgba(25, 50, 95, 0.5);
+        }
+        .bg-poem .author {
+            font-size: clamp(16px, 2vw, 24px);
+            color: #fff;
+            opacity: 0.75;
+            font-family: "STKaiti", "KaiTi", serif;
+            letter-spacing: 4px;
+            margin-top: 30px;
+            transition: opacity 1s ease;
+            text-shadow: 2px 2px 6px rgba(25, 50, 95, 0.5);
+        }
+        .bg-poem.fade .line, .bg-poem.fade .author { opacity: 0; }
+
+        /* 换景按钮 */
+        .bg-switch {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 300;
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: rgba(255, 253, 247, 0.85);
+            border: 2px solid var(--gold);
+            color: var(--ink-blue);
+            font-size: 13px;
+            font-family: "STKaiti", "KaiTi", serif;
+            letter-spacing: 1px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            box-shadow: 0 3px 12px rgba(25, 50, 95, 0.2);
+            transition: all 0.25s;
+        }
+        .bg-switch .icon { font-size: 18px; margin-bottom: 1px; }
+        .bg-switch:hover {
+            background: var(--ink-blue);
+            color: #fff;
+            transform: rotate(20deg);
+        }
+
+        /* 主内容 */
+        .main-content {
+            position: relative;
+            z-index: 1;
+            min-height: calc(100vh - 64px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+        .main-content h1 {
+            text-align: center;
+            font-size: clamp(36px, 6vw, 56px);
+            color: var(--ink-blue);
+            letter-spacing: 10px;
+            font-family: "STKaiti", "KaiTi", serif;
+            margin-bottom: 15px;
+            position: relative;
+            padding: 20px 60px;
+            display: inline-block;
+        }
+        /* 标题两侧花纹 */
+        .title-wrap {
+            text-align: center;
+            position: relative;
+            margin-bottom: 15px;
+        }
+        .title-wrap::before, .title-wrap::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 80px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+        .title-wrap::before { left: calc(50% - 220px); }
+        .title-wrap::after { right: calc(50% - 220px); }
+        /* 标题上下装饰云纹 */
+        .title-deco {
+            text-align: center;
+            color: var(--gold);
+            font-size: 20px;
+            letter-spacing: 16px;
+            margin-bottom: 5px;
+            opacity: 0.8;
+        }
+        .main-content .sub {
+            text-align: center;
+            font-size: clamp(14px, 2vw, 18px);
+            color: #8b7355;
+            letter-spacing: 3px;
+            margin-bottom: 60px;
+        }
+        /* 5个功能卡片 */
+        .feature-grid {
+            grid-template-columns: repeat(5, 1fr);
+            gap: 18px;
+            margin-top: 70px;
+        }
+        @media (max-width: 1200px) {
+            .feature-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 700px) {
+            .feature-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body data-page="home">
+    <!-- 登录门禁（未登录先显示此层，登录成功才进入首页） -->
+    <div class="gate" id="gate">
+        <div class="gate-card">
+            <div class="gate-title-deco">❖ ❖ ❖</div>
+            <div class="gate-title" data-i18n="auth.gateTitle">千 年 诗 境</div>
+            <div class="gate-sub" data-i18n="auth.gateSub">请登录后进入首页</div>
+            <div class="auth-err" id="gateErr"></div>
+            <input class="auth-field" id="gateUser" placeholder="用户名" autocomplete="off" data-i18n-placeholder="auth.user">
+            <div class="pwd-wrap">
+                <input class="auth-field" id="gatePass" type="password" placeholder="密码" data-i18n-placeholder="auth.pass">
+                <button class="pwd-eye" id="gateEye" type="button" aria-label="显示密码">👁</button>
+            </div>
+            <div class="pwd-hint" id="gatePwdHint" data-i18n="auth.pwdHint" style="display:none">至少 8 位，需含两种字符（字母/数字/符号）</div>
+            <input class="auth-field" id="gatePass2" type="password" placeholder="确认密码" style="display:none" data-i18n-placeholder="auth.pass2">
+            <button class="auth-submit" id="gateSubmit" data-i18n="auth.submit">登 录</button>
+            <div class="auth-switch" id="gateSwitch" data-i18n="auth.toReg">没有账号？去注册</div>
+            <div class="auth-hint" data-i18n="auth.hint">模拟账号：admin / 123456</div>
+        </div>
+    </div>
+
+    <nav class="nav">
+        <a href="index.html" class="logo" data-i18n="logo">千年诗境</a>
+        <a href="dynasty.html" data-page="dynasty" data-i18n="nav.dynasty">朝代分析</a>
+        <a href="poet.html" data-page="poet" data-i18n="nav.poet">诗人图谱</a>
+        <a href="text.html" data-page="text" data-i18n="nav.text">诗词文本分析</a>
+        <a href="imagery.html" data-page="imagery" data-i18n="nav.imagery">诗境意象</a>
+        <a href="overview.html" data-page="overview" data-i18n="nav.overview">诗词数据概览</a>
+    </nav>
+
+    <!-- 背景图层 -->
+    <div class="bg-layer" id="bgLayer"></div>
+
+    <!-- 背景轮播诗句 -->
+    <div class="bg-poem" id="bgPoem">
+        <div class="line" id="poemLine">床前明月光，疑是地上霜。</div>
+        <div class="author" id="poemAuthor">—— 李白《静夜思》</div>
+    </div>
+
+    <!-- 换景按钮 -->
+    <button class="bg-switch" id="bgSwitch" onclick="switchBg()" title="更换背景" data-i18n-title="bgTitle">
+        <span class="icon">🏞</span>
+        <span data-i18n="switchBg">换景</span>
+    </button>
+
+    <!-- 主内容 -->
+    <div class="main-content">
+        <div class="title-deco">❖ ❖ ❖</div>
+        <div class="title-wrap">
+            <h1 data-i18n="home.title">千 年 诗 境</h1>
+        </div>
+        <div class="title-deco">❖ ❖ ❖</div>
+
+        <div class="feature-grid">
+            <a href="dynasty.html" class="feature-item card-bg-1">
+                <h4 data-i18n="home.card1.title">朝代分析</h4>
+                <p data-i18n="home.card1.desc">各朝代作品数量、诗人数量、平均长度</p>
+            </a>
+            <a href="poet.html" class="feature-item card-bg-2">
+                <h4 data-i18n="home.card2.title">诗人图谱</h4>
+                <p data-i18n="home.card2.desc">作品数量 TopN、各朝代代表诗人</p>
+            </a>
+            <a href="text.html" class="feature-item card-bg-3">
+                <h4 data-i18n="home.card3.title">诗词文本分析</h4>
+                <p data-i18n="home.card3.desc">高频字词、长度分布、朝代高频字</p>
+            </a>
+            <a href="imagery.html" class="feature-item card-bg-4">
+                <h4 data-i18n="home.card4.title">诗境意象</h4>
+                <p data-i18n="home.card4.desc">月、柳、酒等意象出现频率与分布</p>
+            </a>
+            <a href="overview.html" class="feature-item card-bg-5">
+                <h4 data-i18n="home.card5.title">诗词数据概览</h4>
+                <p data-i18n="home.card5.desc">类别统计、TopN、朝代×类别、长度区间</p>
+            </a>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script>
+        const poems = [
+            { line: "床前明月光，疑是地上霜。", author: "李白《静夜思》" },
+            { line: "白日依山尽，黄河入海流。", author: "王之涣《登鹳雀楼》" },
+            { line: "春眠不觉晓，处处闻啼鸟。", author: "孟浩然《春晓》" },
+            { line: "红豆生南国，春来发几枝。", author: "王维《相思》" },
+            { line: "会当凌绝顶，一览众山小。", author: "杜甫《望岳》" },
+            { line: "海上生明月，天涯共此时。", author: "张九龄《望月怀远》" },
+            { line: "大漠孤烟直，长河落日圆。", author: "王维《使至塞上》" },
+            { line: "山重水复疑无路，柳暗花明又一村。", author: "陆游《游山西村》" }
+        ];
+
+        const bgEl = document.getElementById('bgPoem');
+        const lineEl = document.getElementById('poemLine');
+        const authorEl = document.getElementById('poemAuthor');
+        let currentIdx = 0;
+
+        function showNextPoem() {
+            bgEl.classList.add('fade');
+            setTimeout(() => {
+                currentIdx = (currentIdx + 1) % poems.length;
+                lineEl.textContent = poems[currentIdx].line;
+                authorEl.textContent = "—— " + poems[currentIdx].author;
+                bgEl.classList.remove('fade');
+            }, 1000);
+        }
+
+        // 4秒自动换
+        setInterval(showNextPoem, 4000);
+
+        // ===== 换景功能：三张背景循环切换 =====
+        const bgImages = ['img/bg-home.jpg', 'img/bg-2.jpg', 'img/bg-3.jpg'];
+        const bgLayer = document.getElementById('bgLayer');
+        let bgIdx = 0;
+        function switchBg() {
+            bgLayer.style.opacity = 0;
+            setTimeout(() => {
+                bgIdx = (bgIdx + 1) % bgImages.length;
+                bgLayer.style.backgroundImage = `url('${bgImages[bgIdx]}')`;
+                bgLayer.style.opacity = 1;
+            }, 600);
+        }
+    </script>
+
+    <!-- 登录门禁逻辑 -->
+    <script>
+        (function () {
+            const gate = document.getElementById('gate');
+            // 本会话已通过门禁（站内点 logo 回到首页）→ 直接进首页，不弹门禁
+            if (sessionStorage.getItem('poetry_gate_passed')) {
+                gate.style.display = 'none';
+            } else {
+                gate.style.display = 'flex';
+            }
+
+            const logged = localStorage.getItem('poetry_user');
+            const title = document.querySelector('#gate .gate-title');
+            const sub = document.querySelector('#gate .gate-sub');
+            const err = document.getElementById('gateErr');
+            const uIn = document.getElementById('gateUser');
+            const pIn = document.getElementById('gatePass');
+            const pass2 = document.getElementById('gatePass2');
+            const submit = document.getElementById('gateSubmit');
+            const sw = document.getElementById('gateSwitch');
+            const hint = document.querySelector('#gate .auth-hint');
+            const pwdHint = document.getElementById('gatePwdHint');
+            const eye = document.getElementById('gateEye');
+
+            if (logged) {
+                // 已登录：无需重新输密码，直接进入
+                function renderLoggedIn() {
+                    title.innerHTML = t('auth.gateTitle');
+                    sub.innerHTML = t('auth.welcomeBack') + '，' + logged;
+                    uIn.style.display = 'none';
+                    pIn.style.display = 'none';
+                    pass2.style.display = 'none';
+                    sw.style.display = 'none';
+                    hint.style.display = 'none';
+                    pwdHint.style.display = 'none';
+                    eye.style.display = 'none';
+                    err.textContent = '';
+                    submit.innerHTML = t('auth.enter');
+                }
+                renderLoggedIn();
+                submit.onclick = () => {
+                    sessionStorage.setItem('poetry_gate_passed', '1');
+                    gate.style.display = 'none';
+                };
+                window.addEventListener('langchange', renderLoggedIn);
+            } else {
+                // 未登录：登录 / 注册
+                let mode = 'login';
+                function setMode(m) {
+                    mode = m;
+                    title.innerHTML = t(m === 'login' ? 'auth.title' : 'auth.titleReg');
+                    submit.innerHTML = t(m === 'login' ? 'auth.submit' : 'auth.submitReg');
+                    sw.innerHTML = t(m === 'login' ? 'auth.toReg' : 'auth.toLogin');
+                    pass2.style.display = m === 'login' ? 'none' : 'block';
+                    pwdHint.style.display = m === 'login' ? 'none' : 'block';
+                    err.textContent = '';
+                }
+                // 密码防偷窥（仅切换明文/密文，图标不变）
+                eye.onclick = () => {
+                    pIn.type = pIn.type === 'password' ? 'text' : 'password';
+                };
+                sw.onclick = () => setMode(mode === 'login' ? 'register' : 'login');
+                submit.onclick = () => {
+                    const u = uIn.value.trim();
+                    const p = pIn.value;
+                    const p2 = pass2.value;
+                    err.textContent = '';
+                    if (!u || !p) { err.textContent = t('auth.errFill'); return; }
+                    const users = JSON.parse(localStorage.getItem('poetry_users') || '[]');
+                    if (mode === 'register') {
+                        if (pwdError(p)) { err.textContent = pwdError(p); return; }
+                        if (p !== p2) { err.textContent = t('auth.errMatch'); return; }
+                        if (users.some(x => x.u === u)) { err.textContent = t('auth.errExists'); return; }
+                        users.push({ u, p });
+                        localStorage.setItem('poetry_users', JSON.stringify(users));
+                    } else {
+                        const user = users.find(x => x.u === u && x.p === p);
+                        if (!user) { err.textContent = t('auth.errWrong'); return; }
+                    }
+                    localStorage.setItem('poetry_user', u);
+                    sessionStorage.setItem('poetry_gate_passed', '1');
+                    gate.style.display = 'none';   // 登录成功，进入首页
+                    if (window.renderAuth) window.renderAuth();
+                };
+                window.addEventListener('langchange', () => setMode(mode));
+            }
+        })();
+    </script>
+</body>
+</html>
