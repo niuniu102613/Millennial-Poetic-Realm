@@ -2,13 +2,19 @@
 .idea/
 *.iml
 
-# 编译产物
+# build output
 target/
 
-# 临时文件
+# JVM crash logs
+hs_err_pid*.log
+
+# temporary extracted archives
+META-INF/
+
+# temporary files
 .ref/
 *.tmp
 .DS_Store
 
-# 日志
+# logs
 *.log
