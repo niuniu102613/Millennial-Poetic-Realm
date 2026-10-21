@@ -4,40 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fac013e5-4255-4774-ad65-c7770f87714a" name="Changes" comment="member1">
-      <change afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/build.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/package.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/pkg_err.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/pkg_out.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/run.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/poetry/backend/service/DynastyDataService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/poetry/backend/service/DynastyDataService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/backend-1.0.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/backend-1.0.0.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/backend-1.0.0.jar.original" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/backend-1.0.0.jar.original" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/poetry/backend/service/DynastyDataService.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/poetry/backend/service/DynastyDataService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mr/member1/src/main/java/com/poetry/dynasty/DynastyCountJob.java" beforeDir="false" afterPath="$PROJECT_DIR$/mr/member1/src/main/java/com/poetry/dynasty/DynastyCountJob.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mr/member1/target/classes/com/poetry/dynasty/DynastyAuthorCountJob$AuthorCountMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/mr/member1/target/classes/com/poetry/dynasty/DynastyAuthorCountJob$AuthorCountMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mr/member1/target/classes/com/poetry/dynasty/DynastyCountJob$DynastyCombiner.class" beforeDir="false" afterPath="$PROJECT_DIR$/mr/member1/target/classes/com/poetry/dynasty/DynastyCountJob$DynastyCombiner.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mr/member1/target/classes/com/poetry/dynasty/DynastyCountJob$DynastyMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/mr/member1/target/classes/com/poetry/dynasty/DynastyCountJob$DynastyMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mr/member1/target/classes/com/poetry/dynasty/DynastyCountJob$DynastyReducer.class" beforeDir="false" afterPath="$PROJECT_DIR$/mr/member1/target/classes/com/poetry/dynasty/DynastyCountJob$DynastyReducer.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mr/member1/target/classes/com/poetry/dynasty/DynastyCountJob.class" beforeDir="false" afterPath="$PROJECT_DIR$/mr/member1/target/classes/com/poetry/dynasty/DynastyCountJob.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mr/member1/target/maven-archiver/pom.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mr/member1/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/mr/member1/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mr/member1/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/mr/member1/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mr/member1/target/original-poetry-mapreduce-member1.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mr/member1/target/poetry-mapreduce-member1.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mr/member2/com/poem/analysis/AuthorAvgLengthTopN.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mr/member2/com/poem/analysis/AuthorWorkCountTopN.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mr/member2/com/poem/analysis/DynastyAuthorCount.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mr/member2/com/poem/analysis/DynastyTopAuthorTopN.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-    </list>
+    <list default="true" id="fac013e5-4255-4774-ad65-c7770f87714a" name="Changes" comment="修改第一次合并" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -85,6 +52,10 @@
     "Maven.poetry-mapreduce-member2 [clean].executor": "Run",
     "Maven.poetry-mapreduce-member2 [package].executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
@@ -138,7 +109,7 @@
       <updated>1792402758066</updated>
       <workItem from="1792402759585" duration="1066000" />
       <workItem from="1792569357257" duration="3000" />
-      <workItem from="1792581677603" duration="3764000" />
+      <workItem from="1792581677603" duration="4089000" />
     </task>
     <task id="LOCAL-00001" summary="member1">
       <option name="closed" value="true" />
@@ -172,7 +143,15 @@
       <option name="project" value="LOCAL" />
       <updated>1792582518801</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="修改第一次合并">
+      <option name="closed" value="true" />
+      <created>1792585639700</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1792585639700</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -191,6 +170,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="member1" />
-    <option name="LAST_COMMIT_MESSAGE" value="member1" />
+    <MESSAGE value="修改第一次合并" />
+    <option name="LAST_COMMIT_MESSAGE" value="修改第一次合并" />
   </component>
 </project>
