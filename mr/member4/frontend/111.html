@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>意象分析结果 · 千年诗境</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts-wordcloud@2.1.0/dist/echarts-wordcloud.min.js"></script>
+</head>
+<body>
+
+<div class="shell">
+    <aside class="sidebar">
+        <div class="brand">
+            <span class="logo-mark"></span>
+            <span class="logo-text">千年诗境</span>
+        </div>
+
+        <nav class="nav">
+            <div class="nav-item">首页</div>
+            <div class="nav-item">MapReduce 分析</div>
+            <div class="nav-item active">意象分析</div>
+        </nav>
+    </aside>
+
+    <div class="layout">
+        <header class="topbar">
+            <div>
+                <p class="section-label">MapReduce 计算结果</p>
+                <h1>意象分析结果</h1>
+                <p class="topbar-desc">高频意象、朝代分布与诗人偏好的统一视图</p>
+            </div>
+            <div class="action-group">
+                <button class="btn btn-ghost" id="refreshBtn">刷新数据</button>
+            </div>
+        </header>
+
+        <section class="kpi-row">
+            <div class="kpi-card">
+                <p class="kpi-label">意象总数</p>
+                <p class="kpi-value primary" id="totalImageryCount">0</p>
+                <p class="kpi-sub">全量统计维度</p>
+            </div>
+            <div class="kpi-card">
+                <p class="kpi-label">覆盖朝代</p>
+                <p class="kpi-value" id="dynastyCount">0</p>
+                <p class="kpi-sub">对比维度</p>
+            </div>
+            <div class="kpi-card">
+                <p class="kpi-label">覆盖诗人</p>
+                <p class="kpi-value" id="authorCount">0</p>
+                <p class="kpi-sub">样本来源</p>
+            </div>
+            <div class="kpi-card">
+                <p class="kpi-label">诗词总量</p>
+                <p class="kpi-value" id="totalPoemCount">0</p>
+                <p class="kpi-sub">计算基数</p>
+            </div>
+        </section>
+
+        <section class="grid">
+            <div class="card card-1-1">
+                <div class="card-head">
+                    <div>
+                        <h2>高频意象词云</h2>
+                        <p class="card-sub">全量诗词意象出现频次分布</p>
+                    </div>
+                </div>
+                <div id="wordCloudChart" class="chart"></div>
+            </div>
+
+            <div class="card card-1-1">
+                <div class="card-head">
+                    <div>
+                        <h2>意象出现次数 Top10</h2>
+                        <p class="card-sub">频次最高的十大意象</p>
+                    </div>
+                </div>
+                <div id="topNChart" class="chart"></div>
+            </div>
+
+            <div class="card card-2-1">
+                <div class="card-head">
+                    <div>
+                        <h2>朝代意象分布</h2>
+                        <p class="card-sub">分朝代意象出现数量对比</p>
+                    </div>
+                    <div class="segmented">
+                        <span class="seg-item active" data-dynasty="">全部</span>
+                        <span class="seg-item" data-dynasty="唐代">唐</span>
+                        <span class="seg-item" data-dynasty="宋代">宋</span>
+                        <span class="seg-item" data-dynasty="元代">元</span>
+                        <span class="seg-item" data-dynasty="清代">清</span>
+                    </div>
+                </div>
+                <div id="dynastyChart" class="chart"></div>
+            </div>
+
+            <div class="card card-1-1">
+                <div class="card-head">
+                    <div>
+                        <h2>诗人意象偏好</h2>
+                        <p class="card-sub">查看指定诗人的意象使用占比</p>
+                    </div>
+                </div>
+                <div class="author-panel">
+                    <div class="author-selector">
+                        <label>快速选择诗人</label>
+                        <select id="authorSelect" class="select">
+                            <option value="李白">李白</option>
+                            <option value="杜甫">杜甫</option>
+                            <option value="苏轼">苏轼</option>
+                            <option value="李清照">李清照</option>
+                        </select>
+                    </div>
+                    <div class="author-custom">
+                        <label>自定义诗人查询</label>
+                        <div class="input-group">
+                            <input type="text" id="authorInput" class="input" placeholder="输入诗人姓名">
+                            <button class="btn btn-primary" id="authorSearchBtn">查询</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="current-author">
+                    当前诗人：<span id="currentAuthorName">李白</span>
+                </div>
+                <div id="authorChart" class="chart"></div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <p>数据说明：图表数值均来自 MapReduce 计算输出结果，刷新页面可加载最新数据。</p>
+        </footer>
+    </div>
+</div>
+
+<script src="js/imagery-charts.js"></script>
+</body>
+</html>

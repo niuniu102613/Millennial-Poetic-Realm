@@ -1,0 +1,7 @@
+server:
+  port: 8081  # 独立端口，避免和全局后端冲突
+
+hbase:
+  zookeeper:
+    quorum: 192.168.130.133
+    port: 2181
