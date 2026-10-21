@@ -426,6 +426,7 @@ function initAuth() {
                     const act = a.dataset.act;
                     if (act === 'logout') {
                         localStorage.removeItem('poetry_user');
+                        sessionStorage.removeItem('poetry_gate_passed');   // 清掉"已过门禁"标记，重新打开要回登录门禁
                         location.reload();   // 登出后回到登录门禁
                     } else {
                         alert(act === 'fav' ? '收藏功能待接入后端' : '个人中心待接入后端');

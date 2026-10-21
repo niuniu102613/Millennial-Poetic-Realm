@@ -276,8 +276,12 @@
     <script>
         (function () {
             const gate = document.getElementById('gate');
-            // 打开前端总是先显示登录门禁
-            gate.style.display = 'flex';
+            // 本会话已通过门禁（站内点 logo 回到首页）→ 直接进首页，不弹门禁
+            if (sessionStorage.getItem('poetry_gate_passed')) {
+                gate.style.display = 'none';
+            } else {
+                gate.style.display = 'flex';
+            }
 
             const logged = localStorage.getItem('poetry_user');
             const title = document.querySelector('#gate .gate-title');
@@ -308,7 +312,10 @@
                     submit.innerHTML = t('auth.enter');
                 }
                 renderLoggedIn();
-                submit.onclick = () => { gate.style.display = 'none'; };
+                submit.onclick = () => {
+                    sessionStorage.setItem('poetry_gate_passed', '1');
+                    gate.style.display = 'none';
+                };
                 window.addEventListener('langchange', renderLoggedIn);
             } else {
                 // 未登录：登录 / 注册
@@ -345,6 +352,7 @@
                         if (!user) { err.textContent = t('auth.errWrong'); return; }
                     }
                     localStorage.setItem('poetry_user', u);
+                    sessionStorage.setItem('poetry_gate_passed', '1');
                     gate.style.display = 'none';   // 登录成功，进入首页
                     if (window.renderAuth) window.renderAuth();
                 };
