@@ -4,7 +4,40 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fac013e5-4255-4774-ad65-c7770f87714a" name="Changes" comment="member1" />
+    <list default="true" id="fac013e5-4255-4774-ad65-c7770f87714a" name="Changes" comment="member1">
+      <change afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/build.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/package.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/pkg_err.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/pkg_out.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/run.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/poetry/backend/service/DynastyDataService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/poetry/backend/service/DynastyDataService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/backend-1.0.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/backend-1.0.0.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/backend-1.0.0.jar.original" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/backend-1.0.0.jar.original" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/poetry/backend/service/DynastyDataService.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/poetry/backend/service/DynastyDataService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mr/member1/src/main/java/com/poetry/dynasty/DynastyCountJob.java" beforeDir="false" afterPath="$PROJECT_DIR$/mr/member1/src/main/java/com/poetry/dynasty/DynastyCountJob.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mr/member1/target/classes/com/poetry/dynasty/DynastyAuthorCountJob$AuthorCountMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/mr/member1/target/classes/com/poetry/dynasty/DynastyAuthorCountJob$AuthorCountMapper.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mr/member1/target/classes/com/poetry/dynasty/DynastyCountJob$DynastyCombiner.class" beforeDir="false" afterPath="$PROJECT_DIR$/mr/member1/target/classes/com/poetry/dynasty/DynastyCountJob$DynastyCombiner.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mr/member1/target/classes/com/poetry/dynasty/DynastyCountJob$DynastyMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/mr/member1/target/classes/com/poetry/dynasty/DynastyCountJob$DynastyMapper.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mr/member1/target/classes/com/poetry/dynasty/DynastyCountJob$DynastyReducer.class" beforeDir="false" afterPath="$PROJECT_DIR$/mr/member1/target/classes/com/poetry/dynasty/DynastyCountJob$DynastyReducer.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mr/member1/target/classes/com/poetry/dynasty/DynastyCountJob.class" beforeDir="false" afterPath="$PROJECT_DIR$/mr/member1/target/classes/com/poetry/dynasty/DynastyCountJob.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mr/member1/target/maven-archiver/pom.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mr/member1/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/mr/member1/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mr/member1/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/mr/member1/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mr/member1/target/original-poetry-mapreduce-member1.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mr/member1/target/poetry-mapreduce-member1.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mr/member2/com/poem/analysis/AuthorAvgLengthTopN.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mr/member2/com/poem/analysis/AuthorWorkCountTopN.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mr/member2/com/poem/analysis/DynastyAuthorCount.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mr/member2/com/poem/analysis/DynastyTopAuthorTopN.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -13,12 +46,20 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory">{
-  &quot;lastFilter&quot;: {
-    &quot;state&quot;: &quot;OPEN&quot;,
-    &quot;assignee&quot;: &quot;niuniu102613&quot;
-  }
-}</component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {}
+}]]></component>
+  <component name="GitHubPullRequestState"><![CDATA[{
+  "prStates": [
+    {
+      "id": {
+        "id": "PR_kwDOUZu55s8AAAABJPdfcQ",
+        "number": 1
+      },
+      "lastSeen": 1792582978061
+    }
+  ]
+}]]></component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/niuniu102613/Millennial-Poetic-Realm.git&quot;,
@@ -36,28 +77,50 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/dev/workspace/lworkspace/Millennial-Poetic-Realm&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Global Libraries&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2920792&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;MavenSettings&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.AuthorAvgLengthTopN.executor": "Run",
+    "Application.BackendApplication.executor": "Run",
+    "JavaScript Debug.index.html.executor": "Run",
+    "Maven.poetry-mapreduce-member2 [clean].executor": "Run",
+    "Maven.poetry-mapreduce-member2 [package].executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Spring Boot.BackendApplication.executor": "Run",
+    "git-widget-placeholder": "main",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/dev/workspace/lworkspace/Millennial-Poetic-Realm",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2920792",
+    "settings.editor.selected.configurable": "MavenSettings",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\dev\workspace\lworkspace\Millennial-Poetic-Realm\backend\src\main\java\com\poetry\backend\controller" />
+      <recent name="D:\dev\workspace\lworkspace\Millennial-Poetic-Realm\backend\src\main\java\com\poetry\backend\service" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="BackendApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="backend" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.poetry.backend.BackendApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -75,7 +138,7 @@
       <updated>1792402758066</updated>
       <workItem from="1792402759585" duration="1066000" />
       <workItem from="1792569357257" duration="3000" />
-      <workItem from="1792581677603" duration="658000" />
+      <workItem from="1792581677603" duration="3764000" />
     </task>
     <task id="LOCAL-00001" summary="member1">
       <option name="closed" value="true" />
@@ -101,7 +164,15 @@
       <option name="project" value="LOCAL" />
       <updated>1792582334421</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="member1">
+      <option name="closed" value="true" />
+      <created>1792582518801</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1792582518801</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -121,20 +192,5 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="member1" />
     <option name="LAST_COMMIT_MESSAGE" value="member1" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-method">
-          <url>file://$PROJECT_DIR$/backend/src/main/java/com/poetry/backend/BackendApplication.java</url>
-          <line>8</line>
-          <properties class="com.poetry.backend.BackendApplication">
-            <option name="EMULATED" value="true" />
-            <option name="WATCH_EXIT" value="false" />
-          </properties>
-          <option name="timeStamp" value="4" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

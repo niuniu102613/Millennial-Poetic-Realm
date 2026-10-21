@@ -2,11 +2,10 @@ package com.poetry.backend.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
-import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,18 +19,18 @@ import java.util.Map;
 @Service
 public class DynastyDataService {
 
-    @Value("${data.file:../data/result/dynasty_stats.json}")
-    private String dataFile;
-
     private List<Map<String, Object>> poemCount = new ArrayList<>();
     private List<Map<String, Object>> authorCount = new ArrayList<>();
     private List<Map<String, Object>> avgLen = new ArrayList<>();
 
     @PostConstruct
     public void load() {
-        try {
+        try (InputStream in = getClass().getResourceAsStream("/dynasty_stats.json")) {
+            if (in == null) {
+                throw new IllegalStateException("classpath 下找不到 dynasty_stats.json");
+            }
             ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(new File(dataFile));
+            JsonNode root = mapper.readTree(in);
 
             poemCount = parseArray(root.path("poemCount"), "count");
             authorCount = parseArray(root.path("authorCount"), "count");
