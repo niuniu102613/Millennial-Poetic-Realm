@@ -9,15 +9,82 @@
     <groupId>com.poetry</groupId>
     <artifactId>millennial-poetic-realm</artifactId>
     <version>1.0.0</version>
-
-    <!-- 聚合工程本身不编译代码，只把各子模块挂起来；
-         每个子模块用自己的 pom（backend 用 Java 21，MR 模块用 Java 8）。 -->
     <packaging>pom</packaging>
+
+    <!--
+      千年诗境 · 聚合根 pom
+      - 统一管理所有依赖版本（改版本只改这一处）
+      - backend 子模块自己挂 spring-boot-starter-parent（Java 21）
+      - mr/member1~5 是 Hadoop MapReduce 作业 jar，从本 pom 继承依赖版本
+    -->
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <hadoop.version>3.3.6</hadoop.version>
+        <hbase.version>2.4.17</hbase.version>
+        <commons-csv.version>1.10.0</commons-csv.version>
+    </properties>
 
     <modules>
         <module>backend</module>
         <module>mr/member1</module>
         <module>mr/member2</module>
+        <module>mr/member3</module>
+        <module>mr/member4</module>
+        <module>mr/member5</module>
     </modules>
+
+    <!-- 统一依赖版本：子模块引用时不写 version -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-common</artifactId>
+                <version>${hadoop.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-mapreduce-client-core</artifactId>
+                <version>${hadoop.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-mapreduce-client-common</artifactId>
+                <version>${hadoop.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
+                <version>${hadoop.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-hdfs</artifactId>
+                <version>${hadoop.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hbase</groupId>
+                <artifactId>hbase-client</artifactId>
+                <version>${hbase.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-csv</artifactId>
+                <version>${commons-csv.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.huaban</groupId>
+                <artifactId>jieba-analysis</artifactId>
+                <version>1.0.2</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <repositories>
+        <repository>
+            <id>aliyunmaven</id>
+            <name>阿里云公共仓库</name>
+            <url>https://maven.aliyun.com/repository/public</url>
+        </repository>
+    </repositories>
 
 </project>

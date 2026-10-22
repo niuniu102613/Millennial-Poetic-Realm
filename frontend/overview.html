@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>千年诗境 · 诗词数据概览</title>
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="js/echarts.min.js?v=2"></script>
     <link rel="stylesheet" href="css/style.css">
     <style>
         /* 数字卡片行 */
@@ -178,161 +178,127 @@
         </div>
     </div>
 
-<script src="js/common.js"></script>
+<script src="js/common.js?v=3"></script>
 <script>
-// ============ 模拟数据（内部用中文 key） ============
-const categoryCount = {
-    "古体诗": 52341, "近体诗": 38920, "词": 8200,
-    "绝句": 6500, "律诗": 4200, "乐府": 1800, "其他": 1500
-};
-const categoryTopN = Object.entries(categoryCount).sort((a, b) => b[1] - a[1]).slice(0, 6);
-const dynKeys = ["唐代", "宋代", "元代", "明代", "清代", "魏晋", "先秦"];
-const catKeys = ["古体诗", "近体诗", "词", "绝句", "律诗"];
-const dynastyCategoryData = {
-    "古体诗": [18200, 9800, 2100, 7600, 8900, 3200, 541],
-    "近体诗": [15600, 11200, 980, 4300, 5800, 800, 20],
-    "词":     [1200,  6800,  400,  100,  300,  50,  50],
-    "绝句":   [3200,  2100,  300,  400,  450,   50,   0],
-    "律诗":   [2800,  1500,  120,  300,  500,   30,   0]
-};
-const lengthRangeData = {
-    "0-20": 12000, "21-50": 45000, "51-100": 32000, "101-200": 15000, "200+": 5643
-};
-const dt = k => t('dyn.' + k);   // 朝代显示名
-const ct = k => t('cat.' + k);   // 类别显示名
-
-// 各朝代代表诗句（模拟，接后端后可换成接口数据；诗词本身不翻译）
-const dynastyPoem = {
-    "唐代": { verse: "海上生明月，天涯共此时。", src: "张九龄《望月怀远》" },
-    "宋代": { verse: "山重水复疑无路，柳暗花明又一村。", src: "陆游《游山西村》" },
-    "元代": { verse: "枯藤老树昏鸦，小桥流水人家。", src: "马致远《天净沙·秋思》" },
-    "明代": { verse: "千锤万凿出深山，烈火焚烧若等闲。", src: "于谦《石灰吟》" },
-    "清代": { verse: "九州生气恃风雷，万马齐喑究可哀。", src: "龚自珍《己亥杂诗》" },
-    "魏晋": { verse: "采菊东篱下，悠然见南山。", src: "陶渊明《饮酒》" },
-    "先秦": { verse: "关关雎鸠，在河之洲。", src: "《诗经·关雎》" }
-};
-
-// 图表实例（只初始化一次）
 const pieChart = echarts.init(document.getElementById('categoryPie'));
 const catTopChart = echarts.init(document.getElementById('categoryTop'));
 const dynastyChart = echarts.init(document.getElementById('dynastyCategory'));
 const detailChart = echarts.init(document.getElementById('detailChart'));
 const lenChart = echarts.init(document.getElementById('lengthRange'));
 
-let curIdx = 0;
-function updateDetail(i) {
-    curIdx = i;
-    const key = dynKeys[i];
-    const name = dt(key);
-    const values = catKeys.map(cat => dynastyCategoryData[cat][i]);
-    const total = values.reduce((a, b) => a + b, 0);
+const dynastyPoem = {
+    "唐代": { verse:"海上生明月，天涯共此时。", src:"张九龄《望月怀远》" },
+    "宋代": { verse:"山重水复疑无路，柳暗花明又一村。", src:"陆游《游山西村》" },
+    "元代": { verse:"枯藤老树昏鸦，小桥流水人家。", src:"马致远《天净沙·秋思》" },
+    "清代": { verse:"九州生气恃风雷，万马齐喑究可哀。", src:"龚自珍《己亥杂诗》" },
+    "东汉": { verse:"对酒当歌，人生几何。", src:"曹操《短歌行》" },
+    "战国": { verse:"路漫漫其修远兮，吾将上下而求索。", src:"屈原《离骚》" }
+};
+
+let CACHE = null;
+async function loadData() {
+    const [cat, len, dynCat] = await Promise.all([
+        fetchAPI('/overview/categoryCount'),
+        fetchAPI('/overview/lengthRange'),
+        fetchAPI('/overview/dynastyCategory'),
+    ]);
+    return { cat: cat||[], len: len||[], dynCat: dynCat||[] };
+}
+
+function updateDetail(i, dynKeys, catKeys, matrix) {
+    const name = dynKeys[i];
+    const values = catKeys.map(c => (matrix[c] || [])[i] || 0);
+    const total = values.reduce((a,b)=>a+b,0);
     document.getElementById('detailDynasty').textContent = name;
-    document.getElementById('detailTotal').textContent =
-        `${t('ov.totalPrefix')} ${total.toLocaleString()} ${t('ov.totalSuffix')}`;
-    const p = dynastyPoem[key] || {};
-    document.getElementById('detailVerse').textContent = p.verse || t('ov.noVerse');
+    document.getElementById('detailTotal').textContent = '共 ' + total.toLocaleString() + ' 首';
+    const p = dynastyPoem[name] || {};
+    document.getElementById('detailVerse').textContent = p.verse || '';
     document.getElementById('detailVerseSrc').textContent = p.src ? '—— ' + p.src : '';
     detailChart.setOption({
-        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-        grid: { left: 40, right: 20, top: 10, bottom: 42 },
-        xAxis: { type: 'category', data: catKeys.map(ct), axisLabel: { interval: 0, fontSize: 12 } },
-        yAxis: { type: 'value', show: false },
+        tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' } },
+        grid:{ left:40, right:20, top:10, bottom:42 },
+        xAxis:{ type:'category', data:catKeys, axisLabel:{ interval:0, fontSize:12 } },
+        yAxis:{ type:'value', show:false },
         color: THEME_COLORS,
-        series: [{
-            type: 'bar', data: values,
-            barWidth: '45%',
-            itemStyle: { borderRadius: [3, 3, 0, 0] },
-            label: { show: true, position: 'top', fontSize: 10 }
-        }]
+        series:[{ type:'bar', data:values, barWidth:'45%', itemStyle:{ borderRadius:[3,3,0,0] }, label:{ show:true, position:'top', fontSize:10 } }]
     }, true);
 }
 
-function renderOverview() {
-    // 顶部数字卡片
-    const total = Object.values(categoryCount).reduce((a, b) => a + b, 0);
-    const topCat = categoryTopN[0][0];
-    const avgLen = Math.round(
-        (0*12000 + 35*45000 + 75*32000 + 150*15000 + 250*5643) / total
-    );
+function renderOverview(data) {
+    const categoryCount = {};
+    data.cat.forEach(d => categoryCount[d.category] = d.count);
+    const categoryTopN = Object.entries(categoryCount).sort((a,b)=>b[1]-a[1]).slice(0,6);
+    const lengthRangeData = {};
+    data.len.forEach(d => lengthRangeData[d.range] = d.count);
+
+    const dynKeys = data.dynCat.map(d => d.dynasty);
+    const catKeys = [];
+    data.dynCat.forEach(d => Object.keys(d.categories).forEach(c => { if(!catKeys.includes(c)) catKeys.push(c); }));
+    const matrix = {};
+    catKeys.forEach(c => { matrix[c] = data.dynCat.map(d => d.categories[c] || 0); });
+
+    const total = Object.values(categoryCount).reduce((a,b)=>a+b,0);
+    const mid = [10,35,75,150,250];
+    let weighted = 0, totLen = 0;
+    Object.keys(lengthRangeData).forEach((k,i)=>{ weighted += mid[i]*lengthRangeData[k]; totLen += lengthRangeData[k]; });
+    const avgLen = totLen ? Math.round(weighted/totLen) : 0;
+
     document.getElementById('statTotal').textContent = total.toLocaleString();
     document.getElementById('statCategory').textContent = Object.keys(categoryCount).length;
-    document.getElementById('statAvgLen').textContent = avgLen + ' ' + t('ov.lenUnit');
-    document.getElementById('statTopCat').textContent = ct(topCat);
+    document.getElementById('statAvgLen').textContent = avgLen + ' 字';
+    document.getElementById('statTopCat').textContent = categoryTopN[0] ? categoryTopN[0][0] : '—';
 
-    // 1. 饼图（点击下钻）
     pieChart.setOption({
-        tooltip: {
-            trigger: 'item',
-            formatter: p => `${p.name}: ${p.value} ${t('ov.totalSuffix')} (${p.percent}%)`
-        },
-        legend: { bottom: 0, type: 'scroll' },
+        tooltip:{ trigger:'item', formatter: p => `${p.name}: ${p.value} 首 (${p.percent}%)` },
+        legend:{ bottom:0, type:'scroll' },
         color: THEME_COLORS,
-        series: [{
-            type: 'pie', radius: ['40%', '70%'],
-            label: { show: true, formatter: '{b}\n{d}%' },
-            data: Object.entries(categoryCount).map(([name, value]) => ({ name: ct(name), value }))
-        }]
+        series:[{ type:'pie', radius:['40%','70%'], label:{ show:true, formatter:'{b}\n{d}%' },
+            data:Object.entries(categoryCount).map(([name,value])=>({name,value})) }]
     }, true);
 
-    // 2. TopN 横向条形图
     catTopChart.setOption({
-        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-        grid: { left: 100, right: 40, top: 10, bottom: 30 },
-        xAxis: { type: 'value' },
-        yAxis: { type: 'category', data: categoryTopN.map(x => ct(x[0])).reverse() },
-        series: [{
-            type: 'bar', data: categoryTopN.map(x => x[1]).reverse(),
-            itemStyle: { color: '#77171C', borderRadius: [0, 4, 4, 0] },
-            label: { show: true, position: 'right' }
-        }]
+        tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' } },
+        grid:{ left:100, right:40, top:10, bottom:30 },
+        xAxis:{ type:'value' },
+        yAxis:{ type:'category', data:categoryTopN.map(x=>x[0]).reverse() },
+        series:[{ type:'bar', data:categoryTopN.map(x=>x[1]).reverse(),
+            itemStyle:{ color:'#77171C', borderRadius:[0,4,4,0] }, label:{ show:true, position:'right' } }]
     }, true);
 
-    // 3. 堆叠图（legend可筛选 + 点击联动）
     dynastyChart.setOption({
-        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-        legend: { data: catKeys.map(ct), top: 0, selectedMode: 'multiple' },
-        grid: { left: 60, right: 30, top: 40, bottom: 30 },
-        xAxis: { type: 'category', data: dynKeys.map(dt) },
-        yAxis: { type: 'value', name: t('ov.quantity') },
+        tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' } },
+        legend:{ data:catKeys, top:0, selectedMode:'multiple' },
+        grid:{ left:60, right:30, top:40, bottom:30 },
+        xAxis:{ type:'category', data:dynKeys },
+        yAxis:{ type:'value', name:'数量' },
         color: THEME_COLORS,
-        series: catKeys.map(cat => ({
-            name: ct(cat), type: 'bar', stack: 'total', data: dynastyCategoryData[cat]
-        }))
+        series: catKeys.map(c => ({ name:c, type:'bar', stack:'total', data:matrix[c] }))
     }, true);
 
-    // 4. 长度区间（加平均线）
     lenChart.setOption({
-        tooltip: { trigger: 'axis' },
-        grid: { left: 60, right: 60, top: 30, bottom: 30 },
-        xAxis: { type: 'category', data: Object.keys(lengthRangeData), name: t('ov.rangeName') },
-        yAxis: { type: 'value', name: t('ov.poemCount') },
+        tooltip:{ trigger:'axis' },
+        grid:{ left:60, right:60, top:30, bottom:30 },
+        xAxis:{ type:'category', data:Object.keys(lengthRangeData), name:'字数区间' },
+        yAxis:{ type:'value', name:'诗词数' },
         color: THEME_COLORS,
-        series: [{
-            type: 'bar', data: Object.values(lengthRangeData),
-            itemStyle: { color: '#19325F', borderRadius: [4, 4, 0, 0] },
-            label: { show: true, position: 'top' },
-            markLine: {
-                data: [{ type: 'average', name: t('ov.average') }],
-                lineStyle: { color: '#77171C', type: 'dashed' },
-                label: { formatter: t('ov.avgFmt') }
-            }
-        }]
+        series:[{ type:'bar', data:Object.values(lengthRangeData),
+            itemStyle:{ color:'#19325F', borderRadius:[4,4,0,0] }, label:{ show:true, position:'top' },
+            markLine:{ data:[{ type:'average', name:'平均' }], lineStyle:{ color:'#77171C', type:'dashed' } } }]
     }, true);
 
-    updateDetail(curIdx);
+    updateDetail(0, dynKeys, catKeys, matrix);
+    CACHE = { dynKeys, catKeys, matrix };
 }
 
-// 点击饼图扇区，alert该类别详情（下钻效果）
-pieChart.on('click', function(params) {
-    alert(`【${params.name}】\n${t('ov.quantity')}: ${params.value} ${t('ov.totalSuffix')}\n${t('ov.share')}: ${params.percent}%`);
+pieChart.on('click', function(p){
+    alert(`【${p.name}】\n数量: ${p.value} 首\n占比: ${p.percent}%`);
 });
-// 点击堆叠图任意一段 -> 联动更新详情
-dynastyChart.on('click', function(params) {
-    updateDetail(params.dataIndex);
+dynastyChart.on('click', function(p){
+    if (CACHE) updateDetail(p.dataIndex, CACHE.dynKeys, CACHE.catKeys, CACHE.matrix);
 });
 
-document.addEventListener('DOMContentLoaded', renderOverview);
-window.addEventListener('langchange', renderOverview);
+async function boot() { renderOverview(await loadData()); }
+document.addEventListener('DOMContentLoaded', boot);
 window.addEventListener('resize', () => {
     document.querySelectorAll('.chart').forEach(el => echarts.getInstanceByDom(el)?.resize());
 });

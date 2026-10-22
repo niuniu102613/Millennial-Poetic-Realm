@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>千年诗境 · 朝代分析</title>
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="js/echarts.min.js?v=2"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body data-page="dynasty">
@@ -21,12 +21,64 @@
             <p data-i18n="dy.sub">各朝代作品数、诗人数量、平均长度、朝代 TopN</p>
         </div>
         <div class="grid-2">
-            <div class="card"><h3 data-i18n="dy.c1">各朝代诗词数量</h3><div class="chart-empty"><div class="icon">🏯</div><div class="text" data-i18n="dy.empty">数据待接入</div><div class="sub" data-i18n="dy.emptySub">等待 MapReduce 结果</div></div></div>
-            <div class="card"><h3 data-i18n="dy.c2">各朝代作者数量</h3><div class="chart-empty"><div class="icon">🏯</div><div class="text" data-i18n="dy.empty">数据待接入</div><div class="sub" data-i18n="dy.emptySub">等待 MapReduce 结果</div></div></div>
-            <div class="card"><h3 data-i18n="dy.c3">各朝代平均诗词长度</h3><div class="chart-empty"><div class="icon">🏯</div><div class="text" data-i18n="dy.empty">数据待接入</div><div class="sub" data-i18n="dy.emptySub">等待 MapReduce 结果</div></div></div>
-            <div class="card"><h3 data-i18n="dy.c4">各朝代诗词数量 TopN</h3><div class="chart-empty"><div class="icon">🏯</div><div class="text" data-i18n="dy.empty">数据待接入</div><div class="sub" data-i18n="dy.emptySub">等待 MapReduce 结果</div></div></div>
+            <div class="card"><h3 data-i18n="dy.c1">各朝代诗词数量</h3><div id="c1" class="chart" style="height:320px;"></div></div>
+            <div class="card"><h3 data-i18n="dy.c2">各朝代作者数量</h3><div id="c2" class="chart" style="height:320px;"></div></div>
+            <div class="card"><h3 data-i18n="dy.c3">各朝代平均诗词长度</h3><div id="c3" class="chart" style="height:320px;"></div></div>
+            <div class="card"><h3 data-i18n="dy.c4">各朝代诗词数量 TopN</h3><div id="c4" class="chart" style="height:320px;"></div></div>
         </div>
     </div>
-    <script src="js/common.js"></script>
+    <script src="js/common.js?v=3"></script>
+    <script>
+    const charts = ['c1','c2','c3','c4'].map(id => echarts.init(document.getElementById(id)));
+
+    function barOption(names, values, color, fmt) {
+        return {
+            tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' }, valueFormatter: v => (fmt||(x=>x))(v) },
+            grid:{ left:60, right:30, top:20, bottom:40 },
+            xAxis:{ type:'category', data:names, axisLabel:{ interval:0 } },
+            yAxis:{ type:'value' },
+            color:[color || THEME_COLORS[0]],
+            series:[{ type:'bar', data:values, barWidth:'45%',
+                itemStyle:{ borderRadius:[4,4,0,0] }, label:{ show:true, position:'top' } }]
+        };
+    }
+    function hbarOption(names, values, color) {
+        return {
+            tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' } },
+            grid:{ left:80, right:40, top:10, bottom:20 },
+            xAxis:{ type:'value' },
+            yAxis:{ type:'category', data:names.slice().reverse() },
+            color:[color || THEME_COLORS[1]],
+            series:[{ type:'bar', data:values.slice().reverse(), barWidth:'45%',
+                itemStyle:{ borderRadius:[0,4,4,0] }, label:{ show:true, position:'right' } }]
+        };
+    }
+
+    let DATA = null;
+
+    function render() {
+        if (!DATA) return;
+        const names = d => d.map(x => trDyn(x.dynasty));
+        const vals = d => d.map(x => x.value);
+        charts[0].setOption(barOption(names(DATA.pc), vals(DATA.pc), THEME_COLORS[0]), true);
+        charts[1].setOption(barOption(names(DATA.ac), vals(DATA.ac), THEME_COLORS[3]), true);
+        charts[2].setOption(barOption(names(DATA.al), vals(DATA.al), THEME_COLORS[5]), true);
+        charts[3].setOption(hbarOption(names(DATA.top), vals(DATA.top), THEME_COLORS[1]), true);
+    }
+
+    async function boot() {
+        const [pc, ac, al, top] = await Promise.all([
+            fetchAPI('/dynasty/poemCount'),
+            fetchAPI('/dynasty/authorCount'),
+            fetchAPI('/dynasty/avgLen'),
+            fetchAPI('/dynasty/top/6'),
+        ]);
+        DATA = { pc: pc||[], ac: ac||[], al: al||[], top: top||[] };
+        render();
+    }
+    document.addEventListener('DOMContentLoaded', boot);
+    window.addEventListener('langchange', () => { if(DATA) render(); });
+    window.addEventListener('resize', () => charts.forEach(c => c.resize()));
+    </script>
 </body>
 </html>

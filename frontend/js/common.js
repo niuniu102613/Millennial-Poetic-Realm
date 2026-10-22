@@ -1,12 +1,13 @@
 // ===== 千年诗境 · 公共 JS =====
-const API_BASE = '/api';
+// file:// 直接双击打开时走本地后端；http 部署时走同源
+const API_BASE = (location.protocol === 'file:') ? 'http://localhost:8080/api' : '/api';
 
 async function fetchAPI(path) {
     try {
         const res = await fetch(API_BASE + path);
         return await res.json();
     } catch (e) {
-        console.warn('接口暂未就绪，使用模拟数据:', path, e);
+        console.warn('接口暂未就绪:', path, e);
         return null;
     }
 }
@@ -49,6 +50,7 @@ const I18N = {
         /* 朝代显示名 */
         'dyn.唐代': '唐代', 'dyn.宋代': '宋代', 'dyn.元代': '元代',
         'dyn.明代': '明代', 'dyn.清代': '清代', 'dyn.魏晋': '魏晋', 'dyn.先秦': '先秦',
+        'dyn.东汉': '东汉', 'dyn.战国': '战国',
         /* 类别显示名 */
         'cat.古体诗': '古体诗', 'cat.近体诗': '近体诗', 'cat.词': '词',
         'cat.绝句': '绝句', 'cat.律诗': '律诗',
@@ -104,6 +106,15 @@ const I18N = {
         'im.c2': '意象 TopN',
         'im.c3': '朝代 × 意象',
         'im.c4': '作者 × 意象',
+        'im.count': '出现次数',
+        'im.all': '全部',
+        'im.cloud': '高频意象词云',
+        'im.quickPoet': '快速选择诗人：',
+        'im.times': '次',
+        'im.kTotal': '意象种类',
+        'im.kPoems': '诗词总量',
+        'im.kDyn': '覆盖朝代',
+        'im.kAuth': '覆盖诗人',
         /* 登录门禁 */
         'auth.gateTitle': '千 年 诗 境',
         'auth.gateSub': '请登录后进入首页',
@@ -152,6 +163,7 @@ const I18N = {
         /* 朝代显示名 */
         'dyn.唐代': 'Tang', 'dyn.宋代': 'Song', 'dyn.元代': 'Yuan',
         'dyn.明代': 'Ming', 'dyn.清代': 'Qing', 'dyn.魏晋': 'Wei-Jin', 'dyn.先秦': 'Pre-Qin',
+        'dyn.东汉': 'Eastern Han', 'dyn.战国': 'Warring States',
         /* 类别显示名 */
         'cat.古体诗': 'Ancient-style', 'cat.近体诗': 'Recent-style', 'cat.词': 'Ci',
         'cat.绝句': 'Jueju', 'cat.律诗': 'Lushi',
@@ -207,6 +219,15 @@ const I18N = {
         'im.c2': 'Imagery TopN',
         'im.c3': 'Dynasty × Imagery',
         'im.c4': 'Poet × Imagery',
+        'im.count': 'Occurrences',
+        'im.all': 'All',
+        'im.cloud': 'Frequent Imagery Cloud',
+        'im.quickPoet': 'Quick pick a poet: ',
+        'im.times': 'times',
+        'im.kTotal': 'Imagery Types',
+        'im.kPoems': 'Total Poems',
+        'im.kDyn': 'Dynasties',
+        'im.kAuth': 'Poets',
         /* 登录门禁 */
         'auth.gateTitle': 'MILLENNIAL POETRY',
         'auth.gateSub': 'Please sign in to enter',
@@ -260,6 +281,46 @@ function applyLang(lang) {
 function t(key) {
     const dict = I18N[window.__lang || 'zh'];
     return (dict && dict[key] != null) ? dict[key] : key;
+}
+
+// 数据里的朝代/类别名 → 当前语言显示名（找不到就原样返回）
+function trDyn(name) { return t('dyn.' + name); }
+function trCat(name) { return t('cat.' + name); }
+
+// 诗人名 → 拼音/通用英译（找不到就原样）
+const POET_EN = {
+    '曹操':'Cao Cao','曹丕':'Cao Pi','曹植':'Cao Zhi','陶渊明':'Tao Yuanming',
+    '李白':'Li Bai','杜甫':'Du Fu','王维':'Wang Wei','孟浩然':'Meng Haoran',
+    '王昌龄':'Wang Changling','岑参':'Cen Shen','高适':'Gao Shi','韩愈':'Han Yu',
+    '柳宗元':'Liu Zongyuan','白居易':'Bai Juyi','元稹':'Yuan Zhen','刘禹锡':'Liu Yuxi',
+    '李贺':'Li He','杜牧':'Du Mu','李商隐':'Li Shangyin','温庭筠':'Wen Tingyun',
+    '李煜':'Li Yu','苏轼':'Su Shi','苏辙':'Su Zhe','苏洵':'Su Xun','欧阳修':'Ouyang Xiu',
+    '王安石':'Wang Anshi','曾巩':'Zeng Gong','黄庭坚':'Huang Tingjian','秦观':'Qin Guan',
+    '柳永':'Liu Yong','周邦彦':'Zhou Bangyan','李清照':'Li Qingzhao','辛弃疾':'Xin Qiji',
+    '陆游':'Lu You','杨万里':'Yang Wanli','范成大':'Fan Chengda','朱熹':'Zhu Xi',
+    '梅尧臣':'Mei Yaochen','范仲淹':'Fan Zhongyan','晏殊':'Yan Shu','晏几道':'Yan Jidao',
+    '姜夔':'Jiang Kui','吴文英':'Wu Wenying','王十朋':'Wang Shipeng','宋祁':'Song Qi',
+    '宋庠':'Song Xiang','曹勋':'Cao Xun','洪适':'Hong Shi','姜特立':'Jiang Teli',
+    '王之道':'Wang Zhidao','韩元吉':'Han Yuanji','刘子翚':'Liu Zihui','史浩':'Shi Hao',
+    '释正觉':'Monk Zhengjue','释印肃':'Monk Yinsu','吴芾':'Wu Fu','无名氏':'Anonymous',
+    '孟子及弟子':'Mencius & Disciples','曾子':'Zengzi','子思':'Zisi',
+    '关汉卿':'Guan Hanqing','马致远':'Ma Zhiyuan','王实甫':'Wang Shifu',
+    '张养浩':'Zhang Yanghao','张可久':'Zhang Kejiu','徐再思':'Xu Zaisi',
+    '吴西逸':'Wu Xiyi','查德卿':'Zha Deqing','薛昂夫':'Xue Angfu','沈禧':'Shen Xi',
+    '袁桷':'Yuan Jue','高明':'Gao Ming','纳兰性德':'Nalan Xingde','顾云':'Gu Yun',
+    '欧阳炯':'Ouyang Jiong','李行甫':'Li Xingfu','李文蔚':'Li Wenwei','吴少微':'Wu Shaowei',
+    '高茂卿':'Gao Maoqing','朱凯':'Zhu Kai','舒元舆':'Shu Yuanyu','慧净':'Hui Jing',
+    '李薰':'Li Xun','孙松柏':'Sun Songbai','皎然':'Monk Jiaoran','贾岛':'Jia Dao',
+};
+function trName(name) {
+    if (window.__lang !== 'en') return name;
+    if (POET_EN[name]) return POET_EN[name];
+    // 处理 "诗人·朝代" 这种组合
+    if (name && name.includes('·')) {
+        const parts = name.split('·');
+        return (POET_EN[parts[0]] || parts[0]) + '·' + trDyn(parts[1]);
+    }
+    return name;
 }
 
 // 密码强度校验：至少 8 位，且含两种字符（小写/大写/数字/符号）

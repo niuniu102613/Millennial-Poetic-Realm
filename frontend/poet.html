@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>千年诗境 · 诗人图谱</title>
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="js/echarts.min.js?v=2"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body data-page="poet">
@@ -21,12 +21,69 @@
             <p data-i18n="pt.sub">作者作品数量 TopN、各朝代代表诗人</p>
         </div>
         <div class="grid-2">
-            <div class="card"><h3 data-i18n="pt.c1">作者作品数量 TopN</h3><div class="chart-empty"><div class="icon">👤</div><div class="text" data-i18n="dy.empty">数据待接入</div><div class="sub" data-i18n="dy.emptySub">等待 MapReduce 结果</div></div></div>
-            <div class="card"><h3 data-i18n="pt.c2">各朝代作者数量</h3><div class="chart-empty"><div class="icon">👤</div><div class="text" data-i18n="dy.empty">数据待接入</div><div class="sub" data-i18n="dy.emptySub">等待 MapReduce 结果</div></div></div>
-            <div class="card"><h3 data-i18n="pt.c3">作者平均作品长度 TopN</h3><div class="chart-empty"><div class="icon">👤</div><div class="text" data-i18n="dy.empty">数据待接入</div><div class="sub" data-i18n="dy.emptySub">等待 MapReduce 结果</div></div></div>
-            <div class="card"><h3 data-i18n="pt.c4">各朝代代表诗人 TopN</h3><div class="chart-empty"><div class="icon">👤</div><div class="text" data-i18n="dy.empty">数据待接入</div><div class="sub" data-i18n="dy.emptySub">等待 MapReduce 结果</div></div></div>
+            <div class="card"><h3 data-i18n="pt.c1">作者作品数量 TopN</h3><div id="p1" class="chart" style="height:360px;"></div></div>
+            <div class="card"><h3 data-i18n="pt.c2">各朝代作者数量</h3><div id="p2" class="chart" style="height:360px;"></div></div>
+            <div class="card"><h3 data-i18n="pt.c3">作者平均作品长度 TopN</h3><div id="p3" class="chart" style="height:360px;"></div></div>
+            <div class="card"><h3 data-i18n="pt.c4">各朝代代表诗人（按作品数）</h3><div id="p4" class="chart" style="height:360px;"></div></div>
         </div>
     </div>
-    <script src="js/common.js"></script>
+    <script src="js/common.js?v=3"></script>
+    <script>
+    const charts = ['p1','p2','p3','p4'].map(id => echarts.init(document.getElementById(id)));
+
+    function hbar(names, values, color) {
+        return {
+            tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' } },
+            grid:{ left:90, right:50, top:10, bottom:20 },
+            xAxis:{ type:'value' },
+            yAxis:{ type:'category', data:names.slice().reverse() },
+            color:[color],
+            series:[{ type:'bar', data:values.slice().reverse(), barWidth:'50%',
+                itemStyle:{ borderRadius:[0,4,4,0] }, label:{ show:true, position:'right' } }]
+        };
+    }
+
+    let DATA = null;
+
+    function render() {
+        const w = (DATA.workTop||[]).slice(0,15);
+        charts[0].setOption(hbar(w.map(x=>trName(x.author)), w.map(x=>x.count), THEME_COLORS[1]), true);
+
+        const d = DATA.dynCnt||[];
+        charts[1].setOption({
+            tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' } },
+            grid:{ left:60, right:30, top:20, bottom:40 },
+            xAxis:{ type:'category', data:d.map(x=>trDyn(x.dynasty)), axisLabel:{interval:0} },
+            yAxis:{ type:'value' },
+            color:[THEME_COLORS[3]],
+            series:[{ type:'bar', data:d.map(x=>x.value), barWidth:'45%',
+                itemStyle:{ borderRadius:[4,4,0,0] }, label:{ show:true, position:'top' } }]
+        }, true);
+
+        const a = (DATA.avgTop||[]).slice(0,15);
+        charts[2].setOption(hbar(a.map(x=>trName(x.author)), a.map(x=>x.avgLen), THEME_COLORS[5]), true);
+
+        const reps = [];
+        Object.keys(DATA.dynAuth||{}).forEach(dyn => {
+            const list = DATA.dynAuth[dyn];
+            if (list && list[0]) reps.push({ name: trName(list[0].author) + '·' + trDyn(dyn), count: list[0].count });
+        });
+        charts[3].setOption(hbar(reps.map(x=>x.name), reps.map(x=>x.count), THEME_COLORS[0]), true);
+    }
+
+    async function boot() {
+        const [workTop, avgTop, dynAuth, dynCnt] = await Promise.all([
+            fetchAPI('/author/workTopN'),
+            fetchAPI('/author/avgLenTopN'),
+            fetchAPI('/author/dynastyTop'),
+            fetchAPI('/dynasty/authorCount'),
+        ]);
+        DATA = { workTop:workTop||[], avgTop:avgTop||[], dynAuth:dynAuth||{}, dynCnt:dynCnt||[] };
+        render();
+    }
+    document.addEventListener('DOMContentLoaded', boot);
+    window.addEventListener('langchange', render);
+    window.addEventListener('resize', () => charts.forEach(c => c.resize()));
+    </script>
 </body>
 </html>

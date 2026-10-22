@@ -1,4 +1,10 @@
 D:\dev\workspace\lworkspace\Millennial-Poetic-Realm\backend\src\main\java\com\poetry\backend\BackendApplication.java
+D:\dev\workspace\lworkspace\Millennial-Poetic-Realm\backend\src\main\java\com\poetry\backend\controller\AuthorController.java
 D:\dev\workspace\lworkspace\Millennial-Poetic-Realm\backend\src\main\java\com\poetry\backend\controller\DynastyController.java
+D:\dev\workspace\lworkspace\Millennial-Poetic-Realm\backend\src\main\java\com\poetry\backend\controller\ImageryController.java
+D:\dev\workspace\lworkspace\Millennial-Poetic-Realm\backend\src\main\java\com\poetry\backend\controller\OverviewController.java
+D:\dev\workspace\lworkspace\Millennial-Poetic-Realm\backend\src\main\java\com\poetry\backend\controller\TextController.java
 D:\dev\workspace\lworkspace\Millennial-Poetic-Realm\backend\src\main\java\com\poetry\backend\service\DynastyDataService.java
+D:\dev\workspace\lworkspace\Millennial-Poetic-Realm\backend\src\main\java\com\poetry\backend\service\ExtraDataService.java
+D:\dev\workspace\lworkspace\Millennial-Poetic-Realm\backend\src\main\java\com\poetry\backend\service\TextImageryDataService.java
 D:\dev\workspace\lworkspace\Millennial-Poetic-Realm\backend\src\main\java\com\poetry\backend\TestController.java

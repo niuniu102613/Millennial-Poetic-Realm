@@ -1,4 +1,10 @@
-com\poetry\backend\service\DynastyDataService.class
+com\poetry\backend\service\ExtraDataService.class
 com\poetry\backend\controller\DynastyController.class
+com\poetry\backend\controller\TextController.class
 com\poetry\backend\BackendApplication.class
+com\poetry\backend\controller\AuthorController.class
 com\poetry\backend\TestController.class
+com\poetry\backend\service\DynastyDataService.class
+com\poetry\backend\controller\OverviewController.class
+com\poetry\backend\service\TextImageryDataService.class
+com\poetry\backend\controller\ImageryController.class
