@@ -1,0 +1,367 @@
+{
+  "categoryCount": [
+    {
+      "category": "古体诗",
+      "count": 72153
+    },
+    {
+      "category": "古诗",
+      "count": 6201
+    },
+    {
+      "category": "词",
+      "count": 21258
+    },
+    {
+      "category": "曲",
+      "count": 9984
+    },
+    {
+      "category": "其他",
+      "count": 46
+    }
+  ],
+  "lengthRange": [
+    {
+      "range": "0-20",
+      "count": 853
+    },
+    {
+      "range": "21-50",
+      "count": 51547
+    },
+    {
+      "range": "51-100",
+      "count": 40518
+    },
+    {
+      "range": "101-200",
+      "count": 14111
+    },
+    {
+      "range": "200+",
+      "count": 2613
+    }
+  ],
+  "dynastyCategory": [
+    {
+      "dynasty": "东汉",
+      "categories": {
+        "其他": 26
+      }
+    },
+    {
+      "dynasty": "元代",
+      "categories": {
+        "曲": 9984
+      }
+    },
+    {
+      "dynasty": "唐代",
+      "categories": {
+        "古体诗": 36487,
+        "古诗": 3156,
+        "其他": 2
+      }
+    },
+    {
+      "dynasty": "宋代",
+      "categories": {
+        "古体诗": 35666,
+        "古诗": 3045,
+        "词": 21001,
+        "其他": 2
+      }
+    },
+    {
+      "dynasty": "战国",
+      "categories": {
+        "其他": 16
+      }
+    },
+    {
+      "dynasty": "清代",
+      "categories": {
+        "词": 257
+      }
+    }
+  ],
+  "authorWorkTopN": [
+    {
+      "author": "陆游",
+      "count": 6572
+    },
+    {
+      "author": "白居易",
+      "count": 2919
+    },
+    {
+      "author": "无名氏",
+      "count": 2917
+    },
+    {
+      "author": "王十朋",
+      "count": 2203
+    },
+    {
+      "author": "宋祁",
+      "count": 1570
+    },
+    {
+      "author": "曹勋",
+      "count": 1509
+    },
+    {
+      "author": "杜甫",
+      "count": 1481
+    },
+    {
+      "author": "释正觉",
+      "count": 1299
+    },
+    {
+      "author": "吴芾",
+      "count": 1149
+    },
+    {
+      "author": "释印肃",
+      "count": 1078
+    },
+    {
+      "author": "王之道",
+      "count": 1054
+    },
+    {
+      "author": "梅尧臣",
+      "count": 937
+    },
+    {
+      "author": "洪适",
+      "count": 931
+    },
+    {
+      "author": "姜特立",
+      "count": 896
+    },
+    {
+      "author": "刘禹锡",
+      "count": 865
+    },
+    {
+      "author": "元稹",
+      "count": 843
+    },
+    {
+      "author": "宋庠",
+      "count": 827
+    },
+    {
+      "author": "韩元吉",
+      "count": 686
+    },
+    {
+      "author": "刘子翚",
+      "count": 674
+    },
+    {
+      "author": "史浩",
+      "count": 670
+    }
+  ],
+  "authorAvgLenTopN": [
+    {
+      "author": "孟子及弟子",
+      "avgLen": 3204.9,
+      "count": 14
+    },
+    {
+      "author": "徐再思",
+      "avgLen": 248.4,
+      "count": 16
+    },
+    {
+      "author": "吴西逸",
+      "avgLen": 206.6,
+      "count": 7
+    },
+    {
+      "author": "舒元舆",
+      "avgLen": 202.8,
+      "count": 6
+    },
+    {
+      "author": "查德卿",
+      "avgLen": 188.4,
+      "count": 5
+    },
+    {
+      "author": "李文蔚",
+      "avgLen": 184.6,
+      "count": 87
+    },
+    {
+      "author": "欧阳炯",
+      "avgLen": 177.9,
+      "count": 7
+    },
+    {
+      "author": "李行甫",
+      "avgLen": 164.4,
+      "count": 38
+    },
+    {
+      "author": "李薰",
+      "avgLen": 160.8,
+      "count": 6
+    },
+    {
+      "author": "慧净",
+      "avgLen": 156.8,
+      "count": 5
+    },
+    {
+      "author": "吴少微",
+      "avgLen": 155.2,
+      "count": 8
+    },
+    {
+      "author": "高茂卿",
+      "avgLen": 154.4,
+      "count": 30
+    },
+    {
+      "author": "朱凯",
+      "avgLen": 153.3,
+      "count": 27
+    },
+    {
+      "author": "顾云",
+      "avgLen": 151.4,
+      "count": 8
+    },
+    {
+      "author": "张养浩",
+      "avgLen": 149.7,
+      "count": 24
+    },
+    {
+      "author": "袁朗",
+      "avgLen": 148.8,
+      "count": 5
+    },
+    {
+      "author": "孙松寿",
+      "avgLen": 145.2,
+      "count": 8
+    },
+    {
+      "author": "薛昂夫",
+      "avgLen": 144.4,
+      "count": 27
+    },
+    {
+      "author": "沈禧",
+      "avgLen": 142.9,
+      "count": 14
+    },
+    {
+      "author": "张可久",
+      "avgLen": 142.9,
+      "count": 127
+    }
+  ],
+  "dynastyTopAuthors": {
+    "东汉": [
+      {
+        "author": "曹操",
+        "count": 26
+      }
+    ],
+    "元代": [
+      {
+        "author": "无名氏",
+        "count": 1253
+      },
+      {
+        "author": "关汉卿",
+        "count": 607
+      },
+      {
+        "author": "高明《蔡伯喈琵琶记》",
+        "count": 377
+      },
+      {
+        "author": "马致远",
+        "count": 359
+      },
+      {
+        "author": "王实甫",
+        "count": 350
+      }
+    ],
+    "唐代": [
+      {
+        "author": "白居易",
+        "count": 2919
+      },
+      {
+        "author": "杜甫",
+        "count": 1481
+      },
+      {
+        "author": "刘禹锡",
+        "count": 865
+      },
+      {
+        "author": "元稹",
+        "count": 843
+      },
+      {
+        "author": "陆龟蒙",
+        "count": 628
+      }
+    ],
+    "宋代": [
+      {
+        "author": "陆游",
+        "count": 6572
+      },
+      {
+        "author": "王十朋",
+        "count": 2203
+      },
+      {
+        "author": "宋祁",
+        "count": 1570
+      },
+      {
+        "author": "无名氏",
+        "count": 1544
+      },
+      {
+        "author": "曹勋",
+        "count": 1509
+      }
+    ],
+    "战国": [
+      {
+        "author": "孟子及弟子",
+        "count": 14
+      },
+      {
+        "author": "曾子",
+        "count": 1
+      },
+      {
+        "author": "子思",
+        "count": 1
+      }
+    ],
+    "清代": [
+      {
+        "author": "纳兰性德",
+        "count": 257
+      }
+    ]
+  }
+}

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>千年诗境 · 诗词文本分析</title>
+    <script src="js/echarts.min.js?v=2"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="text">
+    <nav class="nav">
+        <a href="index.html" class="logo" data-i18n="logo">千年诗境</a>
+        <a href="dynasty.html" data-page="dynasty" data-i18n="nav.dynasty">朝代分析</a>
+        <a href="poet.html" data-page="poet" data-i18n="nav.poet">诗人图谱</a>
+        <a href="text.html" data-page="text" data-i18n="nav.text">诗词文本分析</a>
+        <a href="imagery.html" data-page="imagery" data-i18n="nav.imagery">诗境意象</a>
+        <a href="overview.html" data-page="overview" data-i18n="nav.overview">诗词数据概览</a>
+    </nav>
+    <div class="container">
+        <div class="page-header">
+            <h1 data-i18n="tx.title">诗词文本分析</h1>
+            <p data-i18n="tx.sub">高频字、高频词、长度分布、各朝代高频字</p>
+        </div>
+        <div class="grid-2">
+            <div class="card">
+                <h3>高频字统计（Top 30）</h3>
+                <div id="charFreq" class="chart" style="height:340px;"></div>
+            </div>
+            <div class="card">
+                <h3>高频词统计（Top 30）</h3>
+                <div id="wordFreq" class="chart" style="height:340px;"></div>
+            </div>
+        </div>
+        <div class="card" style="margin-top:20px;">
+            <h3>诗词长度分布</h3>
+            <div id="lengthDist" class="chart" style="height:320px;"></div>
+        </div>
+        <div class="card" style="margin-top:20px;">
+            <h3>各朝代高频字
+                <select id="dynSel" style="margin-left:12px;padding:4px 10px;font-family:inherit;"></select>
+            </h3>
+            <div id="dynastyChar" class="chart" style="height:360px;"></div>
+        </div>
+    </div>
+    <script src="js/common.js?v=3"></script>
+<script>
+const charChart = echarts.init(document.getElementById('charFreq'));
+const wordChart = echarts.init(document.getElementById('wordFreq'));
+const lenChart  = echarts.init(document.getElementById('lengthDist'));
+const dynCharChart = echarts.init(document.getElementById('dynastyChar'));
+let DY = null;
+
+async function loadData() {
+    const [ch, wd, ln, dc] = await Promise.all([
+        fetchAPI('/text/charFreq'), fetchAPI('/text/wordFreq'),
+        fetchAPI('/text/lengthDist'), fetchAPI('/text/dynastyChar'),
+    ]);
+    return { ch: ch||[], wd: wd||[], ln: ln||[], dc: dc||{} };
+}
+
+function renderDynChar(dynasty) {
+    const list = (DY[dynasty] || []).slice(0, 15);
+    dynCharChart.setOption({
+        tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' } },
+        grid:{ left:60, right:30, top:20, bottom:40 },
+        xAxis:{ type:'category', data:list.map(x=>x.char) },
+        yAxis:{ type:'value', name:'出现次数' },
+        color: THEME_COLORS,
+        series:[{ type:'bar', data:list.map(x=>x.count),
+            itemStyle:{ color:'#3D6036', borderRadius:[4,4,0,0] }, label:{ show:true, position:'top', fontSize:10 } }]
+    }, true);
+}
+
+function renderText(d) {
+    charChart.setOption({
+        tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' } },
+        grid:{ left:60, right:30, top:20, bottom:60 },
+        xAxis:{ type:'category', data:d.ch.map(x=>x.char), axisLabel:{ interval:0 } },
+        yAxis:{ type:'value', name:'出现次数' },
+        color: THEME_COLORS,
+        series:[{ type:'bar', data:d.ch.map(x=>x.count),
+            itemStyle:{ color:'#19325F', borderRadius:[4,4,0,0] } }]
+    }, true);
+
+    wordChart.setOption({
+        tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' } },
+        grid:{ left:70, right:40, top:20, bottom:60 },
+        xAxis:{ type:'category', data:d.wd.map(x=>x.word), axisLabel:{ interval:0, rotate:40 } },
+        yAxis:{ type:'value', name:'出现次数' },
+        color: THEME_COLORS,
+        series:[{ type:'bar', data:d.wd.map(x=>x.count),
+            itemStyle:{ color:'#77171C', borderRadius:[4,4,0,0] } }]
+    }, true);
+
+    lenChart.setOption({
+        tooltip:{ trigger:'axis' },
+        grid:{ left:60, right:60, top:30, bottom:40 },
+        xAxis:{ type:'category', data:d.ln.map(x=>x.range), name:'字数区间' },
+        yAxis:{ type:'value', name:'诗词数' },
+        color: THEME_COLORS,
+        series:[{ type:'bar', data:d.ln.map(x=>x.count),
+            itemStyle:{ color:'#C7935F', borderRadius:[4,4,0,0] }, label:{ show:true, position:'top' } }]
+    }, true);
+
+    DY = d.dc;
+    fillDynSel();
+    document.getElementById('dynSel').onchange = () => renderDynChar(document.getElementById('dynSel').value);
+    if (Object.keys(DY).length) renderDynChar(document.getElementById('dynSel').value || Object.keys(DY)[0]);
+}
+
+function fillDynSel() {
+    const sel = document.getElementById('dynSel');
+    const prev = sel.value;
+    sel.innerHTML = '';
+    Object.keys(DY).forEach(k => {
+        const o = document.createElement('option'); o.value = k; o.textContent = trDyn(k); sel.appendChild(o);
+    });
+    if (prev && DY[prev]) sel.value = prev;
+}
+
+async function boot() { renderText(await loadData()); }
+document.addEventListener('DOMContentLoaded', boot);
+window.addEventListener('langchange', () => { fillDynSel(); if (DY && Object.keys(DY).length) renderDynChar(document.getElementById('dynSel').value); });
+window.addEventListener('resize', () => {
+    document.querySelectorAll('.chart').forEach(el => echarts.getInstanceByDom(el)?.resize());
+});
+</script>
+</body>
+</html>

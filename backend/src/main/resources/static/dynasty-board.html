@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>千年诗境 · 朝代分析</title>
+<script src="js/echarts.min.js?v=2"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Microsoft YaHei", sans-serif; background: #f5f6fa; padding: 24px; }
+  h1 { text-align: center; color: #2c3e50; margin-bottom: 4px; }
+  .sub { text-align: center; color: #888; margin-bottom: 24px; font-size: 14px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1200px; margin: 0 auto; }
+  .card { background: #fff; border-radius: 10px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+  .card h3 { font-size: 15px; color: #34495e; margin-bottom: 8px; }
+  .chart { height: 320px; }
+  .full { grid-column: 1 / -1; }
+  .tip { text-align:center; color:#c0392b; margin-top:20px; font-size:13px; }
+</style>
+</head>
+<body>
+  <h1>千年诗境 · 朝代分析看板</h1>
+  <div class="sub">数据来源：Hadoop MapReduce 统计结果 · Spring Boot API</div>
+
+  <div class="grid">
+    <div class="card"><h3>各朝代诗词数量</h3><div id="c1" class="chart"></div></div>
+    <div class="card"><h3>各朝代作者数量</h3><div id="c2" class="chart"></div></div>
+    <div class="card"><h3>各朝代平均诗词长度（字）</h3><div id="c3" class="chart"></div></div>
+    <div class="card"><h3>诗词数量 TopN</h3><div id="c4" class="chart"></div></div>
+  </div>
+
+  <div class="tip" id="err" style="display:none"></div>
+
+<script>
+const API = 'http://localhost:8080/api/dynasty';
+
+async function get(path) {
+  const res = await fetch(API + path);
+  if (!res.ok) throw new Error(path + ' ' + res.status);
+  return res.json();
+}
+
+function render(id, rows, type, color) {
+  const chart = echarts.init(document.getElementById(id));
+  chart.setOption({
+    tooltip: { trigger: 'axis' },
+    xAxis: { type: 'category', data: rows.map(r => r.dynasty) },
+    yAxis: { type: 'value' },
+    series: [{
+      type: type,
+      data: rows.map(r => r.value),
+      itemStyle: { color: color, borderRadius: type === 'bar' ? [4,4,0,0] : 0 },
+      smooth: type === 'line'
+    }]
+  });
+  window.addEventListener('resize', () => chart.resize());
+}
+
+async function main() {
+  try {
+    const [count, authors, avg, top] = await Promise.all([
+      get('/poemCount'), get('/authorCount'), get('/avgLen'), get('/top/6')
+    ]);
+    render('c1', count, 'bar', '#5470c6');
+    render('c2', authors, 'bar', '#91cc75');
+    render('c3', avg, 'line', '#ee6666');
+    // TopN 横向条形图
+    const c4 = echarts.init(document.getElementById('c4'));
+    c4.setOption({
+      tooltip: {},
+      xAxis: { type: 'value' },
+      yAxis: { type: 'category', data: top.map(r => r.dynasty).reverse() },
+      series: [{ type: 'bar', data: top.map(r => r.value).reverse(),
+                 itemStyle: { color: '#fac858', borderRadius: [0,4,4,0] } }]
+    });
+    window.addEventListener('resize', () => c4.resize());
+  } catch (e) {
+    const err = document.getElementById('err');
+    err.style.display = 'block';
+    err.textContent = '接口请求失败：' + e.message + ' —— 请确认后端已启动（localhost:8080）';
+  }
+}
+main();
+</script>
+</body>
+</html>
