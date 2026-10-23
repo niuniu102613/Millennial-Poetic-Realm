@@ -14,6 +14,14 @@ IMAGERY_DICT = ["月","风","云","山","水","花","鸟","酒","剑",
 
 STOP = set("的了是不在有人我他这中上来时也都就一而之以于其且则乃焉兮如何似共又复莫无未自但虽纵却须即为因缘故在是了着过与及或此该等上下内外间时处之中")
 
+# 与 mr/member3 CSVUtils.STOP_CHARS 保持一致：高频字/朝代高频字统计时过滤
+STOP_CHARS = set(list("不之也矣焉哉乎其而以"
+                      "于为则乃且惟虽故因由"
+                      "是非无有何若如但却仍"
+                      "已尚方即既每各另别些"
+                      "个一二三四五六七八九"
+                      "十百千万大小多少长短"))
+
 # jieba 可选
 try:
     import jieba
@@ -59,12 +67,14 @@ with open(CSV_PATH, encoding="utf-8") as f:
         except:
             L = len(content)
 
-        # member3 高频字
+        # member3 高频字（job1，过滤停用字）
         for ch in ch_re.findall(content):
+            if ch in STOP_CHARS: continue
             char_counter[ch] += 1
-        # 朝代高频字
+        # 朝代高频字（job4，过滤停用字）
         if dynasty:
             for ch in ch_re.findall(content):
+                if ch in STOP_CHARS: continue
                 dynasty_chars[dynasty][ch] += 1
 
         # member3 高频词

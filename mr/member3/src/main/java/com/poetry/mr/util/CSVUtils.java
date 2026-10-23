@@ -8,6 +8,19 @@ public class CSVUtils {
 
     private static final Pattern CHINESE_PATTERN = Pattern.compile("[\\u4e00-\\u9fff]");
 
+    private static final Set<Character> STOP_CHARS = new HashSet<>(Arrays.asList(
+            '不', '之', '也', '矣', '焉', '哉', '乎', '其', '而', '以',
+            '于', '为', '则', '乃', '且', '惟', '虽', '故', '因', '由',
+            '是', '非', '无', '有', '何', '若', '如', '但', '却', '仍',
+            '已', '尚', '方', '即', '既', '每', '各', '另', '别', '些',
+            '个', '一', '二', '三', '四', '五', '六', '七', '八', '九',
+            '十', '百', '千', '万', '大', '小', '多', '少', '长', '短'
+    ));
+
+    public static boolean isStopChar(char c) {
+        return STOP_CHARS.contains(c);
+    }
+
     public static List<String> parseCSVLine(String line) {
         List<String> fields = new ArrayList<>();
         boolean inQuotes = false;

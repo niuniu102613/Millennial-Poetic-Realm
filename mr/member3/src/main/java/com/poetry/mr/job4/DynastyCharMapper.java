@@ -25,7 +25,7 @@ public class DynastyCharMapper extends Mapper<LongWritable, Text, Text, IntWrita
         String content = CSVUtils.removePunctuation(CSVUtils.getContent(fields));
 
         for (char c : content.toCharArray()) {
-            if (CSVUtils.isChinese(c)) {
+            if (CSVUtils.isChinese(c) && !CSVUtils.isStopChar(c)) {
                 outKey.set(dynasty + "\t" + c);
                 context.write(outKey, outVal);
             }
