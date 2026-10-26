@@ -3,10 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <title>千年诗境 · 朝代分析</title>
-    <script src="js/echarts.min.js?v=2"></script>
+    <script src="js/echarts.min.js?v=32"></script>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* ==== 长卷基底 ==== */
+        body { background: #f0e8d0; }
+        .scroll-wrap { position:relative; max-width: 1400px; margin: 0 auto; padding: 0 40px 120px; }
+        /* 淡墨山水背景层 */
+        .ink-bg { position: fixed; inset: 0; z-index: -1; opacity:.5; pointer-events:none;
+            background:
+                radial-gradient(ellipse 80% 50% at 20% 10%, rgba(45,74,62,.08), transparent 60%),
+                radial-gradient(ellipse 60% 40% at 85% 30%, rgba(139,46,46,.06), transparent 60%),
+                radial-gradient(ellipse 70% 50% at 50% 90%, rgba(201,169,110,.10), transparent 60%),
+                linear-gradient(#f0e8d0, #ece2c8);
+        }
+        /* 远山 SVG 固定在背景 */
+        .ink-mountains { position: fixed; left:0; right:0; bottom:0; height: 40vh; z-index:-1; opacity:.18; pointer-events:none; }
+        /* 卷轴上下轴 */
+        .rod { height: 14px; background: linear-gradient(#8b6f47,#5a4526,#8b6f47); border-radius:7px; margin: 30px 0; box-shadow: 0 2px 6px rgba(0,0,0,.15); }
+        /* ==== Hero ==== */
+        .hero { text-align:center; padding: 70px 0 40px; position:relative; }
+        .hero .eyebrow { font-size:12px; letter-spacing:6px; color:#8B2E2E; text-transform:uppercase; margin-bottom:20px; }
+        .hero h1 { font-family:"STKaiti","SimSun",serif; font-size:64px; color:#2D4A3E; margin:0 0 16px; letter-spacing:12px; text-shadow: 0 2px 12px rgba(45,74,62,.12); }
+        .hero .sub { font-size:20px; color:#5a6b5e; font-family:"STKaiti",serif; margin-bottom:6px; }
+        .hero .sub2 { font-size:14px; color:#9a8a70; }
+        /* 竖排诗签装饰 */
+        .ver { position:absolute; writing-mode: vertical-rl; font-family:"STKaiti",serif; font-size:16px; color:#8a7a5a; letter-spacing:8px; opacity:.6; }
+        .ver.l { left:0; top:120px; }
+        .ver.r { right:0; top:120px; }
+        /* KPI */
+        .kpi-row { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin:50px 0 10px; }
+        .kpi-card { background: rgba(255,253,247,.55); border:1px solid rgba(201,169,110,.3); border-radius:2px; padding:24px 20px; text-align:center; backdrop-filter: blur(2px); }
+        .kpi-card .k-label { font-size:13px; color:#8b7355; letter-spacing:2px; margin-bottom:10px; }
+        .kpi-card .k-num { font-size:34px; color:#2D4A3E; font-weight:bold; font-family:"STKaiti",serif; }
+        .kpi-note { font-size:12px; color:#b0a080; text-align:center; margin:14px 0 30px; }
+        /* ==== 章节：淡墨晕染，不用硬卡 ==== */
+        .section { margin: 60px 0; opacity:0; transform: translateY(30px); transition: opacity .9s ease, transform .9s ease; }
+        .section.in { opacity:1; transform: translateY(0); }
+        .sec-tag { display:inline-flex; align-items:center; gap:10px; font-size:14px; color:#8B2E2E; letter-spacing:2px; margin-bottom:10px; }
+        .sec-tag::before { content:''; width:3px; height:16px; background:#8B2E2E; }
+        .sec-title { font-family:"STKaiti","SimSun",serif; font-size:30px; color:#2D4A3E; margin:0 0 8px; letter-spacing:3px; }
+        .sec-desc { font-size:14px; color:#9a8a70; margin-bottom:24px; }
+        .sec-ink { background: linear-gradient(180deg, rgba(255,253,247,.5), rgba(255,253,247,.35)); border:none; border-top:1px solid rgba(201,169,110,.2); border-bottom:1px solid rgba(201,169,110,.2); padding:28px 24px; position:relative; }
+        .sec-ink::before, .sec-ink::after { content:''; position:absolute; width:10px; height:10px; border:1px solid #C9A96E; }
+        .sec-ink::before { top:-1px; left:-1px; border-right:none; border-bottom:none; }
+        .sec-ink::after { bottom:-1px; right:-1px; border-left:none; border-top:none; }
+        .two-col { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+        .chart-box { width:100%; height:320px; }
+        .chart-box.tall { height:400px; }
+        /* 毛笔分隔 */
+        .brush { height:2px; background: linear-gradient(90deg, transparent, #C9A96E 20%, #C9A96E 80%, transparent); margin:0; opacity:.4; }
+        /* 朱砂印章 */
+        .seal { position:absolute; top:0; right:0; width:54px; height:54px; background:#8B2E2E; color:#F5EFE0;
+            font-family:"STKaiti",serif; font-size:26px; line-height:54px; text-align:center;
+            border-radius:6px; box-shadow: 0 2px 8px rgba(139,46,46,.35);
+            opacity:0; transform: scale(2.2) rotate(-12deg); transition: opacity .5s ease, transform .5s cubic-bezier(.2,1.6,.4,1); }
+        .section.in .seal { opacity:1; transform: scale(1) rotate(-6deg); }
+        .sec-ink-wrap { position:relative; }
+        /* 立轴展开：自上而下，地轴滚下 */
+        .scroll-stage { overflow: hidden; position: relative; }
+        .scroll-wrap { clip-path: inset(0 0 100% 0); animation: unroll 7.5s cubic-bezier(.3,.6,.2,1) .5s forwards; }
+        @keyframes unroll { to { clip-path: inset(0 0 0 0); } }
+        .rod.top { animation: rodTopIn .5s ease .3s backwards; }
+        @keyframes rodTopIn { from { opacity:0; } to { opacity:1; } }
+        /* 可见地轴：从顶部跟着纸一起往下滚 */
+        .rod.bottom { position: absolute; left:0; right:0; z-index:5; height:14px;
+            background: linear-gradient(#8b6f47,#5a4526,#8b6f47); border-radius:7px;
+            box-shadow: 0 4px 12px rgba(0,0,0,.3);
+            animation: rollerDown 7.5s cubic-bezier(.3,.6,.2,1) .5s forwards; }
+        .rod.bottom::before, .rod.bottom::after { content:''; position:absolute; top:50%; transform:translateY(-50%);
+            width:10px; height:22px; background:#3e2a14; border-radius:3px; }
+        .rod.bottom::before { left:-4px; } .rod.bottom::after { right:-4px; }
+        @keyframes rollerDown { 0%{ top:0; } 100%{ top: calc(100% - 14px); } }
+        /* 弯曲时间轴 */
+        .dyn-bar { position:relative; height:140px; margin:20px 20px 0; }
+        .dyn-path { position:absolute; inset:0; width:100%; height:100%; }
+        .dyn-node { position:absolute; transform:translate(-50%,-50%); display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; z-index:2; }
+        .dyn-dot { width:18px; height:18px; border-radius:50%; background:#F5EFE0; border:2px solid #C9A96E; transition:all .3s; }
+        .dyn-node:hover .dyn-dot { border-color:#8B2E2E; transform:scale(1.25); }
+        .dyn-node.active .dyn-dot { background:#8B2E2E; border-color:#8B2E2E; box-shadow:0 0 0 5px rgba(139,46,46,.2); transform:scale(1.35); }
+        .dyn-name { font-family:STKaiti,serif; font-size:14px; color:#2D4A3E; white-space:nowrap; }
+        .dyn-node.active .dyn-name { color:#8B2E2E; font-weight:bold; }
+        @media (max-width:760px){ .two-col{grid-template-columns:1fr} .kpi-row{grid-template-columns:1fr} .hero h1{font-size:42px;letter-spacing:6px} .ver{display:none} }
+    </style>
+<style>
+.dyn-node{cursor:pointer;transition:transform .25s;}
+.dyn-node:hover{transform:scale(1.25);}
+.dyn-pop{position:fixed;z-index:99;background:#F5EFE0;border:1px solid #C9A96E;box-shadow:0 6px 24px rgba(45,74,62,.25);
+  padding:10px 14px;font-family:STKaiti,serif;font-size:13px;color:#2D4A3E;display:none;pointer-events:none;
+  border-radius:4px;min-width:140px;}
+.dyn-pop b{color:#8B2E2E;}
+.dyn-pop::before{content:"";position:absolute;top:-6px;left:20px;width:10px;height:10px;background:#F5EFE0;
+  border-left:1px solid #C9A96E;border-top:1px solid #C9A96E;transform:rotate(45deg);}
+.ripple{position:absolute;border-radius:50%;background:rgba(139,46,46,.35);transform:scale(0);animation:rip .8s ease-out forwards;pointer-events:none;}
+@keyframes rip{to{transform:scale(4);opacity:0;}}
+</style>
+<style>
+.big-char{position:fixed;right:8%;top:18%;font-family:STKaiti,serif;font-size:340px;font-weight:bold;
+  color:#2D4A3E;opacity:0.06;pointer-events:none;z-index:1;transition:all 1.2s ease-out;line-height:1;
+  text-shadow:0 0 60px rgba(45,74,62,.2);}
+.fly-poem{position:fixed;font-family:STKaiti,serif;color:#2D4A3E;opacity:0;pointer-events:none;z-index:2;
+  font-size:16px;letter-spacing:3px;transition:opacity 2s;writing-mode:vertical-rl;}
+</style>
 </head>
 <body data-page="dynasty">
+    <svg width="0" height="0" style="position:absolute"><defs><filter id="sealRough"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3"/></filter></defs></svg>
+    <!-- 富春山居图 淡墨背景 -->
+    <div class="ink-bg" style="background:
+        linear-gradient(rgba(240,232,208,.82), rgba(236,226,200,.88)),
+        url('img/landscape.jpg') center/cover no-repeat fixed;"></div>
+
     <nav class="nav">
         <a href="index.html" class="logo" data-i18n="logo">千年诗境</a>
         <a href="dynasty.html" data-page="dynasty" data-i18n="nav.dynasty">朝代分析</a>
@@ -15,70 +121,265 @@
         <a href="imagery.html" data-page="imagery" data-i18n="nav.imagery">诗境意象</a>
         <a href="overview.html" data-page="overview" data-i18n="nav.overview">诗词数据概览</a>
     </nav>
-    <div class="container">
-        <div class="page-header">
-            <h1 data-i18n="dy.title">朝代分析</h1>
-            <p data-i18n="dy.sub">各朝代作品数、诗人数量、平均长度、朝代 TopN</p>
+
+    <div class="scroll-stage"><div class="scroll-wrap">
+        <div class="rod top"></div>
+        <!-- Hero -->
+        <div class="hero">
+            <div class="ver l" data-i18n="dy.verL">山河千载</div>
+            <div class="ver r" data-i18n="dy.verR">诗卷长流</div>
+            <div class="eyebrow" data-i18n="dy.eyebrow">A Journey Through Chinese Poetry</div>
+            <h1 data-i18n="dy.heroTitle">诗脉千年</h1>
+            <p class="sub" data-i18n="dy.heroSub">一字一句，皆是山河岁月。</p>
+            <p class="sub2" data-i18n="dy.heroSub2">循着历史的脉络，探寻诗词与诗人的千年风华。</p>
+            <div class="kpi-row">
+                <div class="kpi-card"><div class="k-label" data-i18n="dy.kPoems">收录诗词</div><div class="k-num" id="kPoems">—</div></div>
+                <div class="kpi-card"><div class="k-label" data-i18n="dy.kAuthors">收录作者</div><div class="k-num" id="kAuthors">—</div></div>
+                <div class="kpi-card"><div class="k-label" data-i18n="dy.kDyn">统计朝代</div><div class="k-num" id="kDyn">—</div></div>
+            </div>
+            <p class="kpi-note" data-i18n="dy.kNote">数据概览 · 实际数值由现有数据接口提供</p>
+            <div class="dyn-bar" id="dynBar"></div>
         </div>
-        <div class="grid-2">
-            <div class="card"><h3 data-i18n="dy.c1">各朝代诗词数量</h3><div id="c1" class="chart" style="height:320px;"></div></div>
-            <div class="card"><h3 data-i18n="dy.c2">各朝代作者数量</h3><div id="c2" class="chart" style="height:320px;"></div></div>
-            <div class="card"><h3 data-i18n="dy.c3">各朝代平均诗词长度</h3><div id="c3" class="chart" style="height:320px;"></div></div>
-            <div class="card"><h3 data-i18n="dy.c4">各朝代诗词数量 TopN</h3><div id="c4" class="chart" style="height:320px;"></div></div>
+        <div class="brush"></div>
+
+        <!-- 壹·诗脉 -->
+        <div class="section">
+            <div class="sec-tag" data-i18n="dy.s1Tag">壹 · 诗脉</div>
+            <h2 class="sec-title" data-i18n="dy.s1Title">千年诗词，何处繁盛？</h2>
+            <p class="sec-desc" data-i18n="dy.s1Desc">各朝代诗词数量 · 横向墨色条形图</p>
+            <div class="sec-ink"><div id="c1" class="chart-box tall"></div></div>
         </div>
+
+        <!-- 贰+叁 -->
+        <div class="section">
+            <div class="two-col">
+                <div>
+                    <div class="sec-tag" data-i18n="dy.s2Tag">贰 · 群星</div>
+                    <h2 class="sec-title" data-i18n="dy.s2Title">历代作者</h2>
+                    <p class="sec-desc" data-i18n="dy.s2Desc">作者数量与朝代分布</p>
+                    <div class="sec-ink"><div id="c2" class="chart-box"></div></div>
+                </div>
+                <div>
+                    <div class="sec-tag" data-i18n="dy.s3Tag">叁 · 篇章</div>
+                    <h2 class="sec-title" data-i18n="dy.s3Title">诗词篇幅</h2>
+                    <p class="sec-desc" data-i18n="dy.s3Desc">平均长度与差异比较</p>
+                    <div class="sec-ink"><div id="c3" class="chart-box"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 肆·榜录 -->
+        <div class="section">
+            <div class="sec-tag" data-i18n="dy.s4Tag">肆 · 榜录</div>
+            <h2 class="sec-title" data-i18n="dy.s4Title">诗词数量 · 朝代排行</h2>
+            <p class="sec-desc" data-i18n="dy.s4Desc">以简洁的古籍题签呈现排名，点击朝代可联动上方数据。</p>
+            <div class="sec-ink"><div id="c4" class="chart-box tall"></div></div>
+        </div>
+
+        <div class="rod bottom"></div>
     </div>
-    <script src="js/common.js?v=3"></script>
-    <script>
-    const charts = ['c1','c2','c3','c4'].map(id => echarts.init(document.getElementById(id)));
 
-    function barOption(names, values, color, fmt) {
-        return {
-            tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' }, valueFormatter: v => (fmt||(x=>x))(v) },
-            grid:{ left:60, right:30, top:20, bottom:40 },
-            xAxis:{ type:'category', data:names, axisLabel:{ interval:0 } },
-            yAxis:{ type:'value' },
-            color:[color || THEME_COLORS[0]],
-            series:[{ type:'bar', data:values, barWidth:'45%',
-                itemStyle:{ borderRadius:[4,4,0,0] }, label:{ show:true, position:'top' } }]
+    </div></div>
+    <script src="js/common.js?v=32"></script>
+<script>
+const charts = ['c1','c2','c3','c4'].map(id => echarts.init(document.getElementById(id)));
+let DATA = null;
+const C = { ink:'#2D4A3E', cinnabar:'#8B2E2E', gold:'#C9A96E', stone:'#8FA38A' };
+// 各朝代名句（悬停墨韵）
+// 每个图表配不同诗句（图1诗脉/图2群星/图3篇章/图4榜录）
+const POEM_SETS = [
+  { '唐':['春江潮水连海平，海上明月共潮生。','张若虚《春江花月夜》'], '宋':['莫等闲，白了少年头，空悲切。','岳飞《满江红》'], '元':['峰峦如聚，波涛如怒。','张养浩《山坡羊·潼关怀古》'], '清':['我劝天公重抖擞，不拘一格降人才。','龚自珍《己亥杂诗》'], '东汉':['涉江采芙蓉，兰泽多芳草。','《古诗十九首》'], '战国':['亦余心之所善兮，虽九死其犹未悔。','屈原《离骚》'] },
+  { '唐':['白也诗无敌，飘然思不群。','杜甫《春日忆李白》'], '宋':['醉里挑灯看剑，梦回吹角连营。','辛弃疾《破阵子》'], '元':['地也，你不分好歹何为地？','关汉卿《窦娥冤》'], '清':['江山代有才人出，各领风骚数百年。','赵翼《论诗》'], '东汉':['青青河畔草，郁郁园中柳。','《古诗十九首》'], '战国':['举世皆浊我独清，众人皆醉我独醒。','屈原《渔父》'] },
+  { '唐':['读书破万卷，下笔如有神。','杜甫《奉赠韦左丞丈》'], '宋':['衣带渐宽终不悔，为伊消得人憔悴。','柳永《蝶恋花》'], '元':['夕阳西下，断肠人在天涯。','马致远《天净沙·秋思》'], '清':['横眉冷对千夫指，俯首甘为孺子牛。','鲁迅（近代）'], '东汉':['人生天地间，忽如远行客。','《古诗十九首》'], '战国':['路漫漫其修远兮，吾将上下而求索。','屈原《离骚》'] },
+  { '唐':['天生我材必有用，千金散尽还复来。','李白《将进酒》'], '宋':['大江东去，浪淘尽，千古风流人物。','苏轼《念奴娇·赤壁怀古》'], '元':['不要人夸好颜色，只留清气满乾坤。','王冕《墨梅》'], '清':['落红不是无情物，化作春泥更护花。','龚自珍《己亥杂诗》'], '东汉':['行行重行行，与君生别离。','《古诗十九首》'], '战国':['路漫漫其修远兮，吾将上下而求索。','屈原《离骚》'] }
+];
+let CHART_IDX = 0; // 当前图索引，render 时切换
+function dynOf(name){
+  if(!DATA) return null;
+  return DATA.pc.find(x=>name.indexOf(x.dynasty)>=0) ||
+         DATA.ac.find(x=>name.indexOf(x.dynasty)>=0) ||
+         DATA.al.find(x=>name.indexOf(x.dynasty)>=0) || null;
+}
+function tipFmt(setIdx){
+  return function(raw){
+    const p = Array.isArray(raw) ? raw[0] : raw;
+    const name = p.name;
+    const d = dynOf(name);
+    const pc = d && DATA.pc.find(x=>x.dynasty===d.dynasty);
+    const ac = d && DATA.ac.find(x=>x.dynasty===d.dynasty);
+    const al = d && DATA.al.find(x=>x.dynasty===d.dynasty);
+    const set = POEM_SETS[setIdx] || POEM_SETS[0];
+    const key = d ? Object.keys(set).find(k=>d.dynasty.indexOf(k)>=0) : null;
+    const line = key ? set[key] : null;
+    let rows = '';
+    if(pc) rows += `<div style="font-size:12px;color:#6a6a5a;">诗词：<b style="color:#2D4A3E">${pc.value.toLocaleString()}</b> 首</div>`;
+    if(ac) rows += `<div style="font-size:12px;color:#6a6a5a;">作者：<b style="color:#2D4A3E">${ac.value.toLocaleString()}</b> 人</div>`;
+    if(al) rows += `<div style="font-size:12px;color:#6a6a5a;">均篇：<b style="color:#2D4A3E">${al.value}</b> 字</div>`;
+    const quote = line ? `<div style="margin-top:6px;padding-top:6px;border-top:1px dashed #C9A96E;color:#8B2E2E;font-family:STKaiti,serif;font-size:13px;">“${line[0]}”<br/><span style="font-size:11px;color:#9a8a70;">${line[1]}</span></div>` : '';
+    return `<b style="color:#2D4A3E;font-size:14px;">${name}</b>${rows}${quote}`;
+  };
+}
+function axisStyle(){ return {
+    axisLine:{ lineStyle:{ color:'#d0c4a4' } },
+    axisLabel:{ color:'#6a6a5a', fontSize:12 },
+    splitLine:{ lineStyle:{ color:'#e8dfc5', type:'dashed' } }
+};}
+function renderKPI(){
+    const pc=DATA.pc||[], ac=DATA.ac||[];
+    document.getElementById('kPoems').textContent = pc.reduce((s,x)=>s+x.value,0).toLocaleString();
+    document.getElementById('kAuthors').textContent = ac.reduce((s,x)=>s+x.value,0).toLocaleString();
+    document.getElementById('kDyn').textContent = pc.length;
+}
+const CHRONO = { '战国':0, '东汉':1, '唐代':2, '宋代':3, '元代':4, '清代':5 };
+const byChrono = d => d.slice().sort((a,b)=>(CHRONO[a.dynasty]??99)-(CHRONO[b.dynasty]??99));
+function render(zeroSelected){
+    renderKPI();
+    const names=d=>d.map(x=>trDyn(x.dynasty)), vals=d=>d.map(x=>x.value);
+    // 所有数据按历史顺序重排
+    const pc = byChrono(DATA.pc), ac = byChrono(DATA.ac), al = byChrono(DATA.al), top = byChrono(DATA.top);
+    charts[0].setOption({animationDuration:1500,animationEasing:"elasticOut",
+        tooltip:{trigger:'axis',axisPointer:{type:'shadow'},formatter:tipFmt(0)},
+        grid:{left:70,right:60,top:10,bottom:30},
+        xAxis:Object.assign({type:'value'},axisStyle()),
+        yAxis:Object.assign({type:'category',data:names(pc),inverse:true},axisStyle(),{splitLine:{show:false}}),
+        series:[{type:'bar',barWidth:16,
+            data:pc.map(x=>{
+                const dim = selected && x.dynasty!==selected;
+                const v = (zeroSelected && selected===x.dynasty) ? 0 : x.value;
+                return { value:v,
+                    itemStyle:{color: x.dynasty==='宋'?C.cinnabar:C.ink, borderRadius:[0,3,3,0], opacity: dim?0.3:1} };
+            }),
+            label:{show:true,position:'right',color:'#8B6F3A',fontWeight:'bold'}}]
+    },true);
+    charts[1].setOption({animationDuration:1500,
+        tooltip:{trigger:'axis',axisPointer:{type:'shadow'},formatter:tipFmt(1)},
+        grid:{left:90,right:70,top:10,bottom:20},
+        xAxis:{type:'value',show:false},
+        yAxis:{type:'category',inverse:true,
+            data:ac.map(x=>trDyn(x.dynasty)),
+            axisLine:{show:false},axisTick:{show:false},
+            axisLabel:{color:'#2D4A3E',fontSize:15,fontFamily:'STKaiti,serif'}},
+        series:[
+            {type:'bar',barWidth:3,
+                itemStyle:{color:new echarts.graphic.LinearGradient(0,0,1,0,[{offset:0,color:'#8FA38A'},{offset:1,color:'#2D4A3E'}])},
+                silent:true, data:ac.map(x=>({value:x.value,itemStyle:{opacity:(selected&&x.dynasty!==selected)?0.3:1}}))},
+            {type:'scatter',symbolSize:16,
+                itemStyle:{color:'#8B2E2E',borderColor:'#F5EFE0',borderWidth:2,shadowBlur:6,shadowColor:'rgba(139,46,46,.4)'},
+                label:{show:true,position:'right',color:'#8B6F3A',fontWeight:'bold',fontSize:13,formatter:'{c}'},
+                data:ac.map(x=>selected&&x.dynasty!==selected?{value:x.value,itemStyle:{opacity:0.3}}:x.value)}]
+    },true);
+    CHART_IDX=2; charts[2].setOption({animationDuration:1500,
+        tooltip:{trigger:'item',formatter:tipFmt(2)},
+        series:[{type:'treemap',width:'96%',height:'92%',
+            roam:false, nodeClick:false, visibleMin:0,
+            breadcrumb:{show:false},
+            itemStyle:{borderColor:'#F5EFE0',borderWidth:3,gapWidth:3},
+            label:{show:true,color:'#F5EFE0',fontSize:11,fontFamily:'STKaiti,serif',
+                formatter:function(p){return p.name+'  '+p.value+'字'}},
+            upperLabel:{show:false},
+            data:al.map((x,i)=>({name:trDyn(x.dynasty),value:x.value,
+                itemStyle:{color:['#6b8e7f','#C9A96E','#b8995a','#a8895a','#d4b87a','#8B2E2E'][i],
+                    opacity:(selected&&x.dynasty!==selected)?0.3:1}}))}]
+    },true);
+    charts[3].setOption({animationDuration:1500,
+        tooltip:{trigger:'axis',formatter:tipFmt(3)},
+        grid:{left:60,right:40,top:30,bottom:40},
+        xAxis:Object.assign({type:'category',data:names(top)},axisStyle(),{axisLabel:{interval:0,fontFamily:'STKaiti,serif',fontSize:13,color:'#8B6F3A',fontWeight:'bold'}}),
+        yAxis:Object.assign({type:'value'},axisStyle()),
+        series:[{type:'line',smooth:true,symbol:'circle',symbolSize:10,
+            lineStyle:{color:C.cinnabar,width:3},
+            itemStyle:{color:C.cinnabar,borderColor:'#F5EFE0',borderWidth:2},
+            areaStyle:{color:C.cinnabar,opacity:.12},
+            label:{show:true,position:'top',color:'#8B2E2E',fontWeight:'bold'},
+            data:vals(top).map((v,i)=>selected&&top[i].dynasty!==selected?{value:v,lineStyle:{opacity:.2},itemStyle:{opacity:.2},label:{opacity:.2}}:v)}]
+    },true);
+}
+let selected = null;
+function resetSel(){ selected=null; buildDynBar(); render(false); }
+function buildDynBar(){
+    const bar = document.getElementById('dynBar');
+    const order = ['战国','东汉','唐代','宋代','元代','清代'];
+    const W=1200, H=100;
+    const step=W/(order.length-1);
+    // S 形正弦曲线 y
+    const yAt = i => 50 + Math.sin(i*Math.PI/2.5)*28;
+    let pathD='M0,'+yAt(0);
+    for(let i=1;i<order.length;i++){
+        const cx=(i-0.5)*step, cy=yAt(i-1)*0.4+yAt(i)*0.6;
+        pathD+=` Q ${cx},${cy} ${i*step},${yAt(i)}`;
+    }
+    let nodes='';
+    order.forEach((d,i)=>{
+        const x=i*step, y=yAt(i);
+        const act = selected===d?' active':'';
+        nodes+=`<div class="dyn-node${act}" data-dyn="${d}" style="left:${x}px; top:${y}px;">
+            <div class="dyn-dot"></div><div class="dyn-name">${trDyn(d)}</div></div>`;
+    });
+    bar.innerHTML=`<svg class="dyn-path" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+        <path d="${pathD}" fill="none" stroke="#C9A96E" stroke-width="2"  opacity=".7"/></svg>${nodes}`;
+    const pop=document.getElementById('dynPop');
+    bar.querySelectorAll('.dyn-node').forEach(p=>{
+        p.onclick=(e)=>{
+            // 涟漪
+            const r=document.createElement('span'); r.className='ripple';
+            r.style.width='20px';r.style.height='20px';r.style.left=(e.offsetX-10)+'px';r.style.top=(e.offsetY-10)+'px';
+            p.appendChild(r); setTimeout(()=>r.remove(),800);
+            selected=(selected===p.dataset.dyn)?null:p.dataset.dyn;
+            buildDynBar(); render(true); setTimeout(()=>render(false),60);
+            const bc=document.getElementById('bigChar');
+            if(selected){ bc.textContent=selected.replace('代',''); bc.style.opacity='0.12'; }
+            else { bc.style.opacity='0.06'; }
         };
-    }
-    function hbarOption(names, values, color) {
-        return {
-            tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' } },
-            grid:{ left:80, right:40, top:10, bottom:20 },
-            xAxis:{ type:'value' },
-            yAxis:{ type:'category', data:names.slice().reverse() },
-            color:[color || THEME_COLORS[1]],
-            series:[{ type:'bar', data:values.slice().reverse(), barWidth:'45%',
-                itemStyle:{ borderRadius:[0,4,4,0] }, label:{ show:true, position:'right' } }]
+        p.onmouseenter=()=>{
+            const d=p.dataset.dyn;
+            const pc=DATA.pc.find(x=>x.dynasty===d), ac=DATA.ac.find(x=>x.dynasty===d), al=DATA.al.find(x=>x.dynasty===d);
+            pop.innerHTML=`<b>${trDyn(d)}</b><br/>诗：${pc?pc.value.toLocaleString():'-'} 首<br/>作者：${ac?ac.value.toLocaleString():'-'} 人<br/>均篇：${al?al.value:'-'} 字`;
+            pop.style.display='block';
+            const rect=p.getBoundingClientRect();
+            pop.style.left=(rect.left-40)+'px'; pop.style.top=(rect.top-90)+'px';
         };
-    }
-
-    let DATA = null;
-
-    function render() {
-        if (!DATA) return;
-        const names = d => d.map(x => trDyn(x.dynasty));
-        const vals = d => d.map(x => x.value);
-        charts[0].setOption(barOption(names(DATA.pc), vals(DATA.pc), THEME_COLORS[0]), true);
-        charts[1].setOption(barOption(names(DATA.ac), vals(DATA.ac), THEME_COLORS[3]), true);
-        charts[2].setOption(barOption(names(DATA.al), vals(DATA.al), THEME_COLORS[5]), true);
-        charts[3].setOption(hbarOption(names(DATA.top), vals(DATA.top), THEME_COLORS[1]), true);
-    }
-
-    async function boot() {
-        const [pc, ac, al, top] = await Promise.all([
-            fetchAPI('/dynasty/poemCount'),
-            fetchAPI('/dynasty/authorCount'),
-            fetchAPI('/dynasty/avgLen'),
-            fetchAPI('/dynasty/top/6'),
-        ]);
-        DATA = { pc: pc||[], ac: ac||[], al: al||[], top: top||[] };
-        render();
-    }
-    document.addEventListener('DOMContentLoaded', boot);
-    window.addEventListener('langchange', () => { if(DATA) render(); });
-    window.addEventListener('resize', () => charts.forEach(c => c.resize()));
-    </script>
-</body>
+        p.onmouseleave=()=>{ pop.style.display='none'; };
+    });
+}
+// 视差：背景随滚动慢移
+window.addEventListener('scroll',()=>{
+    const bg=document.querySelector('.ink-bg'); if(bg) bg.style.backgroundPositionY = (window.scrollY*0.3)+'px';
+},{passive:true});
+async function boot(){
+    const [pc,ac,al,top] = await Promise.all([
+        fetchAPI('/dynasty/poemCount'),fetchAPI('/dynasty/authorCount'),
+        fetchAPI('/dynasty/avgLen'),fetchAPI('/dynasty/top/6')]);
+    DATA={pc:pc||[],ac:ac||[],al:al||[],top:top||[]};
+    render(); buildDynBar();
+}
+const FLY_POEMS={
+  '唐代':['床前明月光，疑是地上霜。','天生我材必有用，千金散尽还复来。','春风得意马蹄疾，一日看尽长安花。'],
+  '宋代':['大江东去，浪淘尽。','莫等闲，白了少年头。','众里寻他千百度。'],
+  '元代':['夕阳西下，断肠人在天涯。','峰峦如聚，波涛如怒。'],
+  '清代':['落红不是无情物，化作春泥更护花。','我劝天公重抖擞。'],
+  '东汉':['涉江采芙蓉，兰泽多芳草。'],
+  '战国':['路漫漫其修远兮，吾将上下而求索。']
+};
+const ALL_POEMS=Object.values(FLY_POEMS).flat();
+function spawnFlyPoem(){
+  const layer=document.getElementById('flyLayer');
+  const t=ALL_POEMS[Math.floor(Math.random()*ALL_POEMS.length)];
+  const el=document.createElement('div'); el.className='fly-poem'; el.textContent=t;
+  el.style.left=(5+Math.random()*85)+'%';
+  el.style.top=(100+Math.random()*20)+'vh';
+  el.style.fontSize=(13+Math.random()*8)+'px';
+  el.style.color=Math.random()>0.5?'#2D4A3E':'#8B2E2E';
+  layer.appendChild(el);
+  requestAnimationFrame(()=>{ el.style.opacity='0.4'; el.style.transition='top '+(14+Math.random()*8)+'s linear, opacity 4s'; el.style.top='-15vh'; });
+  setTimeout(()=>el.remove(),22000);
+}document.addEventListener('DOMContentLoaded', boot);
+window.addEventListener('langchange', ()=>{ if(DATA) render(); });
+window.addEventListener('resize', ()=>charts.forEach(c=>c.resize()));
+// 章节徐徐展开
+const io = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in'); }),{threshold:.15});
+document.querySelectorAll('.section').forEach(s=>io.observe(s));
+</script>
+<div class="dyn-pop" id="dynPop"></div>
+<div class="big-char" id="bigChar"></div>
+<div id="flyLayer"></div>`n</body>
 </html>
