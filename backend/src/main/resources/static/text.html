@@ -120,22 +120,20 @@
         </div>
         <div class="brush"></div>
 
-        <!-- 壹·字 + 贰·词 -->
+        <!-- 壹·字 -->
         <div class="section">
-            <div class="two-col">
-                <div>
-                    <div class="sec-tag" data-tx2="s1Tag">壹 · 字</div>
-                    <h2 class="sec-title" data-tx2="s1Title">千年诗卷，何字最频？</h2>
-                    <p class="sec-desc" data-tx2="s1Desc">高频字 Top 30 · 横向墨色条形</p>
-                    <div class="sec-ink"><div id="charFreq" class="chart-box"></div></div>
-                </div>
-                <div>
-                    <div class="sec-tag" data-tx2="s2Tag">贰 · 词</div>
-                    <h2 class="sec-title" data-tx2="s2Title">词组之间，意韵何长？</h2>
-                    <p class="sec-desc" data-tx2="s2Desc">高频词 Top 30 · 朱砂立柱</p>
-                    <div class="sec-ink"><div id="wordFreq" class="chart-box"></div></div>
-                </div>
-            </div>
+            <div class="sec-tag" data-tx2="s1Tag">壹 · 字</div>
+            <h2 class="sec-title" data-tx2="s1Title">千年诗卷，何字最频？</h2>
+            <p class="sec-desc" data-tx2="s1Desc">高频字 Top 20 · 横向墨色条形</p>
+            <div class="sec-ink"><div id="charFreq" class="chart-box tall"></div></div>
+        </div>
+
+        <!-- 贰·词 -->
+        <div class="section">
+            <div class="sec-tag" data-tx2="s2Tag">贰 · 词</div>
+            <h2 class="sec-title" data-tx2="s2Title">词组之间，意韵何长？</h2>
+            <p class="sec-desc" data-tx2="s2Desc">高频词 Top 20 · 朱砂立柱</p>
+            <div class="sec-ink"><div id="wordFreq" class="chart-box tall"></div></div>
         </div>
 
         <!-- 叁·律 -->
@@ -177,8 +175,8 @@ const TX2 = {
         heroSub2:'从字频、词频到篇幅，细读千年诗卷里的语言密码。',
         k1:'字频榜首', k2:'词频榜首', k3:'字数区间', k4:'覆盖朝代',
         kNote:'数据概览 · 实际数值由现有数据接口提供',
-        s1Tag:'壹 · 字', s1Title:'千年诗卷，何字最频？', s1Desc:'高频字 Top 30 · 横向墨色条形',
-        s2Tag:'贰 · 词', s2Title:'词组之间，意韵何长？', s2Desc:'高频词 Top 30 · 朱砂立柱',
+        s1Tag:'壹 · 字', s1Title:'千年诗卷，何字最频？', s1Desc:'高频字 Top 20 · 横向墨色条形',
+        s2Tag:'贰 · 词', s2Title:'词组之间，意韵何长？', s2Desc:'高频词 Top 20 · 朱砂立柱',
         s3Tag:'叁 · 律', s3Title:'诗篇长短，自成节奏', s3Desc:'各字数区间内的诗词数量 · 描金柱',
         s4Tag:'肆 · 韵', s4Title:'历代诗人，偏爱何字？', s4Desc:'按朝代切换，看一朝之语汇偏好',
     },
@@ -190,8 +188,8 @@ const TX2 = {
         heroSub2:'From character frequency to poem length, decode the language across a millennium.',
         k1:'Top Character', k2:'Top Word', k3:'Length Bins', k4:'Dynasties',
         kNote:'Overview · live values from the data API',
-        s1Tag:'I · Characters', s1Title:'Which character reigns supreme?', s1Desc:'Top 30 frequent characters · horizontal ink bars',
-        s2Tag:'II · Words', s2Title:'Which words carry the imagery?', s2Desc:'Top 30 frequent words · cinnabar bars',
+        s1Tag:'I · Characters', s1Title:'Which character reigns supreme?', s1Desc:'Top 20 frequent characters · horizontal ink bars',
+        s2Tag:'II · Words', s2Title:'Which words carry the imagery?', s2Desc:'Top 20 frequent words · cinnabar bars',
         s3Tag:'III · Rhythm', s3Title:'Length shapes the rhythm', s3Desc:'Poem count per character-length bin · gold bars',
         s4Tag:'IV · Dialect', s4Title:'What did each dynasty love to write?', s4Desc:'Switch dynasties to reveal their lexical tastes',
     }
@@ -245,23 +243,20 @@ function renderKPI(d){
 
 function renderDynChar(dynasty) {
     const list = (DY[dynasty] || []).slice(0, 15);
+    const data = list.map(x=>({ name:x.char, value:x.count }));
     dynCharChart.setOption({
         animationDuration: 1200, animationEasing: 'cubicOut',
-        tooltip: Object.assign({ trigger:'axis', axisPointer:{ type:'shadow' },
-            formatter: p => {
-                const it = Array.isArray(p)?p[0]:p;
-                return `<b style="color:${C.ink};font-size:14px;">${trDyn(dynasty)} · ${it.name}</b><br/><span style="color:#6a6a5a;">出现 <b style="color:${C.cinnabar}">${it.value}</b> 次</span>`;
-            }}, tipStyle()),
-        grid:{ left:50, right:30, top:30, bottom:40 },
-        xAxis: Object.assign({ type:'category', data:list.map(x=>x.char),
-            axisLabel:{ interval:0, fontFamily:'STKaiti, serif', fontSize:15, color:C.ink, fontWeight:'bold' } }, axisStyle(), { splitLine:{show:false} }),
-        yAxis: Object.assign({ type:'value' }, axisStyle()),
-        series:[{ type:'bar', barWidth:18,
-            data:list.map(x=>x.count),
-            itemStyle:{ color: new echarts.graphic.LinearGradient(0,0,0,1,[
-                {offset:0,color:C.cinnabar},{offset:1,color:'#b8553f'}]),
-                borderRadius:[4,4,0,0] },
-            label:{ show:true, position:'top', fontSize:11, color:'#8B6F3A' } }]
+        tooltip: Object.assign({ trigger:'item',
+            formatter: p => `<b style="color:${C.ink};font-size:14px;">${trDyn(dynasty)} · ${p.name}</b><br/><span style="color:#6a6a5a;">出现 <b style="color:${C.cinnabar}">${p.value}</b> 次 · 占比 ${p.percent}%</span>`
+        }, tipStyle()),
+        color: THEME_COLORS,
+        series:[{ type:'pie', radius:['36%','66%'], center:['50%','50%'],
+            avoidLabelOverlap:true,
+            itemStyle:{ borderColor:'#F5EFE0', borderWidth:2, borderRadius:3 },
+            label:{ color:C.ink, fontFamily:'STKaiti, serif', fontSize:13, formatter:'{b} {d}%' },
+            labelLine:{ lineStyle:{ color:'#c9b896' } },
+            emphasis:{ scale:true, scaleSize:8, label:{ fontSize:16, fontWeight:'bold' } },
+            data }]
     }, true);
     // 大水印字随朝代切换
     const bc = document.getElementById('bigChar');
@@ -270,7 +265,8 @@ function renderDynChar(dynasty) {
 
 function renderText(d) {
     renderKPI(d);
-    /* 壹·字：横向条形（古籍题签式） */
+    /* 壹·字：横向条形（古籍题签式）Top20 */
+    const topCh = d.ch.slice(0, 20);
     charChart.setOption({
         animationDuration: 1500, animationEasing: 'elasticOut',
         tooltip: Object.assign({ trigger:'axis', axisPointer:{ type:'shadow' },
@@ -280,27 +276,28 @@ function renderText(d) {
             }}, tipStyle()),
         grid:{ left:40, right:60, top:10, bottom:30 },
         xAxis: Object.assign({ type:'value', show:false }, axisStyle()),
-        yAxis: Object.assign({ type:'category', data:d.ch.map(x=>x.char), inverse:true,
+        yAxis: Object.assign({ type:'category', data:topCh.map(x=>x.char), inverse:true,
             axisLabel:{ color:C.ink, fontSize:14, fontFamily:'STKaiti, serif' },
             axisLine:{show:false}, axisTick:{show:false} }, axisStyle(), { splitLine:{show:false} }),
         series:[{ type:'bar', barWidth:10,
-            data:d.ch.map(x=>x.count),
+            data:topCh.map(x=>x.count),
             itemStyle:{ color: new echarts.graphic.LinearGradient(0,0,1,0,[
                 {offset:0,color:C.stone},{offset:1,color:C.ink}]),
                 borderRadius:[0,3,3,0] },
             label:{ show:true, position:'right', color:'#8B6F3A', fontWeight:'bold', fontSize:11 } }]
     }, true);
 
-    /* 贰·词：竖向朱砂柱 */
+    /* 贰·词：竖向朱砂柱 Top20 */
+    const topWd = d.wd.slice(0, 20);
     wordChart.setOption({
         animationDuration: 1500, animationEasing: 'elasticOut',
         tooltip: Object.assign({ trigger:'axis', axisPointer:{ type:'shadow' }}, tipStyle()),
         grid:{ left:50, right:30, top:20, bottom:70 },
-        xAxis: Object.assign({ type:'category', data:d.wd.map(x=>x.word),
+        xAxis: Object.assign({ type:'category', data:topWd.map(x=>x.word),
             axisLabel:{ interval:0, rotate:40, fontFamily:'STKaiti, serif', fontSize:12, color:'#8B6F3A' }}, axisStyle(), { splitLine:{show:false} }),
         yAxis: Object.assign({ type:'value' }, axisStyle()),
         series:[{ type:'bar', barWidth:14,
-            data:d.wd.map(x=>x.count),
+            data:topWd.map(x=>x.count),
             itemStyle:{ color: new echarts.graphic.LinearGradient(0,0,0,1,[
                 {offset:0,color:C.cinnabar},{offset:1,color:'#b8553f'}]),
                 borderRadius:[4,4,0,0] } }]
