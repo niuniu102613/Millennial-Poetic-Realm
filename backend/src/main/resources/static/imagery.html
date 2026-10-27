@@ -7,203 +7,568 @@
     <script src="js/echarts-wordcloud.min.js?v=2"></script>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-bottom:24px; }
-        .stat-card { background:rgba(255,253,247,.9); border:1px solid rgba(201,169,110,.4); padding:20px; text-align:center; border-radius:4px; position:relative; }
-        .stat-card::before,.stat-card::after{ content:''; position:absolute; width:10px;height:10px; border:2px solid var(--gold); }
-        .stat-card::before{ top:-2px;left:-2px; border-right:none;border-bottom:none; }
-        .stat-card::after{ bottom:-2px;right:-2px; border-left:none;border-top:none; }
-        .stat-card .num { font-size:32px; color:var(--ink-blue); font-weight:bold; font-family:"STKaiti",serif; }
-        .stat-card .label { font-size:13px; color:#8b7355; margin-top:6px; letter-spacing:2px; }
-        @media (max-width:900px){ .stats-row{ grid-template-columns:repeat(2,1fr); } }
-        .seg { display:inline-flex; gap:4px; background:rgba(201,169,110,.15); padding:4px; border-radius:6px; }
-        .seg span { padding:5px 14px; border-radius:4px; cursor:pointer; font-size:13px; color:#5a3e2b; }
-        .seg span.active { background:var(--ink-blue); color:#fff; }
-        .author-panel { display:flex; gap:20px; align-items:flex-start; margin-bottom:10px; }
-        .author-panel select { padding:8px 12px; border:1px solid rgba(201,169,110,.5); border-radius:4px; font-family:inherit; background:#fffdf7; }
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: rgba(255,253,247,.9);
+            border: 1px solid rgba(201,169,110,.4);
+            padding: 20px;
+            text-align: center;
+            border-radius: 4px;
+            position: relative;
+        }
+        .stat-card::before,
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border: 2px solid var(--gold);
+        }
+        .stat-card::before {
+            top: -2px;
+            left: -2px;
+            border-right: none;
+            border-bottom: none;
+        }
+        .stat-card::after {
+            bottom: -2px;
+            right: -2px;
+            border-left: none;
+            border-top: none;
+        }
+        .stat-card .num {
+            font-size: 32px;
+            color: var(--ink-blue);
+            font-weight: bold;
+            font-family: "STKaiti", serif;
+        }
+        .stat-card .label {
+            font-size: 13px;
+            color: #8b7355;
+            margin-top: 6px;
+            letter-spacing: 2px;
+        }
+        @media (max-width: 900px) {
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        .dyn-card-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        .dyn-card {
+            padding: 8px 18px;
+            border: 1px solid rgba(201,169,110,.45);
+            border-radius: 6px;
+            background: #fffdf7;
+            cursor: pointer;
+            transition: all 0.22s ease;
+            font-size: 14px;
+            color: #5a3e2b;
+        }
+        .dyn-card:hover {
+            box-shadow: 0 2px 6px rgba(201,169,110,.25);
+            transform: translateY(-2px);
+        }
+        .dyn-card.active {
+            background: var(--ink-blue);
+            color: #ffffff;
+            border-color: var(--ink-blue);
+        }
+        .author-panel {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .author-panel select,
+        .author-panel input {
+            padding: 8px 12px;
+            border: 1px solid rgba(201,169,110,.5);
+            border-radius: 4px;
+            font-family: inherit;
+            background: #fffdf7;
+            outline: none;
+        }
     </style>
 </head>
 <body data-page="imagery">
-    <nav class="nav">
-        <a href="index.html" class="logo" data-i18n="logo">千年诗境</a>
-        <a href="dynasty.html" data-page="dynasty" data-i18n="nav.dynasty">朝代分析</a>
-        <a href="poet.html" data-page="poet" data-i18n="nav.poet">诗人图谱</a>
-        <a href="text.html" data-page="text" data-i18n="nav.text">诗词文本分析</a>
-        <a href="imagery.html" data-page="imagery" data-i18n="nav.imagery">诗境意象</a>
-        <a href="overview.html" data-page="overview" data-i18n="nav.overview">诗词数据概览</a>
-    </nav>
-    <div class="container">
-        <div class="page-header">
-            <h1 data-i18n="im.title">诗境意象</h1>
-            <p data-i18n="im.sub">意象出现次数、意象 TopN、朝代×意象、作者×意象</p>
-        </div>
+<nav class="nav">
+    <a href="index.html" class="logo" data-i18n="logo">千年诗境</a>
+    <a href="dynasty.html" data-page="dynasty" data-i18n="nav.dynasty">朝代分析</a>
+    <a href="poet.html" data-page="poet" data-i18n="nav.poet">诗人图谱</a>
+    <a href="text.html" data-page="text" data-i18n="nav.text">诗词文本分析</a>
+    <a href="imagery.html" data-page="imagery" data-i18n="nav.imagery">诗境意象</a>
+    <a href="overview.html" data-page="overview" data-i18n="nav.overview">诗词数据概览</a>
+</nav>
 
-        <div class="stats-row">
-            <div class="stat-card"><div class="num" id="kTotal">—</div><div class="label" data-i18n="im.kTotal">意象种类</div></div>
-            <div class="stat-card"><div class="num" id="kPoems">—</div><div class="label" data-i18n="im.kPoems">诗词总量</div></div>
-            <div class="stat-card"><div class="num" id="kDyn">—</div><div class="label" data-i18n="im.kDyn">覆盖朝代</div></div>
-            <div class="stat-card"><div class="num" id="kAuth">—</div><div class="label" data-i18n="im.kAuth">覆盖诗人</div></div>
-        </div>
+<div class="container">
+    <div class="page-header">
+        <h1 data-i18n="im.title">诗境意象</h1>
+        <p data-i18n="im.sub">意象出现次数、意象 TopN、朝代×意象、作者×意象</p>
+    </div>
 
-        <div class="grid-2">
-            <div class="card">
-                <h3 data-i18n="im.cloud">高频意象词云</h3>
-                <div id="cloudChart" class="chart" style="height:380px;"></div>
-            </div>
-            <div class="card">
-                <h3 data-i18n="im.c1">意象出现次数 Top10</h3>
-                <div id="top10Chart" class="chart" style="height:380px;"></div>
-            </div>
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="num" id="kTotal">—</div>
+            <div class="label" data-i18n="im.kTotal">意象种类</div>
         </div>
-
-        <div class="card" style="margin-top:20px;">
-            <h3 data-i18n="im.c3">朝代意象分布
-                <span class="seg" id="dynSeg" style="margin-left:12px;">
-                    <span data-dyn="" class="active" data-i18n="im.all">全部</span>
-                    <span data-dyn="唐代">唐</span>
-                    <span data-dyn="宋代">宋</span>
-                    <span data-dyn="元代">元</span>
-                    <span data-dyn="清代">清</span>
-                </span>
-            </h3>
-            <div id="byDynChart" class="chart" style="height:380px;"></div>
+        <div class="stat-card">
+            <div class="num" id="kPoems">—</div>
+            <div class="label" data-i18n="im.kPoems">诗词总量</div>
         </div>
-
-        <div class="card" style="margin-top:20px;">
-            <h3 data-i18n="im.c4">诗人意象偏好</h3>
-            <div class="author-panel">
-                <span style="font-size:13px;color:#8b7355;" data-i18n="im.quickPoet">快速选择诗人：</span>
-                <select id="authorSel">
-                    <option value="李白">李白</option>
-                    <option value="杜甫">杜甫</option>
-                    <option value="苏轼">苏轼</option>
-                    <option value="李清照">李清照</option>
-                </select>
-            </div>
-            <div id="byAuthChart" class="chart" style="height:380px;"></div>
+        <div class="stat-card">
+            <div class="num" id="kDyn">—</div>
+            <div class="label" data-i18n="im.kDyn">覆盖朝代</div>
+        </div>
+        <div class="stat-card">
+            <div class="num" id="kAuth">—</div>
+            <div class="label" data-i18n="im.kAuth">覆盖诗人</div>
         </div>
     </div>
 
-    <script src="js/common.js?v=3"></script>
+    <div class="grid-2">
+        <div class="card">
+            <h3 data-i18n="im.cloud">高频意象词云</h3>
+            <div id="cloudChart" class="chart" style="height:380px;"></div>
+        </div>
+        <div class="card">
+            <h3 data-i18n="im.c1">意象出现次数 Top10</h3>
+            <div id="top10Chart" class="chart" style="height:380px;"></div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+        <h3 data-i18n="im.c3">朝代意象分布</h3>
+        <div class="dyn-card-group" id="dynCardGroup"></div>
+        <div id="byDynChart" class="chart" style="height:380px;margin-top:12px;"></div>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+        <h3 data-i18n="im.c4">诗人意象偏好</h3>
+        <div class="author-panel">
+            <span style="font-size:13px;color:#8b7355;" data-i18n="im.quickPoet">快速选择诗人：</span>
+            <input id="authorSearch" placeholder="输入诗人姓名搜索..." style="width:180px;">
+            <select id="authorSel"></select>
+        </div>
+        <div id="byAuthChart" class="chart" style="height:380px;"></div>
+    </div>
+</div>
+
+<script src="js/common.js?v=3"></script>
 <script>
-const cloudChart = echarts.init(document.getElementById('cloudChart'));
-const top10Chart = echarts.init(document.getElementById('top10Chart'));
-const byDynChart = echarts.init(document.getElementById('byDynChart'));
-const byAuthChart = echarts.init(document.getElementById('byAuthChart'));
+    const cloudChart = echarts.init(document.getElementById('cloudChart'));
+    const top10Chart = echarts.init(document.getElementById('top10Chart'));
+    const byDynChart = echarts.init(document.getElementById('byDynChart'));
+    const byAuthChart = echarts.init(document.getElementById('byAuthChart'));
 
-let DATA = null;
-let currentDyn = '';
+    let DATA = null;
+    let currentDyn = '';
+    let allPoetOptions = [];
 
-async function loadData() {
-    const [meta, total, topn, bd, ba] = await Promise.all([
-        fetchAPI('/imagery/meta'), fetchAPI('/imagery/total'),
-        fetchAPI('/imagery/topn'), fetchAPI('/imagery/by-dynasty'),
-        fetchAPI('/imagery/by-author'),
-    ]);
-    return { meta: meta||{}, total: total||[], topn: topn||[], bd: bd||{}, ba: ba||{} };
-}
+    async function loadData() {
+        const [meta, total, topn, bd, ba] = await Promise.all([
+            fetchAPI('/imagery/meta'),
+            fetchAPI('/imagery/total'),
+            fetchAPI('/imagery/topn'),
+            fetchAPI('/imagery/by-dynasty'),
+            fetchAPI('/imagery/by-author')
+        ]);
+        return {
+            meta: meta || {},
+            total: total || [],
+            topn: topn || [],
+            bd: bd || {},
+            ba: ba || {}
+        };
+    }
 
-function renderKPI() {
-    document.getElementById('kTotal').textContent = DATA.total.length;
-    document.getElementById('kPoems').textContent = (DATA.meta.poemCount||0).toLocaleString();
-    document.getElementById('kDyn').textContent = DATA.meta.dynastyCount || 0;
-    document.getElementById('kAuth').textContent = (DATA.meta.authorCount||0).toLocaleString();
-}
+    function renderKPI() {
+        document.getElementById('kTotal').textContent = DATA.total.length;
+        document.getElementById('kPoems').textContent = (DATA.meta.poemCount || 0).toLocaleString();
+        document.getElementById('kDyn').textContent = DATA.meta.dynastyCount || 0;
+        document.getElementById('kAuth').textContent = (DATA.meta.authorCount || 0).toLocaleString();
+    }
 
-function renderCloud() {
-    cloudChart.setOption({
-        tooltip: { show: true, formatter: p => p.name + '：' + p.value + ' ' + t('im.times') },
-        series: [{
-            type: 'wordCloud', sizeRange: [18, 72], rotationRange: [-30, 30],
-            gridSize: 6, shape: 'circle', drawOutOfBound: false,
-            textStyle: { fontFamily: 'STKaiti, KaiTi, serif',
-                color: () => THEME_COLORS[Math.floor(Math.random()*THEME_COLORS.length)] },
-            emphasis: { textStyle: { textShadowBlur: 8, textShadowColor: 'rgba(0,0,0,0.3)' } },
-            data: DATA.total.map(x => ({ name: x.imagery, value: x.count }))
-        }]
-    }, true);
-}
-
-function renderTop10() {
-    const t = DATA.topn.slice().reverse();
-    top10Chart.setOption({
-        tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' } },
-        grid:{ left:60,right:40,top:20,bottom:30 },
-        xAxis:{ type:'value' }, yAxis:{ type:'category', data:t.map(x=>x.imagery) },
-        series:[{ type:'bar', data:t.map(x=>x.count),
-            itemStyle:{ color:'#A33F32', borderRadius:[0,4,4,0] }, label:{ show:true, position:'right' } }]
-    }, true);
-}
-
-function renderDyn(dyn) {
-    currentDyn = dyn || '';
-    if (!dyn) {
-        const dynKeys = Object.keys(DATA.bd);
-        const imagSet = new Set();
-        dynKeys.forEach(k => (DATA.bd[k]||[]).forEach(x=>imagSet.add(x.imagery)));
-        const imagKeys = [...imagSet];
-        byDynChart.setOption({
-            tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' } },
-            legend:{ data:imagKeys, top:0, type:'scroll' },
-            grid:{ left:60,right:30,top:40,bottom:30 },
-            xAxis:{ type:'category', data:dynKeys.map(trDyn) },
-            yAxis:{ type:'value', name:t('im.count') },
-            color: THEME_COLORS,
-            series: imagKeys.map(im=>({ name:im, type:'bar', stack:'total',
-                data: dynKeys.map(k=>{ const f=(DATA.bd[k]||[]).find(x=>x.imagery===im); return f?f.count:0; }) }))
-        }, true);
-    } else {
-        const list = (DATA.bd[dyn]||[]).slice();
-        byDynChart.setOption({
-            tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' } },
-            grid:{ left:60,right:30,top:20,bottom:50 },
-            xAxis:{ type:'category', data:list.map(x=>x.imagery), axisLabel:{ interval:0 } },
-            yAxis:{ type:'value', name:t('im.count') },
-            color: THEME_COLORS,
-            series:[{ type:'bar', data:list.map(x=>x.count),
-                itemStyle:{ color:'#3D6036', borderRadius:[4,4,0,0] }, label:{ show:true, position:'top', fontSize:10 } }]
+    function renderCloud() {
+        cloudChart.setOption({
+            tooltip: {
+                show: true,
+                formatter: p => p.name + '：' + p.value + ' ' + t('im.times')
+            },
+            series: [{
+                type: 'wordCloud',
+                sizeRange: [18, 72],
+                rotationRange: [-30, 30],
+                gridSize: 6,
+                shape: 'circle',
+                drawOutOfBound: false,
+                textStyle: {
+                    fontFamily: 'STKaiti, KaiTi, serif',
+                    color: () => THEME_COLORS[Math.floor(Math.random() * THEME_COLORS.length)]
+                },
+                emphasis: {
+                    textStyle: {
+                        textShadowBlur: 8,
+                        textShadowColor: 'rgba(0,0,0,0.3)'
+                    }
+                },
+                data: DATA.total.map(x => ({
+                    name: x.imagery,
+                    value: x.count
+                }))
+            }]
         }, true);
     }
-}
 
-function renderAuthor(name) {
-    const list = (DATA.ba[name]) || [];
-    byAuthChart.setOption({
-        tooltip:{ trigger:'item', formatter: p => p.name + '：' + p.value + ' ' + t('im.times') + ' (' + p.percent + '%)' },
-        legend:{ bottom:0, type:'scroll' },
-        title:{ text: name, left:'center', top:'center',
-            textStyle:{ fontSize:20, color:'#19325F', fontFamily:'STKaiti, serif' } },
-        series:[{ type:'pie', radius:['42%','68%'], center:['50%','50%'],
-            itemStyle:{ borderColor:'#fff', borderWidth:2 },
-            color: THEME_COLORS,
-            data: list.map(x=>({ name:x.imagery, value:x.count })) }]
-    }, true);
-}
+    function renderTop10() {
+        const t = DATA.topn.slice().reverse();
+        top10Chart.setOption({
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: { type: 'shadow' }
+            },
+            grid: { left: 60, right: 40, top: 20, bottom: 30 },
+            xAxis: { type: 'value' },
+            yAxis: { type: 'category', data: t.map(x => x.imagery) },
+            series: [{
+                type: 'bar',
+                data: t.map(x => x.count),
+                itemStyle: {
+                    color: '#A33F32',
+                    borderRadius: [0, 4, 4, 0]
+                },
+                label: { show: true, position: 'right' }
+            }]
+        }, true);
+    }
 
-async function boot() {
-    DATA = await loadData();
-    renderKPI(); renderCloud(); renderTop10(); renderDyn('');
-    renderAuthor(document.getElementById('authorSel').value);
-}
+    function renderDynCards() {
+        const group = document.getElementById('dynCardGroup');
+        const dynList = [
+            { dynVal: "", i18nKey: "all" },
+            { dynVal: "战国", i18nKey: "dyn.战国" },
+            { dynVal: "东汉", i18nKey: "dyn.东汉" },
+            { dynVal: "唐代", i18nKey: "dyn.唐代" },
+            { dynVal: "宋代", i18nKey: "dyn.宋代" },
+            { dynVal: "元代", i18nKey: "dyn.元代" },
+            { dynVal: "清代", i18nKey: "dyn.清代" }
+        ];
 
-document.getElementById('dynSeg').addEventListener('click', e => {
-    if (e.target.tagName !== 'SPAN') return;
-    document.querySelectorAll('#dynSeg span').forEach(s=>s.classList.remove('active'));
-    e.target.classList.add('active');
-    renderDyn(e.target.dataset.dyn || '');
-});
-document.getElementById('authorSel').addEventListener('change', e => renderAuthor(e.target.value));
+        let html = '';
+        dynList.forEach(item => {
+            const active = item.dynVal === currentDyn ? 'active' : '';
+            html += `<div class="dyn-card ${active}" data-dyn="${item.dynVal}">${t(item.i18nKey)}</div>`;
+        });
 
-function onLangChange() {
-    if (!DATA) return;
-    renderKPI(); renderCloud(); renderTop10(); renderDyn(currentDyn);
-    renderAuthor(document.getElementById('authorSel').value);
-}
-window.addEventListener('langchange', onLangChange);
+        group.innerHTML = html;
+    }
 
-document.addEventListener('DOMContentLoaded', boot);
-window.addEventListener('resize', () => {
-    document.querySelectorAll('.chart').forEach(el=>echarts.getInstanceByDom(el)?.resize());
-});
+    function renderDyn(dyn) {
+        currentDyn = dyn || '';
+        byDynChart.clear();
+
+        const dynOrderList = ["战国", "东汉", "唐代", "宋代", "元代", "清代"];
+
+        if (!dyn) {
+            const listAll = [];
+
+            for (const dynName of dynOrderList) {
+                const arr = DATA.bd[dynName] || [];
+                const sortedArr = [...arr]
+                    .filter(item => item.count > 0)
+                    .sort((a, b) => b.count - a.count);
+
+                sortedArr.forEach(item => {
+                    listAll.push({
+                        name: trDyn(dynName) + " · " + item.imagery,
+                        value: item.count
+                    });
+                });
+            }
+
+            const xData = listAll.map(i => i.name);
+            const yData = listAll.map(i => i.value);
+
+            byDynChart.setOption({
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross',
+                        lineStyle: {
+                            type: 'dashed',
+                            color: '#777',
+                            width: 1
+                        }
+                    },
+                    formatter: params => {
+                        const p = params[0];
+                        return p.axisValue + '<br/>' + t('im.count') + '：' + p.value;
+                    }
+                },
+                grid: {
+                    left: 90,
+                    right: 30,
+                    top: 20,
+                    bottom: 130
+                },
+                dataZoom: [
+                    {
+                        type: 'inside',
+                        xAxisIndex: 0,
+                        start: 0,
+                        end: 55
+                    },
+                    {
+                        type: 'slider',
+                        xAxisIndex: 0,
+                        show: true,
+                        height: 18,
+                        bottom: 20,
+                        start: 0,
+                        end: 55
+                    }
+                ],
+                xAxis: {
+                    type: 'category',
+                    data: xData,
+                    axisLabel: {
+                        interval: 0,
+                        rotate: 45,
+                        fontSize: 11
+                    },
+                    axisLine: {
+                        lineStyle: { color: '#dcd3c3' }
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: t('im.count'),
+                    nameGap: 22,
+                    splitLine: {
+                        lineStyle: { color: '#f3efe8' }
+                    }
+                },
+                series: [{
+                    type: 'bar',
+                    data: yData,
+                    itemStyle: {
+                        color: '#3D6036',
+                        borderRadius: [4, 4, 0, 0]
+                    }
+                }]
+            }, true);
+        } else {
+            const list = (DATA.bd[dyn] || []).slice();
+
+            byDynChart.setOption({
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross',
+                        lineStyle: {
+                            type: 'dashed',
+                            color: '#777',
+                            width: 1
+                        }
+                    },
+                    formatter: params => {
+                        const p = params[0];
+                        return trDyn(dyn) + ' · ' + p.name + '<br/>' + t('im.count') + '：' + p.value;
+                    }
+                },
+                grid: {
+                    left: 90,
+                    right: 20,
+                    top: 20,
+                    bottom: 130
+                },
+                dataZoom: [
+                    {
+                        type: 'inside',
+                        xAxisIndex: 0,
+                        start: 0,
+                        end: 70
+                    },
+                    {
+                        type: 'slider',
+                        xAxisIndex: 0,
+                        show: true,
+                        height: 18,
+                        bottom: 20,
+                        start: 0,
+                        end: 70
+                    }
+                ],
+                xAxis: {
+                    type: 'category',
+                    data: list.map(x => x.imagery),
+                    axisLabel: {
+                        interval: 0,
+                        rotate: 45,
+                        fontSize: 12
+                    },
+                    axisLine: {
+                        lineStyle: { color: '#dcd3c3' }
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: t('im.count'),
+                    nameGap: 22,
+                    splitLine: {
+                        lineStyle: { color: '#f3efe8' }
+                    }
+                },
+                color: THEME_COLORS,
+                series: [{
+                    type: 'bar',
+                    data: list.map(x => x.count),
+                    itemStyle: {
+                        color: '#3D6036',
+                        borderRadius: [4, 4, 0, 0]
+                    }
+                }]
+            }, true);
+        }
+    }
+
+    function renderAuthor(name) {
+        if (!DATA.ba[name]) {
+            const exist = Object.keys(DATA.ba)[0];
+            name = exist;
+        }
+
+        const list = DATA.ba[name] || [];
+
+        byAuthChart.setOption({
+            tooltip: {
+                trigger: 'item',
+                formatter: p => p.name + '：' + p.value + ' ' + t('im.times') + ' (' + p.percent + '%)'
+            },
+            legend: {
+                bottom: 0,
+                type: 'scroll'
+            },
+            title: {
+                text: name,
+                left: 'center',
+                top: 'center',
+                textStyle: {
+                    fontSize: 20,
+                    color: '#19325F',
+                    fontFamily: 'STKaiti, serif'
+                }
+            },
+            series: [{
+                type: 'pie',
+                radius: ['42%', '68%'],
+                center: ['50%', '50%'],
+                itemStyle: {
+                    borderColor: '#fff',
+                    borderWidth: 2
+                },
+                color: THEME_COLORS,
+                data: list.map(x => ({
+                    name: x.imagery,
+                    value: x.count
+                }))
+            }]
+        }, true);
+    }
+
+    function fillPoetSelect() {
+        const sel = document.getElementById('authorSel');
+        const poets = Object.keys(DATA.ba);
+        allPoetOptions = poets.map(p => ({ text: p, value: p }));
+        sel.innerHTML = allPoetOptions.map(opt => `<option value="${opt.value}">${opt.text}</option>`).join('');
+    }
+
+    async function boot() {
+        DATA = await loadData();
+        renderKPI();
+        renderCloud();
+        renderTop10();
+        renderDyn('');
+        renderDynCards();
+        fillPoetSelect();
+
+        const sel = document.getElementById('authorSel');
+        renderAuthor(sel.value);
+    }
+
+    document.getElementById('dynCardGroup').addEventListener('click', e => {
+        const card = e.target.closest('.dyn-card');
+        if (!card) return;
+
+        document.querySelectorAll('.dyn-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+
+        const dynVal = card.dataset.dyn || '';
+        renderDyn(dynVal);
+    });
+
+    document.getElementById('authorSel').addEventListener('change', e => {
+        const val = e.target.value;
+        document.getElementById('authorSearch').value = val;
+        renderAuthor(val);
+    });
+
+    document.getElementById('authorSearch').addEventListener('input', e => {
+        const kw = e.target.value.trim().toLowerCase();
+        const sel = document.getElementById('authorSel');
+        sel.innerHTML = '';
+
+        const filtered = allPoetOptions.filter(opt =>
+            opt.text.toLowerCase().includes(kw)
+        );
+
+        filtered.forEach(opt => {
+            const o = document.createElement('option');
+            o.value = opt.value;
+            o.textContent = opt.text;
+            sel.appendChild(o);
+        });
+    });
+
+    document.getElementById('authorSearch').addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            const sel = document.getElementById('authorSel');
+            if (sel.options.length > 0) {
+                sel.value = sel.options[0].value;
+                document.getElementById('authorSearch').value = sel.value;
+                renderAuthor(sel.value);
+            }
+        }
+    });
+
+    function onLangChange() {
+        if (!DATA) return;
+        renderKPI();
+        renderCloud();
+        renderTop10();
+        renderDyn(currentDyn);
+        renderDynCards();
+        renderAuthor(document.getElementById('authorSel').value);
+    }
+
+    window.addEventListener('langchange', onLangChange);
+    document.addEventListener('DOMContentLoaded', boot);
+
+    window.addEventListener('resize', () => {
+        document.querySelectorAll('.chart').forEach(el => {
+            echarts.getInstanceByDom(el)?.resize();
+        });
+    });
 </script>
 </body>
 </html>
