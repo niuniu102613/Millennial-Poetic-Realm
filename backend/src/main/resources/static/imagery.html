@@ -99,6 +99,54 @@
             background: #fffdf7;
             outline: none;
         }
+        /* 诗句面板 */
+        .sentence-panel {
+            margin-top: 16px;
+            padding: 20px 24px;
+            background: linear-gradient(180deg, rgba(255,253,247,.7), rgba(255,253,247,.5));
+            border: 1px solid rgba(201,169,110,.35);
+            border-radius: 4px;
+            position: relative;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .sentence-panel::before,
+        .sentence-panel::after {
+            content: '';
+            position: absolute;
+            width: 8px; height: 8px;
+            border: 1px solid #C9A96E;
+        }
+        .sentence-panel::before { top:-1px; left:-1px; border-right:none; border-bottom:none; }
+        .sentence-panel::after { bottom:-1px; right:-1px; border-left:none; border-top:none; }
+        .sentence-hint {
+            text-align: center;
+            color: #b0a080;
+            font-size: 14px;
+            letter-spacing: 2px;
+            font-family: "STKaiti", serif;
+        }
+        .sentence-title {
+            font-size: 14px;
+            color: #8B2E2E;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        .sentence-text {
+            font-size: 22px;
+            color: #2D4A3E;
+            font-family: "STKaiti", "KaiTi", serif;
+            line-height: 1.8;
+            letter-spacing: 2px;
+        }
+        .sentence-source {
+            font-size: 12px;
+            color: #a09070;
+            margin-top: 8px;
+            text-align: right;
+        }
     </style>
 </head>
 <body data-page="imagery">
@@ -154,6 +202,12 @@
     </div>
 
     <div class="card" style="margin-top:20px;">
+        <h3>意象关联热力图</h3>
+        <p style="font-size:13px;color:#9a8a70;margin:4px 0 12px;">高频意象共现频次（同一首诗词中共同出现次数）</p>
+        <div id="heatChart" class="chart" style="height:480px;"></div>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
         <h3 data-i18n="im.c4">诗人意象偏好</h3>
         <div class="author-panel">
             <span style="font-size:13px;color:#8b7355;" data-i18n="im.quickPoet">快速选择诗人：</span>
@@ -161,6 +215,9 @@
             <select id="authorSel"></select>
         </div>
         <div id="byAuthChart" class="chart" style="height:380px;"></div>
+        <div class="sentence-panel" id="sentencePanel">
+            <div class="sentence-hint">点击饼图意象区块，查看该诗人与此意象相关的诗句</div>
+        </div>
     </div>
 </div>
 
@@ -170,10 +227,12 @@
     const top10Chart = echarts.init(document.getElementById('top10Chart'));
     const byDynChart = echarts.init(document.getElementById('byDynChart'));
     const byAuthChart = echarts.init(document.getElementById('byAuthChart'));
+    const heatChart = echarts.init(document.getElementById('heatChart'));
 
     let DATA = null;
     let currentDyn = '';
     let allPoetOptions = [];
+    let currentPoet = '';
 
     async function loadData() {
         const [meta, total, topn, bd, ba] = await Promise.all([
@@ -344,10 +403,11 @@
                     axisLabel: {
                         interval: 0,
                         rotate: 45,
-                        fontSize: 11
+                        fontSize: 11,
+                        color: '#3b2f22'
                     },
                     axisLine: {
-                        lineStyle: { color: '#dcd3c3' }
+                        lineStyle: { color: '#b8a486' }
                     }
                 },
                 yAxis: {
@@ -442,11 +502,94 @@
         }
     }
 
+    // 意象关联热力图（跟随朝代切换）
+    async function renderHeat(dyn) {
+        const res = await fetchAPI('/imagery/correlation?dynasty=' + encodeURIComponent(dyn || ''));
+        if (!res || !res.labels || !res.data || res.labels.length === 0) {
+            heatChart.clear();
+            heatChart.setOption({
+                title: {
+                    text: '意象共现数据待接入',
+                    left: 'center',
+                    top: 'center',
+                    textStyle: { color: '#b0a080', fontSize: 16, fontFamily: 'STKaiti, serif' }
+                }
+            });
+            return;
+        }
+
+        const labels = res.labels;
+        const matrix = res.data;
+        const heatData = [];
+        let maxVal = 0;
+        for (let i = 0; i < labels.length; i++) {
+            for (let j = 0; j < labels.length; j++) {
+                const v = matrix[i][j] || 0;
+                if (v > maxVal) maxVal = v;
+                heatData.push([j, i, v]);
+            }
+        }
+
+        heatChart.setOption({
+            tooltip: {
+                formatter: p => labels[p.value[1]] + ' × ' + labels[p.value[0]] + '<br/>共现次数：' + p.value[2]
+            },
+            grid: {
+                left: 80,
+                right: 80,
+                top: 30,
+                bottom: 60
+            },
+            xAxis: {
+                type: 'category',
+                data: labels,
+                splitArea: { show: true },
+                axisLabel: { color: '#3b2f22', fontSize: 12 }
+            },
+            yAxis: {
+                type: 'category',
+                data: labels,
+                splitArea: { show: true },
+                axisLabel: { color: '#3b2f22', fontSize: 12 }
+            },
+            visualMap: {
+                min: 0,
+                max: maxVal,
+                calculable: true,
+                orient: 'vertical',
+                right: 10,
+                top: 'center',
+                inRange: {
+                    color: ['#f5ecd7', '#C9A96E', '#8B2E2E', '#2D4A3E']
+                },
+                textStyle: { color: '#8b7355' }
+            },
+            series: [{
+                type: 'heatmap',
+                data: heatData,
+                label: {
+                    show: true,
+                    fontSize: 10,
+                    color: '#3b2f22'
+                },
+                emphasis: {
+                    itemStyle: {
+                        shadowBlur: 10,
+                        shadowColor: 'rgba(0,0,0,0.3)'
+                    }
+                }
+            }]
+        }, true);
+    }
+
     function renderAuthor(name) {
         if (!DATA.ba[name]) {
             const exist = Object.keys(DATA.ba)[0];
             name = exist;
         }
+        currentPoet = name;
+        // 重置诗句面板
+        resetSentencePanel();
 
         const list = DATA.ba[name] || [];
 
@@ -456,34 +599,62 @@
                 formatter: p => p.name + '：' + p.value + ' ' + t('im.times') + ' (' + p.percent + '%)'
             },
             legend: {
-                bottom: 0,
-                type: 'scroll'
+                orient: 'vertical',
+                right: 10,
+                top: 'center',
+                type: 'scroll',
+                textStyle: { fontSize: 12, color: '#5a3e2b' }
             },
             title: {
                 text: name,
-                left: 'center',
+                left: '38%',
                 top: 'center',
                 textStyle: {
                     fontSize: 20,
-                    color: '#19325F',
+                    color: '#2D4A3E',
                     fontFamily: 'STKaiti, serif'
                 }
             },
             series: [{
                 type: 'pie',
                 radius: ['42%', '68%'],
-                center: ['50%', '50%'],
+                center: ['38%', '50%'],
                 itemStyle: {
-                    borderColor: '#fff',
+                    borderColor: '#fffdf7',
                     borderWidth: 2
                 },
-                color: THEME_COLORS,
+                emphasis: {
+                    itemStyle: {
+                        shadowBlur: 10,
+                        shadowColor: 'rgba(0,0,0,0.15)'
+                    }
+                },
+                color: ['#2D4A3E', '#8B2E2E', '#C9A96E', '#505970', '#945946', '#967859', '#746356', '#b49b77'],
                 data: list.map(x => ({
                     name: x.imagery,
                     value: x.count
                 }))
             }]
         }, true);
+    }
+
+    function resetSentencePanel() {
+        const panel = document.getElementById('sentencePanel');
+        panel.innerHTML = '<div class="sentence-hint">点击饼图意象区块，查看该诗人与此意象相关的诗句</div>';
+    }
+
+    async function renderSentence(poet, imagery) {
+        const panel = document.getElementById('sentencePanel');
+        const res = await fetchAPI('/imagery/poetSentence?poet=' + encodeURIComponent(poet) + '&imagery=' + encodeURIComponent(imagery));
+        if (!res || !res.sentence) {
+            panel.innerHTML = '<div class="sentence-title">' + poet + ' · ' + imagery + '</div>' +
+                '<div class="sentence-hint">诗句数据待接入后端接口</div>';
+            return;
+        }
+        panel.innerHTML =
+            '<div class="sentence-title">' + poet + ' · ' + imagery + '</div>' +
+            '<div class="sentence-text">「' + res.sentence + '」</div>' +
+            '<div class="sentence-source">—— ' + poet + '《' + (res.title || '无题') + '》</div>';
     }
 
     function fillPoetSelect() {
@@ -499,6 +670,7 @@
         renderCloud();
         renderTop10();
         renderDyn('');
+        renderHeat('');
         renderDynCards();
         fillPoetSelect();
 
@@ -515,6 +687,7 @@
 
         const dynVal = card.dataset.dyn || '';
         renderDyn(dynVal);
+        renderHeat(dynVal);
     });
 
     document.getElementById('authorSel').addEventListener('change', e => {
@@ -557,9 +730,17 @@
         renderCloud();
         renderTop10();
         renderDyn(currentDyn);
+        renderHeat(currentDyn);
         renderDynCards();
         renderAuthor(document.getElementById('authorSel').value);
     }
+
+    // 饼图点击：显示诗句
+    byAuthChart.on('click', function(params) {
+        if (params.seriesType === 'pie' && currentPoet && params.name) {
+            renderSentence(currentPoet, params.name);
+        }
+    });
 
     window.addEventListener('langchange', onLangChange);
     document.addEventListener('DOMContentLoaded', boot);
