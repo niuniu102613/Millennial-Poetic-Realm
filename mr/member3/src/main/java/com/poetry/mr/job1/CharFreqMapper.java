@@ -23,6 +23,7 @@ public class CharFreqMapper extends Mapper<LongWritable, Text, Text, IntWritable
 
         String content = CSVUtils.removePunctuation(CSVUtils.getContent(fields));
         for (char c : content.toCharArray()) {
+            if (CSVUtils.isStopChar(c)) continue;
             outKey.set(String.valueOf(c));
             context.write(outKey, outVal);
         }

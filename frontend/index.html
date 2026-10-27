@@ -5,153 +5,336 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>千年诗境 · 首页</title>
     <link rel="stylesheet" href="css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Zhi+Mang+Xing&family=Liu+Jian+Mao+Cao&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
     <style>
-        /* 背景图层（承载水墨背景图，可切换） */
+        :root {
+            --navy: #20395F;
+            --ink: #263D36;
+            --rice: #EEE7D8;
+            --paper: #F7F3EA;
+            --gold: #C2A36B;
+            --gray: #777263;
+            --cinnabar: #842D2D;
+        }
+        body { background: var(--rice); }
+
+        /* 背景图层 */
         .bg-layer {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            background: url('img/bg-home.jpg') center/cover no-repeat fixed;
+            position: fixed; inset: 0; z-index: 0;
+            background: linear-gradient(rgba(240,232,208,.82), rgba(236,226,200,.88)), url('img/landscape.jpg') center/cover no-repeat fixed;
             transition: opacity 0.6s ease;
         }
+        /* 中央柔雾遮罩 */
+        .bg-mist {
+            position: fixed; inset: 0; z-index: 1; pointer-events: none;
+            background: radial-gradient(ellipse at center, rgba(238,231,216,0.35) 0%, rgba(238,231,216,0.1) 60%, transparent 100%);
+        }
 
-        /* 背景轮播诗句 */
-        .bg-poem {
-            position: fixed;
-            top: 64px;
-            left: 0; right: 0;
-            height: calc(100vh - 64px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
-            z-index: 1;
+        /* ===== 三层飘诗 ===== */
+        .fly-layer { position: fixed; top: 64px; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 3; overflow: hidden; }
+        .fly-poem { position: absolute; writing-mode: vertical-rl; text-orientation: upright; font-family: "Zhi Mang Xing","STKaiti",serif; letter-spacing: 6px; white-space: nowrap; opacity: 0; animation: rise linear forwards; }
+        .fly-far  { color: rgba(38,61,54,0.5); }
+        .fly-mid  { color: rgba(38,61,54,0.7); cursor: pointer; pointer-events: auto; }
+        @keyframes rise {
+            0%   { transform: translateY(0) translateX(0); opacity: 0; }
+            15%  { opacity: 1; }
+            50%  { transform: translateY(-55vh) translateX(20px); }
+            85%  { opacity: 1; }
+            100% { transform: translateY(-110vh) translateX(-15px); opacity: 0; }
         }
-        .bg-poem .line {
-            font-size: clamp(40px, 8vw, 90px);
-            color: #fff;
-            opacity: 0.75;
-            font-family: "STKaiti", "KaiTi", "华文楷体", serif;
-            letter-spacing: 12px;
-            text-align: center;
-            line-height: 1.6;
-            transition: opacity 1s ease;
-            padding: 0 40px;
-            text-shadow: 2px 2px 8px rgba(25, 50, 95, 0.5);
-        }
-        .bg-poem .author {
-            font-size: clamp(16px, 2vw, 24px);
-            color: #fff;
-            opacity: 0.75;
-            font-family: "STKaiti", "KaiTi", serif;
-            letter-spacing: 4px;
-            margin-top: 30px;
-            transition: opacity 1s ease;
-            text-shadow: 2px 2px 6px rgba(25, 50, 95, 0.5);
-        }
-        .bg-poem.fade .line, .bg-poem.fade .author { opacity: 0; }
 
-        /* 换景按钮 */
+        /* ===== 古树层（左侧）===== */
+        .tree-layer { position: fixed; left: 0; top: 64px; bottom: 0; right: 0; z-index: 6; pointer-events: none; }
+        .tree-layer svg { width: 100%; height: 100%; }
+
+        /* ===== 诗笺 ===== */
+        .poem-tag {
+            position: absolute; width: auto; padding: 14px 4px 18px; text-align: center;
+            cursor: pointer; pointer-events: auto;
+            background: rgba(201,168,108,.88);
+            border: none;
+            border-radius: 2px 2px 30% 30% / 2px 2px 10% 10%;
+            box-shadow: 0 2px 6px rgba(60,40,20,0.15);
+            color: #3a2a1a;
+            writing-mode: vertical-rl; text-orientation: upright;
+            font-family: "Zhi Mang Xing","STKaiti",serif;
+            font-size: 16px; color: var(--ink); letter-spacing: 2px;
+            transform-origin: top center;
+            animation: tagIn 0.8s ease-out 3s forwards, sway 4s ease-in-out infinite alternate 3.8s;
+            transition: box-shadow 0.3s ease, filter 0.3s ease;
+        }
+        @keyframes tagIn {
+            0% { opacity: 0; transform: scale(0.3); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes sway {
+            0% { transform: rotate(-1.5deg); }
+            100% { transform: rotate(2deg); }
+        }
+        .poem-tag::before {
+            content: ''; position: absolute; top: -12px; left: 50%; width: 1px; height: 12px; background: var(--gold);
+        }
+        .poem-tag::after {
+            content: ''; position: absolute; top: 3px; left: 50%; transform: translateX(-50%);
+            width: 5px; height: 5px; border-radius: 50%; background: var(--gold);
+        }
+        .poem-tag:hover {
+            box-shadow: 2px 6px 16px rgba(60,40,20,0.2);
+            filter: brightness(1.1) drop-shadow(0 -4px 3px rgba(60,40,20,0.1));
+            z-index: 10;
+        }
+        .poem-tag .tip {
+            position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%);
+            font-size: 10px; color: var(--gray); white-space: nowrap; opacity: 0; transition: opacity 0.3s ease;
+            font-family: "Liu Jian Mao Cao",cursive; letter-spacing: 1px;
+        }
+        .poem-tag:hover .tip { opacity: 1; }
+        .poem-tag:hover .tip { opacity: 1; }
+
+        /* ===== 弹层 ===== */
+        .poem-modal {
+            position: fixed; inset: 0; background: rgba(38,61,54,0.5); z-index: 500;
+            display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px);
+        }
+        .poem-modal.show { display: flex; }
+        .scroll-box {
+            background: linear-gradient(135deg, #d4b896, #c9a876, #b8956a);
+            width: min(400px, 86vw); max-height: 88vh; overflow: hidden;
+            padding: 32px 40px; position: relative;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.4), inset 0 0 20px rgba(90,60,30,0.2);
+            animation: bambooOpen 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            transform-origin: right center;
+        }
+        @keyframes bambooOpen {
+            0% { transform: scaleX(0); opacity: 0; }
+            30% { opacity: 1; }
+            100% { transform: scaleX(1); opacity: 1; }
+        }
+
+        .scroll-close { position: absolute; top: 14px; right: 18px; cursor: pointer; color: var(--gray); font-size: 13px; font-family: "STKaiti",serif; }
+        .scroll-close:hover { color: var(--cinnabar); }
+        .scroll-seal {
+            position: absolute; top: 16px; left: 20px; font-size: 11px; color: var(--cinnabar);
+            border: 1px solid var(--cinnabar); padding: 2px 6px; border-radius: 2px; opacity: 0.7;
+            font-family: "STKaiti",serif;
+        }
+        .scroll-dynasty { text-align: center; color: var(--gray); font-size: 15px; letter-spacing: 4px; margin-bottom: 10px; font-family: "Zhi Mang Xing","STKaiti",serif; }
+        .scroll-title { text-align: center; font-size: 32px; color: var(--ink); font-family: "Zhi Mang Xing","STKaiti",serif; letter-spacing: 8px; margin-bottom: 28px; }
+        .scroll-body { font-size: 22px; line-height: 2.0; color: #3a2a1a; font-family: "Zhi Mang Xing","STKaiti",serif; text-align: center; writing-mode: vertical-rl; text-orientation: upright; letter-spacing: 10px; min-height: 220px; max-height: 42vh; margin: 0 auto; width: fit-content; }
+        .scroll-meta { display: flex; justify-content: space-around; margin-top: 36px; padding-top: 20px; border-top: 1px solid rgba(194,163,107,0.4); }
+        .scroll-meta div { text-align: center; }
+        .scroll-meta .lbl { font-size: 11px; color: var(--gray); margin-bottom: 4px; }
+        .scroll-meta .val { font-size: 17px; color: var(--ink); font-weight: bold; font-family: "Zhi Mang Xing","STKaiti",serif; }
+        .scroll-nav { text-align: center; margin-top: 24px; }
+        .scroll-nav button {
+            background: none; border: 1px solid var(--gold); color: var(--gray);
+            padding: 6px 20px; margin: 0 8px; cursor: pointer; font-family: "STKaiti",serif; border-radius: 2px;
+        }
+        .scroll-nav button:hover { background: var(--gold); color: #fff; }
+
+        /* ===== 换景按钮 ===== */
         .bg-switch {
-            position: fixed;
-            bottom: 28px;
-            right: 28px;
-            z-index: 300;
-            width: 58px;
-            height: 58px;
-            border-radius: 50%;
-            background: rgba(255, 253, 247, 0.85);
-            border: 2px solid var(--gold);
-            color: var(--ink-blue);
-            font-size: 13px;
-            font-family: "STKaiti", "KaiTi", serif;
-            letter-spacing: 1px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            box-shadow: 0 3px 12px rgba(25, 50, 95, 0.2);
-            transition: all 0.25s;
+            position: fixed; bottom: 28px; right: 28px; z-index: 300;
+            width: 54px; height: 54px; border-radius: 50%;
+            background: rgba(247,243,234,0.9); border: 1px solid var(--gold);
+            color: var(--ink); font-size: 12px; font-family: "STKaiti",serif;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; flex-direction: column;
+            box-shadow: 0 3px 10px rgba(38,61,54,0.15); transition: all 0.25s;
         }
-        .bg-switch .icon { font-size: 18px; margin-bottom: 1px; }
-        .bg-switch:hover {
-            background: var(--ink-blue);
-            color: #fff;
-            transform: rotate(20deg);
+        .bg-switch .icon { font-size: 16px; margin-bottom: 1px; }
+        .bg-switch:hover { background: var(--navy); color: #fff; }
+
+        /* ===== 主内容 ===== */
+        .main-content { position: relative; z-index: 2; min-height: calc(100vh - 64px); display: flex; flex-direction: column; justify-content: center; padding: 30px 20px; }
+        .main-content h1 {
+            text-align: center; font-size: clamp(36px, 5.5vw, 54px);
+            color: var(--ink); letter-spacing: 12px; font-family: "STKaiti",serif;
+            margin-bottom: 12px;
+        }
+        .title-wrap { text-align: center; position: relative; margin-bottom: 12px; }
+        .title-deco { text-align: center; color: var(--gold); font-size: 18px; letter-spacing: 16px; margin-bottom: 4px; opacity: 0.7; }
+
+        /* ===== 五个入口卡片（统一宣纸风）===== */
+        .feature-grid {
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-top: 60px;
+        }
+        .feature-item {
+            background: rgba(247,243,234,0.85);
+            border: 1px solid rgba(194,163,107,0.45);
+            padding: 22px 16px; text-align: center;
+            transition: all 0.3s; text-decoration: none;
+            position: relative;
+        }
+        .feature-item:hover {
+            border-color: var(--gold);
+            box-shadow: 0 6px 18px rgba(38,61,54,0.12);
+            transform: translateY(-3px);
+        }
+        .feature-item .num { font-size: 12px; color: var(--gold); letter-spacing: 2px; margin-bottom: 8px; }
+        .feature-item h4 { font-size: 16px; color: var(--ink); font-family: "STKaiti",serif; margin-bottom: 8px; letter-spacing: 2px; }
+        .feature-item p { font-size: 12px; color: var(--gray); line-height: 1.7; }
+        @media (max-width: 1200px) { .feature-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 700px) { .feature-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        /* ===== 减少动效 ===== */
+        @media (prefers-reduced-motion: reduce) {
+            .fly-poem { animation: none !important; opacity: 0 !important; }
+            .scroll-box { animation: none !important; }
         }
 
-        /* 主内容 */
+        /* ===== 首页视觉重构：枫树诗笺 + 山水留白 ===== */
+        html, body { min-height: 100%; }
+        body { overflow-x: hidden; background: #eee7d8; }
+        
+        .bg-layer {
+            background-position: center center; background-size: cover;
+            background-attachment: fixed; filter: saturate(.82);
+        }
+        .bg-mist {
+            background:
+                linear-gradient(90deg, rgba(244,239,226,.08) 0%, rgba(247,243,234,.15) 42%, rgba(247,243,234,.28) 100%),
+                radial-gradient(ellipse at 66% 42%, rgba(247,243,234,.42) 0%, rgba(247,243,234,.16) 42%, transparent 72%);
+        }
+        .tree-layer {
+            position: fixed; top: 58px; left: 0; bottom: 0; width: 100vw;
+            z-index: 6; pointer-events: none; overflow: visible;
+        }
+        .tree-layer .tree-art {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            object-fit: cover; object-position: left center; opacity: .96;
+            pointer-events: none;
+            -webkit-mask-image: linear-gradient(to right, #000 0%, #000 57%, rgba(0,0,0,.82) 72%, transparent 94%);
+            mask-image: linear-gradient(to right, #000 0%, #000 57%, rgba(0,0,0,.82) 72%, transparent 94%);
+            animation: treeGrow 3s ease-out forwards;
+            transform-origin: bottom left;
+        }
+        @keyframes treeGrow {
+            0%   { clip-path: inset(100% 0 0 0); opacity: 0; }
+            50%  { clip-path: inset(50% 0 0 0); opacity: .6; }
+            100% { clip-path: inset(0 0 0 0); opacity: .96; }
+        }
+
+        .poem-tag::after { background: #c2a36b; }
+        .poem-tag:hover {
+            transform: translateY(-5px) rotate(0deg) !important;
+            box-shadow: 2px 8px 18px rgba(62,48,29,.22);
+        }
         .main-content {
-            position: relative;
-            z-index: 1;
-            min-height: calc(100vh - 64px);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 40px 20px;
+            z-index: 5; min-height: calc(100vh - 58px);
+            padding: 42vh 4vw 36px 28vw;
+            justify-content: flex-start; align-items: stretch;
         }
-        .main-content h1 {
-            text-align: center;
-            font-size: clamp(36px, 6vw, 56px);
-            color: var(--ink-blue);
-            letter-spacing: 10px;
-            font-family: "STKaiti", "KaiTi", serif;
-            margin-bottom: 15px;
-            position: relative;
-            padding: 20px 60px;
-            display: inline-block;
-        }
-        /* 标题两侧花纹 */
-        .title-wrap {
-            text-align: center;
-            position: relative;
-            margin-bottom: 15px;
-        }
-        .title-wrap::before, .title-wrap::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 80px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-        }
-        .title-wrap::before { left: calc(50% - 220px); }
-        .title-wrap::after { right: calc(50% - 220px); }
-        /* 标题上下装饰云纹 */
         .title-deco {
-            text-align: center;
-            color: var(--gold);
-            font-size: 20px;
-            letter-spacing: 16px;
-            margin-bottom: 5px;
-            opacity: 0.8;
+            color: #b99a60; font-size: 14px; letter-spacing: 12px;
+            opacity: .8; line-height: 1.5;
         }
-        .main-content .sub {
-            text-align: center;
-            font-size: clamp(14px, 2vw, 18px);
-            color: #8b7355;
-            letter-spacing: 3px;
-            margin-bottom: 60px;
+        .title-wrap { margin-bottom: 0; }
+        .main-content h1 {
+            font-size: clamp(50px, 5.5vw, 82px); letter-spacing: .15em;
+            line-height: 1.25; margin: 2px 0 0; color: #263d36;
+            font-family: "Zhi Mang Xing","Ma Shan Zheng",cursive;
+            text-shadow: 0 1px 0 rgba(255,250,239,.55);
         }
-        /* 5个功能卡片 */
+        .hero-sub {
+            text-align: center; margin: 12px 0 0; color: #6f7568;
+            font-family: "STKaiti","KaiTi","Songti SC",serif;
+            font-size: clamp(13px, 1.2vw, 18px); letter-spacing: .32em;
+        }
         .feature-grid {
-            grid-template-columns: repeat(5, 1fr);
-            gap: 18px;
-            margin-top: 70px;
+            width: min(930px, 72vw); max-width: 930px;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: clamp(10px, 1.25vw, 20px);
+            margin: clamp(52px, 8vh, 82px) 1vw 0 auto;
         }
-        @media (max-width: 1200px) {
-            .feature-grid { grid-template-columns: repeat(3, 1fr); }
+        .feature-item {
+            min-height: 118px; padding: 19px 10px 16px;
+            border: 1px solid rgba(194,163,107,.52);
+            box-shadow: 0 5px 18px rgba(54,54,42,.045);
+            color: #263d36;
+            background-size: cover; background-position: center;
+            position: relative;
         }
-        @media (max-width: 700px) {
-            .feature-grid { grid-template-columns: repeat(2, 1fr); }
+        .feature-item::after {
+            content: ""; position: absolute; inset: 0;
+            background: rgba(248,244,233,.72);
+            transition: background 0.3s;
+            pointer-events: none;
         }
+        .feature-item:hover::after { background: rgba(248,244,233,.5); }
+        .feature-item > * { position: relative; z-index: 1; }
+        .feature-item:nth-child(1) { background-image: url("img/card-1.jpg"); }
+        .feature-item:nth-child(2) { background-image: url("img/card-2.jpg"); }
+        .feature-item:nth-child(3) { background-image: url("img/card-3.jpg"); }
+        .feature-item:nth-child(4) { background-image: url("img/card-4.jpg"); }
+        .feature-item:nth-child(5) { background-image: url("img/card-5.jpg"); }
+        .feature-item::before {
+            content: ""; position: absolute; inset: 5px;
+            border: 1px solid rgba(194,163,107,.22); pointer-events: none;
+        }
+        .feature-item:hover {
+            background: rgba(250,247,239,.96); border-color: rgba(167,132,69,.8);
+            box-shadow: 0 8px 24px rgba(54,54,42,.1); transform: translateY(-4px);
+        }
+        .feature-item .num {
+            margin-bottom: 7px; color: #b39762;
+            font-family: "STKaiti","KaiTi",serif; letter-spacing: 3px;
+        }
+        .feature-item h4 {
+            font-size: clamp(13px, 1.05vw, 16px); letter-spacing: 1px;
+            margin-bottom: 7px; line-height: 1.5; white-space: nowrap;
+        }
+        .feature-item p { font-size: 11px; line-height: 1.65; color: #777263; }
+        .fly-layer { z-index: 3; }
+        .fly-far { color: rgba(38,61,54,.28); }
+        .fly-mid { color: rgba(38,61,54,.43); }
+        .bg-switch, .lang-switch {
+            width: 48px; height: 48px; bottom: 20px;
+            background: rgba(247,243,234,.84); box-shadow: 0 3px 12px rgba(38,61,54,.12);
+        }
+        .bg-switch { right: 20px; }
+        .lang-switch { right: 78px; }
+        @media (max-width: 1100px) {
+            .nav { padding: 0 16px; }
+            .nav .logo { letter-spacing: 2px; }
+            .nav a:not(.logo) { padding: 0 9px; letter-spacing: 0; }
+            .main-content { padding-left: 18vw; padding-right: 3vw; }
+            .feature-grid { width: min(850px, 76vw); gap: 9px; }
+            .feature-item { padding-left: 6px; padding-right: 6px; }
+            .feature-item p { font-size: 10px; }
+        }
+        @media (max-width: 760px) {
+            .nav { height: auto; min-height: 58px; flex-wrap: wrap; padding: 8px 12px 10px; }
+            .nav .logo { width: 100%; line-height: 32px; margin-bottom: 2px; }
+            .nav a:not(.logo) { line-height: 30px; padding: 0 8px; font-size: 12px; }
+            .nav a + a::before { display: none; }
+            .tree-layer { top: 88px; opacity: .62; }
+            .tree-layer .tree-art { object-position: 22% center; }
+            .main-content {
+                min-height: calc(100vh - 88px); padding: 100px 18px 42px;
+                justify-content: center;
+            }
+            .main-content h1 { font-size: clamp(38px, 10vw, 54px); letter-spacing: .18em; }
+            .feature-grid {
+                width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr));
+                margin: 46px auto 0; gap: 12px;
+            }
+            .feature-item { min-height: 105px; }
+            .feature-item:last-child { grid-column: 1 / -1; }
+            .feature-item h4 { white-space: normal; font-size: 15px; }
+            .feature-item p { font-size: 11px; }
+            .poem-tag { width: 36px; min-height: 90px; font-size: 12px; letter-spacing: 1px; }
+            .bg-switch, .lang-switch { width: 42px; height: 42px; bottom: 12px; }
+            .bg-switch { right: 12px; }
+            .lang-switch { right: 62px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+        }
+
     </style>
 </head>
 <body data-page="home">
-    <!-- 登录门禁（未登录先显示此层，登录成功才进入首页） -->
+    <!-- 登录门禁 -->
     <div class="gate" id="gate">
         <div class="gate-card">
             <div class="gate-title-deco">❖ ❖ ❖</div>
@@ -171,7 +354,7 @@
         </div>
     </div>
 
-    <nav class="nav">
+    <nav class="nav" style="border-bottom: 1px solid rgba(194,163,107,0.3);">
         <a href="index.html" class="logo" data-i18n="logo">千年诗境</a>
         <a href="dynasty.html" data-page="dynasty" data-i18n="nav.dynasty">朝代分析</a>
         <a href="poet.html" data-page="poet" data-i18n="nav.poet">诗人图谱</a>
@@ -180,13 +363,36 @@
         <a href="overview.html" data-page="overview" data-i18n="nav.overview">诗词数据概览</a>
     </nav>
 
-    <!-- 背景图层 -->
+    <!-- 背景 -->
     <div class="bg-layer" id="bgLayer"></div>
+    <div class="bg-mist"></div>
 
-    <!-- 背景轮播诗句 -->
-    <div class="bg-poem" id="bgPoem">
-        <div class="line" id="poemLine">床前明月光，疑是地上霜。</div>
-        <div class="author" id="poemAuthor">—— 李白《静夜思》</div>
+    <!-- 三层飘诗层 -->
+    <div class="fly-layer" id="flyLayer"></div>
+
+    <!-- 古树与诗笺：水墨枫树作为透明画层，诗笺由下方脚本动态生成 -->
+    <div class="tree-layer" id="treeLayer" aria-label="悬挂诗笺的古树">
+        <img class="tree-art" src="img/maple-tree.png" alt="" aria-hidden="true">
+    </div>
+
+    <!-- 诗笺弹层 -->
+    <div class="poem-modal" id="poemModal">
+        <div class="scroll-box">
+            <div class="scroll-seal">诗笺</div>
+            <div class="scroll-close" onclick="closePoem()">✕ 关闭</div>
+            <div class="scroll-dynasty" id="mDynasty">唐 · 张九龄</div>
+            <div class="scroll-title" id="mTitle">望月怀远</div>
+            <div class="scroll-body" id="mBody"></div>
+            <div class="scroll-meta">
+                <div><div class="lbl">朝代</div><div class="val" id="mDynastyVal">唐代</div></div>
+                <div><div class="lbl">作者</div><div class="val" id="mAuthor">张九龄</div></div>
+                <div><div class="lbl">字数</div><div class="val" id="mWords">40 字</div></div>
+            </div>
+            <div class="scroll-nav">
+                <button onclick="navPoem(-1)">← 上一首</button>
+                <button onclick="navPoem(1)">下一首 →</button>
+            </div>
+        </div>
     </div>
 
     <!-- 换景按钮 -->
@@ -198,91 +404,163 @@
     <!-- 主内容 -->
     <div class="main-content">
         <div class="title-deco">❖ ❖ ❖</div>
-        <div class="title-wrap">
-            <h1 data-i18n="home.title">千 年 诗 境</h1>
-        </div>
+        <div class="title-wrap"><h1 data-i18n="home.title">千 年 诗 境</h1></div>
+        <p class="hero-sub" data-i18n="home.subtitle">循诗入境 · 以数观文</p>
         <div class="title-deco">❖ ❖ ❖</div>
 
         <div class="feature-grid">
-            <a href="dynasty.html" class="feature-item card-bg-1">
+            <a href="dynasty.html" class="feature-item">
+                <div class="num">壹</div>
                 <h4 data-i18n="home.card1.title">朝代分析</h4>
                 <p data-i18n="home.card1.desc">各朝代作品数量、诗人数量、平均长度</p>
             </a>
-            <a href="poet.html" class="feature-item card-bg-2">
+            <a href="poet.html" class="feature-item">
+                <div class="num">贰</div>
                 <h4 data-i18n="home.card2.title">诗人图谱</h4>
                 <p data-i18n="home.card2.desc">作品数量 TopN、各朝代代表诗人</p>
             </a>
-            <a href="text.html" class="feature-item card-bg-3">
+            <a href="text.html" class="feature-item">
+                <div class="num">叁</div>
                 <h4 data-i18n="home.card3.title">诗词文本分析</h4>
                 <p data-i18n="home.card3.desc">高频字词、长度分布、朝代高频字</p>
             </a>
-            <a href="imagery.html" class="feature-item card-bg-4">
+            <a href="imagery.html" class="feature-item">
+                <div class="num">肆</div>
                 <h4 data-i18n="home.card4.title">诗境意象</h4>
                 <p data-i18n="home.card4.desc">月、柳、酒等意象出现频率与分布</p>
             </a>
-            <a href="overview.html" class="feature-item card-bg-5">
+            <a href="overview.html" class="feature-item">
+                <div class="num">伍</div>
                 <h4 data-i18n="home.card5.title">诗词数据概览</h4>
                 <p data-i18n="home.card5.desc">类别统计、TopN、朝代×类别、长度区间</p>
             </a>
         </div>
     </div>
 
-    <script src="js/common.js?v=3"></script>
+    <script src="js/common.js?v=4"></script>
     <script>
-        const poems = [
-            { line: "床前明月光，疑是地上霜。", author: "李白《静夜思》" },
-            { line: "白日依山尽，黄河入海流。", author: "王之涣《登鹳雀楼》" },
-            { line: "春眠不觉晓，处处闻啼鸟。", author: "孟浩然《春晓》" },
-            { line: "红豆生南国，春来发几枝。", author: "王维《相思》" },
-            { line: "会当凌绝顶，一览众山小。", author: "杜甫《望岳》" },
-            { line: "海上生明月，天涯共此时。", author: "张九龄《望月怀远》" },
-            { line: "大漠孤烟直，长河落日圆。", author: "王维《使至塞上》" },
-            { line: "山重水复疑无路，柳暗花明又一村。", author: "陆游《游山西村》" }
-        ];
+    // ===== 诗笺位置（布局），数据从后端 /api/poem/home 拉 =====
+    const TAG_POS = [
+        { x: "33%", y: "7%",   tilt: -2 },
+        { x: "41%", y: "5%",   tilt: 2  },
+        { x: "49%", y: "8%",   tilt: -1 },
+        { x: "57%", y: "6%",   tilt: 3  },
+        { x: "65%", y: "9%",   tilt: -2 },
+        { x: "73%", y: "7%",   tilt: 1  },
+        { x: "37%", y: "22%",  tilt: 1  },
+        { x: "45%", y: "27%",  tilt: -2 },
+        { x: "53%", y: "20%",  tilt: 2  },
+        { x: "61%", y: "26%",  tilt: -1 },
+        { x: "69%", y: "21%",  tilt: 2  },
+        { x: "77%", y: "28%",  tilt: -2 }
+    ];
+    let TAGS = [];
+    const treeLayer = document.getElementById("treeLayer");
+    let curTagIdx = 0;
+    function renderTags() {
+        TAGS.forEach((tag, i) => {
+            const pos = TAG_POS[i % TAG_POS.length];
+            const el = document.createElement("div");
+            el.className = "poem-tag";
+            el.style.left = pos.x; el.style.top = pos.y;
+            el.style.animationDuration = (3.5 + Math.random() * 2.5) + "s";
+            el.style.animationDelay = (-Math.random() * 3) + "s";
+            el.innerHTML = tag.title + '<span class="tip">阅诗 ✦</span>';
+            el.onclick = () => openPoem(i);
+            treeLayer.appendChild(el);
+        });
+    }
+    function openPoem(i) {
+        curTagIdx = i;
+        const t = TAGS[i];
+        document.getElementById("mDynasty").textContent = t.dynasty + " · " + t.author;
+        document.getElementById("mTitle").textContent = t.title;
+        const bodyEl = document.getElementById("mBody");
+        bodyEl.innerHTML = "";
+        document.getElementById("mDynastyVal").textContent = t.dynasty + "代";
+        document.getElementById("mAuthor").textContent = t.author;
+        document.getElementById("mWords").textContent = t.body.replace(/[，。、？！；：]/g, "").length + " 字";
+        document.getElementById("poemModal").classList.add("show");
+        // 一列一列渐显
+        const cols = t.body.split(/(?<=[，。、？！；：])/).filter(s => s.trim());
+        cols.forEach((col, idx) => {
+            const span = document.createElement("span");
+            span.textContent = col;
+            span.style.opacity = "0";
+            span.style.transition = "opacity 0.6s ease";
+            span.style.display = "inline-block";
+            bodyEl.appendChild(span);
+            setTimeout(() => { span.style.opacity = "1"; }, 300 * idx);
+        });
+    }
+    function closePoem() { document.getElementById("poemModal").classList.remove("show"); }
+    function navPoem(d) { openPoem((curTagIdx + d + TAGS.length) % TAGS.length); }
+    document.getElementById("poemModal").addEventListener("click", e => { if (e.target.id === "poemModal") closePoem(); });
+    document.addEventListener("keydown", e => { if (e.key === "Escape") closePoem(); });
+    fetch("/api/poem/home")
+        .then(r => r.json())
+        .then(data => {
+            TAGS = data;
+            renderTags();
+            // 从诗数据提取名句做飘诗
+            farPoems = data.map(p => p.line || p.body.slice(0,10));
+            midPoems = data.map(p => p.title);
+            farPoems.forEach(t => spawnFly(t, "fly-far"));
+            midPoems.forEach(t => spawnFly(t, "fly-mid"));
+        })
+        .catch(e => console.error("诗笺加载失败", e));
 
-        const bgEl = document.getElementById('bgPoem');
-        const lineEl = document.getElementById('poemLine');
-        const authorEl = document.getElementById('poemAuthor');
-        let currentIdx = 0;
+    // ===== 三层飘诗（数据从后端）=====
+    const flyLayer = document.getElementById("flyLayer");
+    let farPoems = [];
+    let midPoems = [];
+    function spawnFly(text, layer) {
+        const el = document.createElement("div");
+        el.className = "fly-poem " + layer;
+        el.textContent = text;
+        // 随机位置：避开中央标题区（x:35-70%, y:30-60%）
+        let x;
+        const r = Math.random();
+        if(r < 0.4) x = 2 + Math.random() * 25;       // 左侧
+        else if(r < 0.8) x = 70 + Math.random() * 26;  // 右侧
+        else x = 30 + Math.random() * 40;              // 中间偏上/下
+        el.style.left = x + "%";
+        el.style.bottom = "-10vh";
+        el.style.fontSize = (14 + Math.random() * 26) + "px";
+        el.style.opacity = (0.15 + Math.random() * 0.45);
+        el.style.animationDuration = (24 + Math.random() * 14) + "s";
+        el.style.animationDelay = (-Math.random() * 22) + "s";
+        el.style.animationTimingFunction = "ease-in-out";
+        flyLayer.appendChild(el);
+        setTimeout(() => el.remove(), 36000);
+    }
+    setInterval(() => {
+        spawnFly(farPoems[Math.floor(Math.random() * farPoems.length)], "fly-far");
+    }, 4000);
 
-        function showNextPoem() {
-            bgEl.classList.add('fade');
-            setTimeout(() => {
-                currentIdx = (currentIdx + 1) % poems.length;
-                lineEl.textContent = poems[currentIdx].line;
-                authorEl.textContent = "—— " + poems[currentIdx].author;
-                bgEl.classList.remove('fade');
-            }, 1000);
-        }
-
-        // 4秒自动换
-        setInterval(showNextPoem, 4000);
-
-        // ===== 换景功能：三张背景循环切换 =====
-        const bgImages = ['img/bg-home.jpg', 'img/bg-2.jpg', 'img/bg-3.jpg'];
-        const bgLayer = document.getElementById('bgLayer');
-        let bgIdx = 0;
-        function switchBg() {
-            bgLayer.style.opacity = 0;
-            setTimeout(() => {
-                bgIdx = (bgIdx + 1) % bgImages.length;
-                bgLayer.style.backgroundImage = `url('${bgImages[bgIdx]}')`;
-                bgLayer.style.opacity = 1;
-            }, 600);
-        }
+    // ===== 换景 =====
+    const bgImages = ['img/bg-home.jpg'];
+    const bgLayer = document.getElementById('bgLayer');
+    let bgIdx = 0;
+    function switchBg() {
+        bgLayer.style.opacity = 0;
+        setTimeout(() => {
+            bgIdx = (bgIdx + 1) % bgImages.length;
+            bgLayer.style.backgroundImage = `url('${bgImages[bgIdx]}')`;
+            bgLayer.style.opacity = 1;
+        }, 600);
+    }
     </script>
 
     <!-- 登录门禁逻辑 -->
     <script>
         (function () {
             const gate = document.getElementById('gate');
-            // 本会话已通过门禁（站内点 logo 回到首页）→ 直接进首页，不弹门禁
             if (sessionStorage.getItem('poetry_gate_passed')) {
                 gate.style.display = 'none';
             } else {
                 gate.style.display = 'flex';
             }
-
             const logged = localStorage.getItem('poetry_user');
             const title = document.querySelector('#gate .gate-title');
             const sub = document.querySelector('#gate .gate-sub');
@@ -295,49 +573,34 @@
             const hint = document.querySelector('#gate .auth-hint');
             const pwdHint = document.getElementById('gatePwdHint');
             const eye = document.getElementById('gateEye');
-
             if (logged) {
-                // 已登录：无需重新输密码，直接进入
                 function renderLoggedIn() {
                     title.innerHTML = t('auth.gateTitle');
                     sub.innerHTML = t('auth.welcomeBack') + '，' + logged;
-                    uIn.style.display = 'none';
-                    pIn.style.display = 'none';
-                    pass2.style.display = 'none';
-                    sw.style.display = 'none';
-                    hint.style.display = 'none';
-                    pwdHint.style.display = 'none';
-                    eye.style.display = 'none';
-                    err.textContent = '';
+                    uIn.style.display = 'none'; pIn.style.display = 'none';
+                    pass2.style.display = 'none'; sw.style.display = 'none';
+                    hint.style.display = 'none'; pwdHint.style.display = 'none';
+                    eye.style.display = 'none'; err.textContent = '';
                     submit.innerHTML = t('auth.enter');
                 }
                 renderLoggedIn();
-                submit.onclick = () => {
-                    sessionStorage.setItem('poetry_gate_passed', '1');
-                    gate.style.display = 'none';
-                };
+                submit.onclick = () => { sessionStorage.setItem('poetry_gate_passed','1'); gate.style.display='none'; };
                 window.addEventListener('langchange', renderLoggedIn);
             } else {
-                // 未登录：登录 / 注册
                 let mode = 'login';
                 function setMode(m) {
                     mode = m;
-                    title.innerHTML = t(m === 'login' ? 'auth.title' : 'auth.titleReg');
-                    submit.innerHTML = t(m === 'login' ? 'auth.submit' : 'auth.submitReg');
-                    sw.innerHTML = t(m === 'login' ? 'auth.toReg' : 'auth.toLogin');
-                    pass2.style.display = m === 'login' ? 'none' : 'block';
-                    pwdHint.style.display = m === 'login' ? 'none' : 'block';
+                    title.innerHTML = t(m==='login'?'auth.title':'auth.titleReg');
+                    submit.innerHTML = t(m==='login'?'auth.submit':'auth.submitReg');
+                    sw.innerHTML = t(m==='login'?'auth.toReg':'auth.toLogin');
+                    pass2.style.display = m==='login'?'none':'block';
+                    pwdHint.style.display = m==='login'?'none':'block';
                     err.textContent = '';
                 }
-                // 密码防偷窥（仅切换明文/密文，图标不变）
-                eye.onclick = () => {
-                    pIn.type = pIn.type === 'password' ? 'text' : 'password';
-                };
-                sw.onclick = () => setMode(mode === 'login' ? 'register' : 'login');
+                eye.onclick = () => { pIn.type = pIn.type==='password'?'text':'password'; };
+                sw.onclick = () => setMode(mode==='login'?'register':'login');
                 submit.onclick = () => {
-                    const u = uIn.value.trim();
-                    const p = pIn.value;
-                    const p2 = pass2.value;
+                    const u = uIn.value.trim(), p = pIn.value, p2 = pass2.value;
                     err.textContent = '';
                     if (!u || !p) { err.textContent = t('auth.errFill'); return; }
                     const users = JSON.parse(localStorage.getItem('poetry_users') || '[]');
@@ -352,8 +615,8 @@
                         if (!user) { err.textContent = t('auth.errWrong'); return; }
                     }
                     localStorage.setItem('poetry_user', u);
-                    sessionStorage.setItem('poetry_gate_passed', '1');
-                    gate.style.display = 'none';   // 登录成功，进入首页
+                    sessionStorage.setItem('poetry_gate_passed','1');
+                    gate.style.display='none';
                     if (window.renderAuth) window.renderAuth();
                 };
                 window.addEventListener('langchange', () => setMode(mode));

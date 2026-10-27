@@ -3,10 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <title>千年诗境 · 诗人图谱</title>
-    <script src="js/echarts.min.js?v=2"></script>
+    <script src="js/echarts.min.js?v=32"></script>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* ==== 长卷基底（与朝代分析页统一） ==== */
+        body { background: #f0e8d0; }
+        .scroll-wrap { position:relative; max-width: 1400px; margin: 0 auto; padding: 0 40px 120px; }
+        /* 淡墨山水背景层 */
+        .ink-bg { position: fixed; inset: 0; z-index: -1; opacity:.5; pointer-events:none;
+            background:
+                radial-gradient(ellipse 80% 50% at 20% 10%, rgba(45,74,62,.08), transparent 60%),
+                radial-gradient(ellipse 60% 40% at 85% 30%, rgba(139,46,46,.06), transparent 60%),
+                radial-gradient(ellipse 70% 50% at 50% 90%, rgba(201,169,110,.10), transparent 60%),
+                linear-gradient(#f0e8d0, #ece2c8);
+        }
+        /* 卷轴上下轴 */
+        .rod { height: 14px; background: linear-gradient(#8b6f47,#5a4526,#8b6f47); border-radius:7px; margin: 30px 0; box-shadow: 0 2px 6px rgba(0,0,0,.15); }
+        /* ==== Hero ==== */
+        .hero { text-align:center; padding: 60px 0 30px; position:relative; }
+        .hero .eyebrow { font-size:12px; letter-spacing:6px; color:#8B2E2E; text-transform:uppercase; margin-bottom:18px; }
+        .hero h1 { font-family:"STKaiti","SimSun",serif; font-size:64px; color:#2D4A3E; margin:0 0 14px; letter-spacing:12px; text-shadow: 0 2px 12px rgba(45,74,62,.12); }
+        .hero .sub { font-size:20px; color:#5a6b5e; font-family:"STKaiti",serif; margin-bottom:6px; }
+        .hero .sub2 { font-size:14px; color:#9a8a70; }
+        /* 竖排诗签装饰 */
+        .ver { position:absolute; writing-mode: vertical-rl; font-family:"STKaiti",serif; font-size:16px; color:#8a7a5a; letter-spacing:8px; opacity:.6; }
+        .ver.l { left:0; top:120px; }
+        .ver.r { right:0; top:120px; }
+        /* KPI */
+        .kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin:44px 0 10px; }
+        .kpi-card { background: rgba(255,253,247,.55); border:1px solid rgba(201,169,110,.3); border-radius:2px; padding:22px 16px; text-align:center; backdrop-filter: blur(2px); }
+        .kpi-card .k-label { font-size:13px; color:#8b7355; letter-spacing:2px; margin-bottom:10px; }
+        .kpi-card .k-num { font-size:32px; color:#2D4A3E; font-weight:bold; font-family:"STKaiti",serif; line-height:1.15; }
+        .kpi-card .k-num small { font-size:14px; color:#8b7355; font-weight:normal; }
+        .kpi-note { font-size:12px; color:#b0a080; text-align:center; margin:12px 0 22px; }
+        /* ==== 章节：淡墨晕染 ==== */
+        .section { margin: 56px 0; opacity:0; transform: translateY(30px); transition: opacity .9s ease, transform .9s ease; }
+        .section.in { opacity:1; transform: translateY(0); }
+        .sec-tag { display:inline-flex; align-items:center; gap:10px; font-size:14px; color:#8B2E2E; letter-spacing:2px; margin-bottom:10px; }
+        .sec-tag::before { content:''; width:3px; height:16px; background:#8B2E2E; }
+        .sec-title { font-family:"STKaiti","SimSun",serif; font-size:30px; color:#2D4A3E; margin:0 0 8px; letter-spacing:3px; }
+        .sec-desc { font-size:14px; color:#9a8a70; margin-bottom:24px; }
+        .sec-ink { background: linear-gradient(180deg, rgba(255,253,247,.5), rgba(255,253,247,.35)); border:none; border-top:1px solid rgba(201,169,110,.2); border-bottom:1px solid rgba(201,169,110,.2); padding:28px 24px; position:relative; }
+        .sec-ink::before, .sec-ink::after { content:''; position:absolute; width:10px; height:10px; border:1px solid #C9A96E; }
+        .sec-ink::before { top:-1px; left:-1px; border-right:none; border-bottom:none; }
+        .sec-ink::after { bottom:-1px; right:-1px; border-left:none; border-top:none; }
+        .two-col { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+        .chart-box { width:100%; height:360px; }
+        .chart-box.tall { height:560px; }
+        .chart-box.map { height:640px; }
+        /* 毛笔分隔 */
+        .brush { height:2px; background: linear-gradient(90deg, transparent, #C9A96E 20%, #C9A96E 80%, transparent); margin:0; opacity:.4; }
+        /* 立轴展开动画 */
+        .scroll-stage { overflow: hidden; position: relative; }
+        .scroll-wrap { clip-path: inset(0 0 100% 0); animation: unroll 7.5s cubic-bezier(.3,.6,.2,1) .5s forwards; }
+        @keyframes unroll { to { clip-path: inset(0 0 0 0); } }
+        .rod.top { animation: rodTopIn .5s ease .3s backwards; }
+        @keyframes rodTopIn { from { opacity:0; } to { opacity:1; } }
+        .rod.bottom { position: absolute; left:0; right:0; z-index:5; height:14px;
+            background: linear-gradient(#8b6f47,#5a4526,#8b6f47); border-radius:7px;
+            box-shadow: 0 4px 12px rgba(0,0,0,.3);
+            animation: rollerDown 7.5s cubic-bezier(.3,.6,.2,1) .5s forwards; }
+        .rod.bottom::before, .rod.bottom::after { content:''; position:absolute; top:50%; transform:translateY(-50%);
+            width:10px; height:22px; background:#3e2a14; border-radius:3px; }
+        .rod.bottom::before { left:-4px; } .rod.bottom::after { right:-4px; }
+        @keyframes rollerDown { 0%{ top:0; } 100%{ top: calc(100% - 14px); } }
+        /* 弯曲时间轴 */
+        .dyn-bar { position:relative; height:140px; margin:20px 20px 0; }
+        .dyn-path { position:absolute; inset:0; width:100%; height:100%; }
+        .dyn-node { position:absolute; transform:translate(-50%,-50%); display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; z-index:2; }
+        .dyn-dot { width:18px; height:18px; border-radius:50%; background:#F5EFE0; border:2px solid #C9A96E; transition:all .3s; }
+        .dyn-node:hover .dyn-dot { border-color:#8B2E2E; transform:scale(1.25); }
+        .dyn-node.active .dyn-dot { background:#8B2E2E; border-color:#8B2E2E; box-shadow:0 0 0 5px rgba(139,46,46,.2); transform:scale(1.35); }
+        .dyn-name { font-family:STKaiti,serif; font-size:14px; color:#2D4A3E; white-space:nowrap; }
+        .dyn-node.active .dyn-name { color:#8B2E2E; font-weight:bold; }
+        .timeline-hint { font-size:12px; color:#b0a080; margin-top:6px; letter-spacing:1px; }
+        /* 悬停墨笺 */
+        .dyn-pop{position:fixed;z-index:99;background:#F5EFE0;border:1px solid #C9A96E;box-shadow:0 6px 24px rgba(45,74,62,.25);
+          padding:10px 14px;font-family:STKaiti,serif;font-size:13px;color:#2D4A3E;display:none;pointer-events:none;
+          border-radius:4px;min-width:150px;}
+        .dyn-pop b{color:#8B2E2E;}
+        .dyn-pop::before{content:"";position:absolute;top:-6px;left:20px;width:10px;height:10px;background:#F5EFE0;
+          border-left:1px solid #C9A96E;border-top:1px solid #C9A96E;transform:rotate(45deg);}
+        .ripple{position:absolute;border-radius:50%;background:rgba(139,46,46,.35);transform:scale(0);animation:rip .8s ease-out forwards;pointer-events:none;}
+        @keyframes rip{to{transform:scale(4);opacity:0;}}
+        /* 巨幅背景字 */
+        .big-char{position:fixed;right:8%;top:18%;font-family:STKaiti,serif;font-size:340px;font-weight:bold;
+          color:#2D4A3E;opacity:0.06;pointer-events:none;z-index:1;transition:all 1.2s ease-out;line-height:1;
+          text-shadow:0 0 60px rgba(45,74,62,.2);}
+        /* 飞升诗句 */
+        #flyLayer{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden;}
+        .fly-poem{position:fixed;font-family:STKaiti,serif;color:#2D4A3E;opacity:0;pointer-events:none;z-index:2;
+          font-size:16px;letter-spacing:3px;transition:opacity 2s;writing-mode:vertical-rl;}
+        /* ==== 朝代诗签卡片 ==== */
+        .poet-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+        .poet-card { background: linear-gradient(180deg, rgba(255,253,247,.55), rgba(255,253,247,.38));
+            border-top:1px solid rgba(201,169,110,.3); border-bottom:1px solid rgba(201,169,110,.3);
+            padding:20px 20px 18px; position:relative; transition: all .5s ease; }
+        .poet-card::before, .poet-card::after { content:''; position:absolute; width:10px; height:10px; border:1px solid #C9A96E; }
+        .poet-card::before { top:-1px; left:-1px; border-right:none; border-bottom:none; }
+        .poet-card::after { bottom:-1px; right:-1px; border-left:none; border-top:none; }
+        .poet-card.active { background: rgba(255,253,247,.85); box-shadow: 0 6px 26px rgba(45,74,62,.18); transform: translateY(-4px); }
+        .poet-card.dim { opacity:.32; transform: scale(.985); }
+        .pc-head { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:8px; }
+        .pc-title { font-family:STKaiti,serif; font-size:26px; color:#2D4A3E; letter-spacing:3px; }
+        .pc-seal { width:40px; height:40px; background:#8B2E2E; color:#F5EFE0; font-family:STKaiti,serif;
+            font-size:20px; line-height:40px; text-align:center; border-radius:4px; transform:rotate(-6deg);
+            box-shadow:0 2px 8px rgba(139,46,46,.35); flex:none; }
+        .pc-meta { font-size:12px; color:#8b7355; letter-spacing:1px; margin-bottom:10px; }
+        .pc-meta b { color:#2D4A3E; font-weight:normal; }
+        .pc-quote { font-family:STKaiti,serif; font-size:13px; color:#8B2E2E; line-height:1.7; padding:8px 0 10px;
+            border-top:1px dashed rgba(201,169,110,.5); border-bottom:1px dashed rgba(201,169,110,.5); margin-bottom:12px; }
+        .pc-quote span { display:block; text-align:right; font-size:11px; color:#9a8a70; }
+        .pl-row { display:flex; align-items:center; gap:8px; margin-bottom:7px; font-size:13px; }
+        .pl-rank { width:20px; font-family:STKaiti,serif; color:#b0a080; font-size:13px; flex:none; text-align:center; }
+        .pl-row:first-of-type .pl-rank { color:#8B2E2E; font-weight:bold; }
+        .pl-name { flex:0 0 86px; font-family:STKaiti,serif; color:#2D4A3E; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .pl-track { flex:1; height:8px; background:rgba(201,169,110,.18); border-radius:4px; overflow:hidden; }
+        .pl-fill { height:100%; border-radius:4px; transition:width 1.2s ease; }
+        .pl-val { flex:0 0 52px; text-align:right; color:#8B6F3A; font-size:12px; }
+        .note-line { font-size:12px; color:#b0a080; margin-top:14px; text-align:center; letter-spacing:1px; }
+        @media (max-width:1000px){ .two-col{grid-template-columns:1fr} .poet-grid{grid-template-columns:1fr 1fr} }
+        @media (max-width:760px){ .kpi-row{grid-template-columns:1fr 1fr} .poet-grid{grid-template-columns:1fr} .hero h1{font-size:42px;letter-spacing:6px} .ver{display:none} }
+    </style>
 </head>
 <body data-page="poet">
+    <svg width="0" height="0" style="position:absolute"><defs><filter id="sealRough"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3"/></filter></defs></svg>
+    <!-- 富春山居图 淡墨背景 -->
+    <div class="ink-bg" style="background:
+        linear-gradient(rgba(240,232,208,.82), rgba(236,226,200,.88)),
+        url('img/landscape.jpg') center/cover no-repeat fixed;"></div>
+
     <nav class="nav">
         <a href="index.html" class="logo" data-i18n="logo">千年诗境</a>
         <a href="dynasty.html" data-page="dynasty" data-i18n="nav.dynasty">朝代分析</a>
@@ -15,75 +141,446 @@
         <a href="imagery.html" data-page="imagery" data-i18n="nav.imagery">诗境意象</a>
         <a href="overview.html" data-page="overview" data-i18n="nav.overview">诗词数据概览</a>
     </nav>
-    <div class="container">
-        <div class="page-header">
-            <h1 data-i18n="pt.title">诗人图谱</h1>
-            <p data-i18n="pt.sub">作者作品数量 TopN、各朝代代表诗人</p>
+
+    <div class="scroll-stage"><div class="scroll-wrap">
+        <div class="rod top"></div>
+        <!-- Hero -->
+        <div class="hero">
+            <div class="ver l" data-i18n="pt.verL">群贤毕至</div>
+            <div class="ver r" data-i18n="pt.verR">少长咸集</div>
+            <div class="eyebrow" data-i18n="pt.eyebrow">A Gallery of Poets Through Ages</div>
+            <h1 data-i18n="pt.heroTitle">群星璀璨</h1>
+            <p class="sub" data-i18n="pt.heroSub">江山代有才人出，各领风骚数百年。</p>
+            <p class="sub2" data-i18n="pt.heroSub2">纵览历代诗家风貌，遇见每个时代的闪耀灵魂。</p>
+            <div class="kpi-row">
+                <div class="kpi-card"><div class="k-label" data-i18n="pt.kPoets">收录诗人</div><div class="k-num" id="kPoets">—</div></div>
+                <div class="kpi-card"><div class="k-label" data-i18n="pt.kWorks">收录诗词</div><div class="k-num" id="kWorks">—</div></div>
+                <div class="kpi-card"><div class="k-label" data-i18n="pt.kDyn">诗朝</div><div class="k-num" id="kDyn">—</div></div>
+                <div class="kpi-card"><div class="k-label" data-i18n="pt.kChampion">诗家魁首</div><div class="k-num" id="kChampion" style="font-size:24px;">—</div></div>
+            </div>
+            <p class="kpi-note" data-i18n="pt.kNote">数据概览 · 实际数值由数据接口提供</p>
+            <div class="dyn-bar" id="dynBar"></div>
+            <div class="timeline-hint" data-i18n="pt.timelineHint">点击朝代节点，聚焦该朝诗群</div>
         </div>
-        <div class="grid-2">
-            <div class="card"><h3 data-i18n="pt.c1">作者作品数量 TopN</h3><div id="p1" class="chart" style="height:360px;"></div></div>
-            <div class="card"><h3 data-i18n="pt.c2">各朝代作者数量</h3><div id="p2" class="chart" style="height:360px;"></div></div>
-            <div class="card"><h3 data-i18n="pt.c3">作者平均作品长度 TopN</h3><div id="p3" class="chart" style="height:360px;"></div></div>
-            <div class="card"><h3 data-i18n="pt.c4">各朝代代表诗人（按作品数）</h3><div id="p4" class="chart" style="height:360px;"></div></div>
+        <div class="brush"></div>
+
+        <!-- 壹·魁首 -->
+        <div class="section">
+            <div class="sec-tag" data-i18n="pt.s1Tag">壹 · 魁首</div>
+            <h2 class="sec-title" data-i18n="pt.s1Title">谁是最高产的诗人？</h2>
+            <p class="sec-desc" data-i18n="pt.s1Desc">作品数量 Top15 · 墨色横向榜</p>
+            <div class="sec-ink"><div id="c1" class="chart-box tall"></div></div>
         </div>
+
+        <!-- 贰·群英 + 叁·华章 -->
+        <div class="section">
+            <div class="two-col">
+                <div>
+                    <div class="sec-tag" data-i18n="pt.s2Tag">贰 · 群英</div>
+                    <h2 class="sec-title" data-i18n="pt.s2Title">历代诗人，群星璀璨</h2>
+                    <p class="sec-desc" data-i18n="pt.s2Desc">各朝代作者数量 · 南丁格尔玫瑰图</p>
+                    <div class="sec-ink"><div id="c2" class="chart-box"></div></div>
+                </div>
+                <div>
+                    <div class="sec-tag" data-i18n="pt.s3Tag">叁 · 华章</div>
+                    <h2 class="sec-title" data-i18n="pt.s3Title">多产与长篇</h2>
+                    <p class="sec-desc" data-i18n="pt.s3Desc">作品数 × 平均篇幅 · 散点图</p>
+                    <div class="sec-ink"><div id="c3" class="chart-box"></div></div>
+                    <p class="note-line" data-i18n="pt.noteScatter">注：《孟子》等典籍为长篇散文，故平均篇幅远高于诗作</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 肆·星图 -->
+        <div class="section">
+            <div class="sec-tag" data-i18n="pt.s4Tag">肆 · 星图</div>
+            <h2 class="sec-title" data-i18n="pt.s4Title">各朝诗人星图</h2>
+            <p class="sec-desc" data-i18n="pt.s4Desc">由中心向外：朝代 → 代表诗人；圆点越大，作品越多（可滚轮缩放、拖动）</p>
+            <div class="sec-ink"><div id="c4" class="chart-box map"></div></div>
+        </div>
+
+        <!-- 伍·流芳 -->
+        <div class="section">
+            <div class="sec-tag" data-i18n="pt.s5Tag">伍 · 流芳</div>
+            <h2 class="sec-title" data-i18n="pt.s5Title">各朝代代表诗人</h2>
+            <p class="sec-desc" data-i18n="pt.s5Desc">诗签录 · 点击上方时间轴可聚焦某一朝代</p>
+            <div class="poet-grid" id="poetGrid"></div>
+        </div>
+
+        <div class="rod bottom"></div>
     </div>
-    <script src="js/common.js?v=3"></script>
-    <script>
-    const charts = ['p1','p2','p3','p4'].map(id => echarts.init(document.getElementById(id)));
+    </div>
 
-    function hbar(names, values, color) {
-        return {
-            tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' } },
-            grid:{ left:90, right:50, top:10, bottom:20 },
-            xAxis:{ type:'value' },
-            yAxis:{ type:'category', data:names.slice().reverse() },
-            color:[color],
-            series:[{ type:'bar', data:values.slice().reverse(), barWidth:'50%',
-                itemStyle:{ borderRadius:[0,4,4,0] }, label:{ show:true, position:'right' } }]
-        };
-    }
+    <script src="js/common.js?v=33"></script>
+<script>
+/* ================= 数据与常量 ================= */
+const charts = ['c1','c2','c3','c4'].map(id => echarts.init(document.getElementById(id)));
+let DATA = null, selected = null;
+const C = { ink:'#2D4A3E', cinnabar:'#8B2E2E', gold:'#C9A96E', stone:'#8FA38A', paper:'#F5EFE0' };
+const ORDER = ['战国','东汉','唐代','宋代','元代','清代'];
+const DYN_COLOR = { '战国':'#6b8e7f', '东汉':'#b8995a', '唐代':'#8B2E2E', '宋代':'#2D4A3E', '元代':'#C9A96E', '清代':'#7a6a8f' };
+const SEAL_CHAR = { '战国':'战', '东汉':'汉', '唐代':'唐', '宋代':'宋', '元代':'元', '清代':'清' };
+/* 各朝代名句（本页展示用） */
+const QUOTES = {
+  zh: {
+    '战国':['路漫漫其修远兮，吾将上下而求索。','屈原《离骚》'],
+    '东汉':['对酒当歌，人生几何。','曹操《短歌行》'],
+    '唐代':['李杜文章在，光焰万丈长。','韩愈《调张籍》'],
+    '宋代':['王师北定中原日，家祭无忘告乃翁。','陆游《示儿》'],
+    '元代':['夕阳西下，断肠人在天涯。','马致远《天净沙·秋思》'],
+    '清代':['人生若只如初见，何事秋风悲画扇。','纳兰性德《木兰花令》']
+  },
+  en: {
+    '战国':['Long, long is the road; I shall seek high and low.','Qu Yuan, Li Sao'],
+    '东汉':['With wine, let us sing — how brief is life!','Cao Cao, Short Song'],
+    '唐代':['The writings of Li and Du blaze, radiant ten thousand feet.','Han Yu'],
+    '宋代':['When the royal army reclaims the north, forget not to tell me.','Lu You, To My Son'],
+    '元代':['The sun sinks west; the heartbroken roams the edge of the sky.','Ma Zhiyuan, Tianjingsha'],
+    '清代':['If only life stayed like the very first meeting.','Nalan Xingde']
+  }
+};
+const shortName = n => (n||'').replace(/《[^》]*》/g,'').trim();
+const L = () => window.__lang || 'zh';
+const isEn = () => L() === 'en';
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+let poetDyn = {};
 
-    let DATA = null;
+function axisStyle(){ return {
+    axisLine:{ lineStyle:{ color:'#d0c4a4' } },
+    axisLabel:{ color:'#6a6a5a', fontSize:12 },
+    splitLine:{ lineStyle:{ color:'#e8dfc5', type:'dashed' } }
+};}
 
-    function render() {
-        const w = (DATA.workTop||[]).slice(0,15);
-        charts[0].setOption(hbar(w.map(x=>trName(x.author)), w.map(x=>x.count), THEME_COLORS[1]), true);
+/* ================= KPI ================= */
+function renderKPI(){
+    const dc = DATA.dynCnt||[], dp = DATA.dynPoem||[], wt = DATA.workTop||[];
+    const poets = dc.reduce((s,x)=>s+x.value,0), works = dp.reduce((s,x)=>s+x.value,0);
+    document.getElementById('kPoets').textContent = poets.toLocaleString() + (isEn()?'':' ');
+    document.getElementById('kWorks').textContent = works.toLocaleString();
+    document.getElementById('kDyn').textContent = dc.length;
+    const champ = wt[0];
+    document.getElementById('kChampion').innerHTML = champ
+        ? `${trName(shortName(champ.author))}<br><small>${champ.count.toLocaleString()} ${t('pt.pieces')}</small>` : '—';
+}
 
-        const d = DATA.dynCnt||[];
-        charts[1].setOption({
-            tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' } },
-            grid:{ left:60, right:30, top:20, bottom:40 },
-            xAxis:{ type:'category', data:d.map(x=>trDyn(x.dynasty)), axisLabel:{interval:0} },
-            yAxis:{ type:'value' },
-            color:[THEME_COLORS[3]],
-            series:[{ type:'bar', data:d.map(x=>x.value), barWidth:'45%',
-                itemStyle:{ borderRadius:[4,4,0,0] }, label:{ show:true, position:'top' } }]
-        }, true);
+/* ================= 壹 · 作品数 TopN ================= */
+function renderBar(){
+    const top = (DATA.workTop||[]).slice(0,15);
+    const names = top.map((x,i)=> String(i+1).padStart(2,'0') + '  ' + trName(shortName(x.author)));
+    charts[0].setOption({
+        animationDuration:1200, animationEasing:'cubicOut',
+        tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' },
+            formatter: ps => {
+                const p = ps[0]; const a = top[p.dataIndex];
+                const d = poetDyn[shortName(a.author)];
+                return `<b style="color:#2D4A3E;font-size:14px">${trName(shortName(a.author))}</b>` +
+                       (d ? `<div style="font-size:12px;color:#6a6a5a">${trDyn(d)}</div>` : '') +
+                       `<div style="font-size:12px;color:#6a6a5a">${t('pt.works')}：<b style="color:#2D4A3E">${a.count.toLocaleString()}</b> ${t('pt.pieces')}</div>`;
+            }},
+        grid:{ left:150, right:70, top:16, bottom:26 },
+        xAxis: Object.assign({ type:'value', name:t('pt.works'), nameTextStyle:{color:'#8b7355'} }, axisStyle()),
+        yAxis: Object.assign({ type:'category', inverse:true, data:names,
+            axisLabel:{ color:'#2D4A3E', fontSize:13, fontFamily:'STKaiti,serif' },
+            axisTick:{show:false} }, axisStyle(), { splitLine:{show:false} }),
+        series:[{
+            type:'bar', barWidth:15,
+            data: top.map((x,i)=>{
+                const d = poetDyn[shortName(x.author)];
+                const dim = selected && d !== selected;
+                return { value:x.count,
+                    itemStyle:{
+                        color: i===0 ? C.cinnabar : new echarts.graphic.LinearGradient(0,0,1,0,[{offset:0,color:'#8FA38A'},{offset:1,color:C.ink}]),
+                        borderRadius:[0,3,3,0], opacity: dim?0.22:1 } };
+            }),
+            label:{ show:true, position:'right', color:'#8B6F3A', fontWeight:'bold',
+                formatter: p => p.value.toLocaleString() }
+        }]
+    }, true);
+}
 
-        const a = (DATA.avgTop||[]).slice(0,15);
-        charts[2].setOption(hbar(a.map(x=>trName(x.author)), a.map(x=>x.avgLen), THEME_COLORS[5]), true);
+/* ================= 贰 · 各朝代作者玫瑰图 ================= */
+function renderRose(){
+    const dc = DATA.dynCnt||[];
+    const total = dc.reduce((s,x)=>s+x.value,0);
+    const get = d => { const f = dc.find(x=>x.dynasty===d); return f?f.value:0; };
+    charts[1].setOption({
+        animationDuration:1200,
+        tooltip:{ trigger:'item',
+            formatter: p => {
+                const d = ORDER.find(x=>trDyn(x)===p.name);
+                const list = (DATA.dynAuth&&DATA.dynAuth[d])||[];
+                const q = QUOTES[L()][d];
+                const rep = list[0] ? `<div style="font-size:12px;color:#6a6a5a">${t('pt.repPoets')}：<b style="color:#2D4A3E">${trName(shortName(list[0].author))}</b></div>` : '';
+                const quote = q ? `<div style="margin-top:6px;padding-top:6px;border-top:1px dashed #C9A96E;color:#8B2E2E;font-family:STKaiti,serif;font-size:12px">“${q[0]}”<br/><span style="font-size:10px;color:#9a8a70">${q[1]}</span></div>` : '';
+                return `<b style="color:#2D4A3E;font-size:14px">${p.name}</b>
+                  <div style="font-size:12px;color:#6a6a5a">${t('pt.poets')}：<b style="color:#2D4A3E">${p.value.toLocaleString()}</b> ${t('pt.poetsUnit')} · ${t('pt.share')} ${p.percent}%</div>${rep}${quote}`;
+            }},
+        legend:{ show:false },
+        series:[{
+            type:'pie', roseType:'area', radius:['16%','76%'], center:['50%','53%'],
+            itemStyle:{ borderColor:C.paper, borderWidth:2, shadowBlur:8, shadowColor:'rgba(45,74,62,.15)' },
+            label:{ color:'#2D4A3E', fontFamily:'STKaiti,serif', fontSize:12,
+                formatter: p => `${p.name}\n${p.value}${isEn()?'':' ' + t('pt.poetsUnit')}` },
+            labelLine:{ lineStyle:{ color:'#C9A96E' } },
+            data: ORDER.map(d => ({
+                name: trDyn(d), value: get(d),
+                itemStyle:{ color: DYN_COLOR[d], opacity: selected ? (selected===d?1:0.18) : 1 }
+            }))
+        }]
+    }, true);
+    charts[1].off('click');
+    charts[1].on('click', p => { const d = ORDER.find(x=>trDyn(x)===p.name); if(d) toggleSelect(d); });
+}
 
-        const reps = [];
-        Object.keys(DATA.dynAuth||{}).forEach(dyn => {
-            const list = DATA.dynAuth[dyn];
-            if (list && list[0]) reps.push({ name: trName(list[0].author) + '·' + trDyn(dyn), count: list[0].count });
+/* ================= 叁 · 作品数 × 平均篇幅 散点 ================= */
+function renderScatter(){
+    /* 《孟子》等长篇散文典籍（avgLen 异常高）不参与诗作篇幅比较，图下注已说明 */
+    const rows = (DATA.avgTop||[]).filter(x => x.avgLen <= 500);
+    charts[2].setOption({
+        animationDuration:1200,
+        tooltip:{ trigger:'item',
+            formatter: p => {
+                const r = rows[p.dataIndex];
+                return `<b style="color:#2D4A3E;font-size:14px">${trName(shortName(r.author))}</b>
+                  <div style="font-size:12px;color:#6a6a5a">${t('pt.works')}：<b style="color:#2D4A3E">${r.count}</b> ${t('pt.pieces')}</div>
+                  <div style="font-size:12px;color:#6a6a5a">${t('pt.avgLen')}：<b style="color:#2D4A3E">${r.avgLen}</b> ${t('pt.charsUnit')}</div>`;
+            }},
+        grid:{ left:64, right:34, top:30, bottom:56 },
+        xAxis: Object.assign({ type:'log', name:t('pt.axisWorks'), nameLocation:'middle', nameGap:32,
+            nameTextStyle:{color:'#8b7355'}, min:3 }, axisStyle()),
+        yAxis: Object.assign({ type:'value', name:t('pt.axisAvg'), nameTextStyle:{color:'#8b7355'} }, axisStyle()),
+        series:[{
+            type:'scatter',
+            data: rows.map(x => [x.count, x.avgLen]),
+            symbolSize: (v)=> clamp(8 + Math.sqrt(v[0])*1.5, 10, 40),
+            itemStyle:{
+                color: p => rows[p.dataIndex].avgLen > 180 ? C.cinnabar : C.stone,
+                opacity:.82, borderColor:C.paper, borderWidth:1.5,
+                shadowBlur:6, shadowColor:'rgba(45,74,62,.2)' },
+            label:{ show:true, position:'top', color:'#2D4A3E', fontSize:10,
+                fontFamily:'STKaiti,serif', formatter: p => trName(shortName(rows[p.dataIndex].author)) },
+            markLine:{ silent:true, symbol:'none', lineStyle:{color:'#C9A96E',type:'dashed',opacity:.6},
+                label:{color:'#8b7355',fontSize:11,formatter:t('pt.avgLen')},
+                data:[{ yAxis: 100 }] }
+        }]
+    }, true);
+}
+
+/* ================= 肆 · 放射星图 ================= */
+function renderGraph(){
+    const nodes = [], links = [];
+    const dim = d => selected && selected !== d;
+    const YK = 0.5;          /* 纵向坐标压缩，抵消宽屏视口拉伸，保证圆点为正圆 */
+    const R_DYN = 150, R_POET = 300;
+    /* 中心 */
+    nodes.push({ id:'center', name:t('logo'), x:0, y:0, symbolSize:74,
+        itemStyle:{ color:C.ink, borderColor:C.gold, borderWidth:2, shadowBlur:20, shadowColor:'rgba(45,74,62,.35)' },
+        label:{ show:true, color:C.gold, fontSize:15, fontFamily:'STKaiti,serif', fontWeight:'bold' },
+        tooltip:{ show:false } });
+    ORDER.forEach((d,i)=>{
+        const ang = (i*60 - 90) * Math.PI/180;
+        const x1 = R_DYN*Math.cos(ang), y1 = R_DYN*YK*Math.sin(ang);
+        const cnt = (DATA.dynCnt||[]).find(x=>x.dynasty===d);
+        const authors = cnt?cnt.value:0;
+        const poems = (DATA.dynPoem||[]).find(x=>x.dynasty===d);
+        const list = DATA.dynAuth[d] || [];
+        nodes.push({ id:'d_'+d, name:trDyn(d), x:x1, y:y1, category:d,
+            symbolSize: clamp(26 + Math.sqrt(authors)*2.2, 30, 64),
+            itemStyle:{ color:DYN_COLOR[d], opacity:dim(d)?0.15:1, borderColor:C.paper, borderWidth:2,
+                shadowBlur:12, shadowColor:'rgba(45,74,62,.25)' },
+            label:{ show:true, color:C.paper, fontSize:13, fontFamily:'STKaiti,serif', fontWeight:'bold' },
+            _kind:'dyn', _d:d, _authors:authors, _poems:poems?poems.value:0, _rep:list[0]||null });
+        links.push({ source:'center', target:'d_'+d,
+            lineStyle:{ color:DYN_COLOR[d], width:2, opacity:dim(d)?0.08:0.5, curveness:0.06 } });
+        const poets = list.slice(0,5), n = poets.length;
+        poets.forEach((p,j)=>{
+            const spread = n===1 ? 0 : (j/(n-1) - 0.5) * (Math.PI/180*46);
+            const pa = ang + spread;
+            const x = R_POET*Math.cos(pa), y = R_POET*YK*Math.sin(pa);
+            const pos = Math.abs(Math.cos(pa)) > Math.abs(Math.sin(pa)*YK) ? (Math.cos(pa)>0?'right':'left') : (Math.sin(pa)>0?'bottom':'top');
+            const id = 'p_'+d+'_'+j;
+            nodes.push({ id:id, name:trName(shortName(p.author)), x:x, y:y, category:d,
+                symbolSize: clamp(10 + Math.sqrt(p.count)*1.1, 14, 44),
+                itemStyle:{ color:DYN_COLOR[d], opacity:dim(d)?0.1:0.9, borderColor:C.paper, borderWidth:1.5 },
+                label:{ show:true, position:pos, distance:6, color:'#2D4A3E', fontSize:11, fontFamily:'STKaiti,serif' },
+                _kind:'poet', _d:d, _p:p });
+            links.push({ source:'d_'+d, target:id,
+                lineStyle:{ color:DYN_COLOR[d], width:1, type:'dashed', opacity:dim(d)?0.05:0.3, curveness:0.05 } });
         });
-        charts[3].setOption(hbar(reps.map(x=>x.name), reps.map(x=>x.count), THEME_COLORS[0]), true);
-    }
+    });
+    charts[3].setOption({
+        animationDuration:1400,
+        tooltip:{ trigger:'item',
+            formatter: p => {
+                const d = p.data._d;
+                if(p.data._kind==='dyn'){
+                    const q = QUOTES[L()][d];
+                    const rep = p.data._rep ? `<div style="font-size:12px;color:#6a6a5a">${t('pt.repPoets')}：<b style="color:#2D4A3E">${trName(shortName(p.data._rep.author))}（${p.data._rep.count}）</b></div>` : '';
+                    const quote = q ? `<div style="margin-top:6px;padding-top:6px;border-top:1px dashed #C9A96E;color:#8B2E2E;font-family:STKaiti,serif;font-size:12px">“${q[0]}”<br/><span style="font-size:10px;color:#9a8a70">${q[1]}</span></div>` : '';
+                    return `<b style="color:#2D4A3E;font-size:14px">${trDyn(d)}</b>
+                      <div style="font-size:12px;color:#6a6a5a">${t('pt.poets')}：<b style="color:#2D4A3E">${p.data._authors.toLocaleString()}</b> ${t('pt.poetsUnit')}　${t('pt.poems')}：<b style="color:#2D4A3E">${p.data._poems.toLocaleString()}</b></div>${rep}${quote}`;
+                }
+                if(p.data._kind==='poet'){
+                    const r = p.data._p;
+                    return `<b style="color:#2D4A3E;font-size:14px">${trName(shortName(r.author))}</b>
+                      <div style="font-size:12px;color:#6a6a5a">${trDyn(d)}</div>
+                      <div style="font-size:12px;color:#6a6a5a">${t('pt.works')}：<b style="color:#2D4A3E">${r.count.toLocaleString()}</b> ${t('pt.pieces')}</div>`;
+                }
+                return p.name;
+            }},
+        series:[{
+            type:'graph', layout:'none', roam:true,
+            left:70, right:110, top:50, bottom:50,
+            edgeSymbol:['none','none'],
+            emphasis:{ focus:'self', lineStyle:{ opacity:.8 }, label:{ fontWeight:'bold' } },
+            data:nodes, links:links
+        }]
+    }, true);
+    charts[3].off('click');
+    charts[3].on('click', p => { if(p.data && p.data._d) toggleSelect(p.data._d); });
+}
 
-    async function boot() {
-        const [workTop, avgTop, dynAuth, dynCnt] = await Promise.all([
-            fetchAPI('/author/workTopN'),
-            fetchAPI('/author/avgLenTopN'),
-            fetchAPI('/author/dynastyTop'),
-            fetchAPI('/dynasty/authorCount'),
-        ]);
-        DATA = { workTop:workTop||[], avgTop:avgTop||[], dynAuth:dynAuth||{}, dynCnt:dynCnt||[] };
-        render();
+/* ================= 伍 · 朝代诗签卡片 ================= */
+function renderCards(){
+    const grid = document.getElementById('poetGrid');
+    const get = (arr,d) => { const f = (arr||[]).find(x=>x.dynasty===d); return f?f.value:0; };
+    grid.innerHTML = ORDER.map(d => {
+        const list = DATA.dynAuth[d] || [];
+        const authors = get(DATA.dynCnt,d), poems = get(DATA.dynPoem,d);
+        const max = list.length ? list[0].count : 1;
+        const q = QUOTES[L()][d];
+        const rows = list.map((p,i)=>{
+            const w = Math.round(p.count/max*100);
+            return `<div class="pl-row">
+                <div class="pl-rank">${i+1}</div>
+                <div class="pl-name" title="${p.author}">${trName(shortName(p.author))}</div>
+                <div class="pl-track"><div class="pl-fill" style="width:${w}%;background:${DYN_COLOR[d]}"></div></div>
+                <div class="pl-val">${p.count.toLocaleString()}</div>
+            </div>`;
+        }).join('') || `<div class="pl-row" style="color:#b0a080">—</div>`;
+        const cls = 'poet-card' + (selected ? (selected===d?' active':' dim') : '');
+        return `<div class="${cls}" id="card_${d}">
+            <div class="pc-head">
+                <div class="pc-title">${trDyn(d)}</div>
+                <div class="pc-seal">${SEAL_CHAR[d]}</div>
+            </div>
+            <div class="pc-meta">${t('pt.poets')} <b>${authors.toLocaleString()}</b> ${t('pt.poetsUnit')} · ${t('pt.poems')} <b>${poems.toLocaleString()}</b> ${t('pt.pieces')}</div>
+            <div class="pc-quote">“${q[0]}”<span>${q[1]}</span></div>
+            ${rows}
+        </div>`;
+    }).join('');
+    grid.querySelectorAll('.poet-card').forEach(card => {
+        card.onclick = () => {
+            const d = card.id.replace('card_','');
+            toggleSelect(d);
+        };
+    });
+}
+
+/* ================= 时间轴 ================= */
+function buildDynBar(){
+    const bar = document.getElementById('dynBar');
+    const W=1200, H=100;
+    const step = W/(ORDER.length-1);
+    const yAt = i => 50 + Math.sin(i*Math.PI/2.5)*28;
+    let pathD='M0,'+yAt(0);
+    for(let i=1;i<ORDER.length;i++){
+        const cx=(i-0.5)*step, cy=yAt(i-1)*0.4+yAt(i)*0.6;
+        pathD+=` Q ${cx},${cy} ${i*step},${yAt(i)}`;
     }
-    document.addEventListener('DOMContentLoaded', boot);
-    window.addEventListener('langchange', render);
-    window.addEventListener('resize', () => charts.forEach(c => c.resize()));
-    </script>
+    let nodes='';
+    ORDER.forEach((d,i)=>{
+        const x=i*step, y=yAt(i);
+        const act = selected===d?' active':'';
+        nodes+=`<div class="dyn-node${act}" data-dyn="${d}" style="left:${x}px; top:${y}px;">
+            <div class="dyn-dot"></div><div class="dyn-name">${trDyn(d)}</div></div>`;
+    });
+    bar.innerHTML=`<svg class="dyn-path" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+        <path d="${pathD}" fill="none" stroke="#C9A96E" stroke-width="2" opacity=".7"/></svg>${nodes}`;
+    const pop = document.getElementById('dynPop');
+    bar.querySelectorAll('.dyn-node').forEach(p=>{
+        p.onclick=(e)=>{
+            const r=document.createElement('span'); r.className='ripple';
+            r.style.width='20px';r.style.height='20px';r.style.left=(e.offsetX-10)+'px';r.style.top=(e.offsetY-10)+'px';
+            p.appendChild(r); setTimeout(()=>r.remove(),800);
+            toggleSelect(p.dataset.dyn, true);
+        };
+        p.onmouseenter=()=>{
+            const d=p.dataset.dyn;
+            const ac=(DATA.dynCnt||[]).find(x=>x.dynasty===d), pc=(DATA.dynPoem||[]).find(x=>x.dynasty===d);
+            const list=DATA.dynAuth[d]||[];
+            pop.innerHTML=`<b>${trDyn(d)}</b><br/>${t('pt.poets')}：${ac?ac.value.toLocaleString():'-'} ${t('pt.poetsUnit')}<br/>${t('pt.poems')}：${pc?pc.value.toLocaleString():'-'} ${t('pt.pieces')}${list[0]?`<br/>${t('pt.repPoets')}：${trName(shortName(list[0].author))}`:''}`;
+            pop.style.display='block';
+            const rect=p.getBoundingClientRect();
+            pop.style.left=(rect.left-40)+'px'; pop.style.top=(rect.top-96)+'px';
+        };
+        p.onmouseleave=()=>{ pop.style.display='none'; };
+    });
+}
+
+function toggleSelect(d, fromBar){
+    selected = (selected===d) ? null : d;
+    renderAll();
+    const bc = document.getElementById('bigChar');
+    if(selected){ bc.textContent = SEAL_CHAR[selected]; bc.style.opacity='0.12'; }
+    else { bc.textContent = '诗'; bc.style.opacity='0.06'; }
+    if(selected && !fromBar){
+        const card = document.getElementById('card_'+selected);
+        if(card) card.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+}
+
+function renderAll(){
+    if(!DATA) return;
+    renderKPI(); buildDynBar(); renderBar(); renderRose(); renderScatter(); renderGraph(); renderCards();
+}
+
+/* ================= 飞升诗句 ================= */
+function spawnFlyPoem(){
+    const layer = document.getElementById('flyLayer');
+    const sets = Object.values(QUOTES[L()]).map(q=>q[0]);
+    const t = sets[Math.floor(Math.random()*sets.length)];
+    const el = document.createElement('div');
+    el.className='fly-poem'; el.textContent=t;
+    el.style.left=(5+Math.random()*85)+'%';
+    el.style.top='102vh';
+    el.style.fontSize=(13+Math.random()*8)+'px';
+    el.style.color=Math.random()>0.5?'#2D4A3E':'#8B2E2E';
+    layer.appendChild(el);
+    requestAnimationFrame(()=>{ el.style.opacity='0.35'; el.style.transition='top '+(15+Math.random()*8)+'s linear, opacity 4s'; el.style.top='-15vh'; });
+    setTimeout(()=>el.remove(),24000);
+}
+
+/* ================= 启动 ================= */
+async function boot(){
+    const [workTop, avgTop, dynAuth, dynCnt, dynPoem] = await Promise.all([
+        fetchAPI('/author/workTopN'),
+        fetchAPI('/author/avgLenTopN'),
+        fetchAPI('/author/dynastyTop'),
+        fetchAPI('/dynasty/authorCount'),
+        fetchAPI('/dynasty/poemCount')
+    ]);
+    DATA = { workTop:workTop||[], avgTop:avgTop||[], dynAuth:dynAuth||{}, dynCnt:dynCnt||[], dynPoem:dynPoem||[] };
+    /* 诗人 → 朝代 映射（用于高亮） */
+    poetDyn = {};
+    Object.entries(DATA.dynAuth).forEach(([d,list])=>{
+        (list||[]).forEach(p=>{ poetDyn[shortName(p.author)] = d; });
+    });
+    renderAll();
+    setInterval(spawnFlyPoem, 4200);
+}
+document.addEventListener('DOMContentLoaded', boot);
+window.addEventListener('langchange', ()=>{ if(DATA) renderAll(); });
+window.addEventListener('resize', ()=>charts.forEach(c=>c.resize()));
+window.addEventListener('scroll',()=>{
+    const bg=document.querySelector('.ink-bg'); if(bg) bg.style.backgroundPositionY = (window.scrollY*0.3)+'px';
+},{passive:true});
+/* 章节徐徐展开 */
+const io = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in'); }),{threshold:.12});
+document.querySelectorAll('.section').forEach(s=>io.observe(s));
+</script>
+<div class="dyn-pop" id="dynPop"></div>
+<div class="big-char" id="bigChar">诗</div>
+<div id="flyLayer"></div>
 </body>
 </html>
