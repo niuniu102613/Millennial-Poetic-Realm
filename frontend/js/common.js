@@ -1,6 +1,6 @@
 // ===== 千年诗境 · 公共 JS =====
-// file:// 直接双击打开时走本地后端；http 部署时走同源
-const API_BASE = (location.protocol === 'file:') ? 'http://localhost:8080/api' : '/api';
+// 后端固定在 8080 端口，始终跨域请求，避免从 IDEA 内置服务器(63342)等端口打开时 404
+const API_BASE = 'http://localhost:8080/api';
 
 async function fetchAPI(path) {
     try {
@@ -209,6 +209,14 @@ const I18N = {
         'im.kPoems': '诗词总量',
         'im.kDyn': '覆盖朝代',
         'im.kAuth': '覆盖诗人',
+        'im.heatTitle': '意象关联热力图',
+        'im.heatDesc': '高频意象共现频次（同一首诗词中共同出现次数）',
+        'im.heatEmpty': '意象共现数据待接入',
+        'im.coOccur': '共现次数',
+        'im.clickSentence': '点击饼图意象区块，查看该诗人与此意象相关的诗句',
+        'im.noSentence': '诗句数据待接入后端接口',
+        'im.high': '高',
+        'im.low': '低',
         /* 登录门禁 */
         'auth.gateTitle': '千 年 诗 境',
         'auth.gateSub': '请登录后进入首页',
@@ -416,6 +424,14 @@ const I18N = {
         'im.kPoems': 'Total Poems',
         'im.kDyn': 'Dynasties',
         'im.kAuth': 'Poets',
+        'im.heatTitle': 'Imagery Correlation Heatmap',
+        'im.heatDesc': 'Co-occurrence frequency of high-frequency imagery (same poem)',
+        'im.heatEmpty': 'Correlation data pending',
+        'im.coOccur': 'Co-occurrence',
+        'im.clickSentence': 'Click a pie slice to view related poems',
+        'im.noSentence': 'Sentence data pending',
+        'im.high': 'High',
+        'im.low': 'Low',
         /* 登录门禁 */
         'auth.gateTitle': 'MILLENNIAL POETRY',
         'auth.gateSub': 'Please sign in to enter',

@@ -1,6 +1,6 @@
 // ===== 千年诗境 · 公共 JS =====
-// file:// 直接双击打开时走本地后端；http 部署时走同源
-const API_BASE = (location.protocol === 'file:') ? 'http://localhost:8080/api' : '/api';
+// 后端固定在 8080 端口，始终跨域请求，避免从 IDEA 内置服务器(63342)等端口打开时 404
+const API_BASE = 'http://localhost:8080/api';
 
 async function fetchAPI(path) {
     try {
