@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -82,7 +82,7 @@
         .dyn-dot { width:18px; height:18px; border-radius:50%; background:#F5EFE0; border:2px solid #C9A96E; transition:all .3s; }
         .dyn-node:hover .dyn-dot { border-color:#8B2E2E; transform:scale(1.25); }
         .dyn-node.active .dyn-dot { background:#8B2E2E; border-color:#8B2E2E; box-shadow:0 0 0 5px rgba(139,46,46,.2); transform:scale(1.35); }
-        .dyn-name { font-family:STKaiti,serif; font-size:14px; color:#2D4A3E; white-space:nowrap; }
+        .dyn-name { font-family:STKaiti,serif; font-size:14px; color:#2D4A3E; white-space:nowrap; }`n        .timeline-hint { font-size:12px; color:#b0a080; margin-top:6px; letter-spacing:1px; text-align:center; }
         .dyn-node.active .dyn-name { color:#8B2E2E; font-weight:bold; }
         @media (max-width:760px){ .two-col{grid-template-columns:1fr} .kpi-row{grid-template-columns:1fr} .hero h1{font-size:42px;letter-spacing:6px} .ver{display:none} }
     </style>
@@ -138,7 +138,7 @@
                 <div class="kpi-card"><div class="k-label" data-i18n="dy.kDyn">统计朝代</div><div class="k-num" id="kDyn">—</div></div>
             </div>
             <p class="kpi-note" data-i18n="dy.kNote">数据概览 · 实际数值由现有数据接口提供</p>
-            <div class="dyn-bar" id="dynBar"></div>
+            <div class="dyn-bar" id="dynBar"></div>`n            <div class="timeline-hint" data-i18n="dy.timelineHint">点击朝代节点，聚焦该朝数据</div>
         </div>
         <div class="brush"></div>
 
@@ -180,7 +180,7 @@
     </div>
 
     </div></div>
-    <script src="js/common.js?v=32"></script>
+    <script src="js/common.js?v=13"></script>
 <script>
 const charts = ['c1','c2','c3','c4'].map(id => echarts.init(document.getElementById(id)));
 let DATA = null;
@@ -196,9 +196,12 @@ const POEM_SETS = [
 let CHART_IDX = 0; // 当前图索引，render 时切换
 function dynOf(name){
   if(!DATA) return null;
-  return DATA.pc.find(x=>name.indexOf(x.dynasty)>=0) ||
+  let hit = DATA.pc.find(x=>name.indexOf(x.dynasty)>=0) ||
          DATA.ac.find(x=>name.indexOf(x.dynasty)>=0) ||
-         DATA.al.find(x=>name.indexOf(x.dynasty)>=0) || null;
+            DATA.al.find(x=>name.indexOf(x.dynasty)>=0);
+  if(hit) return hit;
+  const all = [...DATA.pc, ...DATA.ac, ...DATA.al];
+  return all.find(x => trDyn(x.dynasty) === name) || null;
 }
 function tipFmt(setIdx){
   return function(raw){
@@ -212,9 +215,9 @@ function tipFmt(setIdx){
     const key = d ? Object.keys(set).find(k=>d.dynasty.indexOf(k)>=0) : null;
     const line = key ? set[key] : null;
     let rows = '';
-    if(pc) rows += `<div style="font-size:12px;color:#6a6a5a;">诗词：<b style="color:#2D4A3E">${pc.value.toLocaleString()}</b> 首</div>`;
-    if(ac) rows += `<div style="font-size:12px;color:#6a6a5a;">作者：<b style="color:#2D4A3E">${ac.value.toLocaleString()}</b> 人</div>`;
-    if(al) rows += `<div style="font-size:12px;color:#6a6a5a;">均篇：<b style="color:#2D4A3E">${al.value}</b> 字</div>`;
+    if(pc) rows += `<div style="font-size:12px;color:#6a6a5a;">${t("dy.poems")}：<b style="color:#2D4A3E">${pc.value.toLocaleString()}</b> ${t("dy.pieces")}</div>`;
+    if(ac) rows += `<div style="font-size:12px;color:#6a6a5a;">${t("dy.poets")}：<b style="color:#2D4A3E">${ac.value.toLocaleString()}</b> ${t("dy.persons")}</div>`;
+    if(al) rows += `<div style="font-size:12px;color:#6a6a5a;">${t("dy.avgLen")}：<b style="color:#2D4A3E">${al.value}</b> ${t("dy.chars")}</div>`;
     const quote = line ? `<div style="margin-top:6px;padding-top:6px;border-top:1px dashed #C9A96E;color:#8B2E2E;font-family:STKaiti,serif;font-size:13px;">“${line[0]}”<br/><span style="font-size:11px;color:#9a8a70;">${line[1]}</span></div>` : '';
     return `<b style="color:#2D4A3E;font-size:14px;">${name}</b>${rows}${quote}`;
   };
@@ -275,7 +278,7 @@ function render(zeroSelected){
             breadcrumb:{show:false},
             itemStyle:{borderColor:'#F5EFE0',borderWidth:3,gapWidth:3},
             label:{show:true,color:'#F5EFE0',fontSize:11,fontFamily:'STKaiti,serif',
-                formatter:function(p){return p.name+'  '+p.value+'字'}},
+                formatter:function(p){return p.name+'  '+p.value+(window.__lang==='en'?' '+t('dy.chars'):' 字')}},
             upperLabel:{show:false},
             data:al.map((x,i)=>({name:trDyn(x.dynasty),value:x.value,
                 itemStyle:{color:['#6b8e7f','#C9A96E','#b8995a','#a8895a','#d4b87a','#8B2E2E'][i],

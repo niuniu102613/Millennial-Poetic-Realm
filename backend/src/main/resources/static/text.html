@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -163,7 +163,7 @@
     <div class="big-char" id="bigChar">字</div>
     <div id="flyLayer"></div>
 
-    <script src="js/common.js?v=32"></script>
+    <script src="js/common.js?v=13"></script>
 <script>
 /* ===== 本页新增文案的中英对照（不污染 common.js） ===== */
 const TX2 = {
@@ -203,6 +203,27 @@ function applyTx2(){
 }
 
 const C = { ink:'#2D4A3E', cinnabar:'#8B2E2E', gold:'#C9A96E', stone:'#8FA38A', paper:'#F5EFE0' };
+const CH_EN = {
+  '人':'person','风':'wind','云':'cloud','来':'come','山':'mountain','天':'sky','日':'sun','花':'flower',
+  '春':'spring','时':'time','我':'I','月':'moon','生':'life','年':'year','中':'in','上':'on',
+  '水':'water','相':'mutual','自':'self','心':'heart','一':'one','不':'not','无':'without',
+  '何':'what','处':'place','知':'know','明':'bright','归':'return','长':'long','青':'green',
+  '白':'white','入':'enter','到':'reach','见':'see','语':'speak','夜':'night','声':'sound',
+  '行':'walk','色':'color','间':'between','前':'front','后':'back','东':'east','西':'west',
+  '南':'south','北':'north','千':'thousand','万':'ten thousand','里':'mile','高':'high',
+  '远':'far','深':'deep','新':'new','旧':'old','好':'good','老':'old','少':'young','多':'many'
+};
+const WORD_EN = {
+  '何处':'where','不知':'unknown','今日':'today','万里':'vast','人间':'world',
+  '正末':'end','春风':'spring breeze','千里':'far away','不见':'cannot see','东风':'east wind',
+  '平生':'all life','如今':'now','明月':'bright moon','归来':'return','不可':'cannot',
+  '不是':'is not','风流':'romantic','无人':'no one','风吹':'wind blows','十年':'ten years',
+  '所以':'therefore','一切':'everything','不得':'cannot','当时':'at that time','一生':'whole life',
+  '一枝':'one branch','江南':'south of river','一杯':'one cup','无处':'no place',
+  '夕阳':'setting sun','斜阳':'slanted sun','故人':'old friend','天子':'emperor','天下':'under heaven'
+};
+function trChar(ch){ return (window.__lang==='en' && CH_EN[ch]) ? CH_EN[ch] : ch; }
+function trWord(w){ return (window.__lang==='en' && WORD_EN[w]) ? WORD_EN[w] : w; }
 const charChart = echarts.init(document.getElementById('charFreq'));
 const wordChart = echarts.init(document.getElementById('wordFreq'));
 const lenChart  = echarts.init(document.getElementById('lengthDist'));
@@ -243,11 +264,11 @@ function renderKPI(d){
 
 function renderDynChar(dynasty) {
     const list = (DY[dynasty] || []).slice(0, 15);
-    const data = list.map(x=>({ name:x.char, value:x.count }));
+    const data = list.map(x=>({ name:trChar(x.char), value:x.count }));
     dynCharChart.setOption({
         animationDuration: 1200, animationEasing: 'cubicOut',
         tooltip: Object.assign({ trigger:'item',
-            formatter: p => `<b style="color:${C.ink};font-size:14px;">${trDyn(dynasty)} · ${p.name}</b><br/><span style="color:#6a6a5a;">出现 <b style="color:${C.cinnabar}">${p.value}</b> 次 · 占比 ${p.percent}%</span>`
+            formatter: p => `<b style="color:${C.ink};font-size:14px;">${trDyn(dynasty)} · ${p.name}</b><br/><span style="color:#6a6a5a;">${window.__lang==="en"?"counted":"出现"} <b style="color:${C.cinnabar}">${p.value}</b> ${window.__lang==="en"?"times":"次"} · ${window.__lang==="en"?"share":"占比"} ${p.percent}%</span>`
         }, tipStyle()),
         color: THEME_COLORS,
         series:[{ type:'pie', radius:['36%','66%'], center:['50%','50%'],
@@ -272,11 +293,11 @@ function renderText(d) {
         tooltip: Object.assign({ trigger:'axis', axisPointer:{ type:'shadow' },
             formatter: p => {
                 const it = Array.isArray(p)?p[0]:p;
-                return `<b style="color:${C.ink};font-size:15px;">${it.name}</b><br/><span style="color:#6a6a5a;">出现 <b style="color:${C.cinnabar}">${it.value}</b> 次</span>`;
+                return `<b style="color:${C.ink};font-size:15px;">${it.name}</b><br/><span style="color:#6a6a5a;">${window.__lang==="en"?"counted":"出现"} <b style="color:${C.cinnabar}">${it.value}</b> ${window.__lang==="en"?"times":"次"}</span>`;
             }}, tipStyle()),
         grid:{ left:40, right:60, top:10, bottom:30 },
         xAxis: Object.assign({ type:'value', show:false }, axisStyle()),
-        yAxis: Object.assign({ type:'category', data:topCh.map(x=>x.char), inverse:true,
+        yAxis: Object.assign({ type:'category', data:topCh.map(x=>trChar(x.char)), inverse:true, name: window.__lang==='en'?'Char':'字', nameTextStyle:{color:'#8b7355',fontSize:11},
             axisLabel:{ color:C.ink, fontSize:14, fontFamily:'STKaiti, serif' },
             axisLine:{show:false}, axisTick:{show:false} }, axisStyle(), { splitLine:{show:false} }),
         series:[{ type:'bar', barWidth:10,
@@ -291,9 +312,13 @@ function renderText(d) {
     const topWd = d.wd.slice(0, 20);
     wordChart.setOption({
         animationDuration: 1500, animationEasing: 'elasticOut',
-        tooltip: Object.assign({ trigger:'axis', axisPointer:{ type:'shadow' }}, tipStyle()),
+        tooltip: Object.assign({ trigger:'axis', axisPointer:{ type:'shadow' },
+            formatter: p => {
+                const it = Array.isArray(p)?p[0]:p;
+                return `<b style="color:${C.ink};font-size:15px;">${it.name}</b><br/><span style="color:#6a6a5a;">${window.__lang==="en"?"counted":"出现"} <b style="color:${C.cinnabar}">${it.value}</b> ${window.__lang==="en"?"times":"次"}</span>`;
+            }}, tipStyle()),
         grid:{ left:50, right:30, top:20, bottom:70 },
-        xAxis: Object.assign({ type:'category', data:topWd.map(x=>x.word),
+        xAxis: Object.assign({ type:'category', data:topWd.map(x=>trWord(x.word)), name: window.__lang==='en'?'Word':'词', nameTextStyle:{color:'#8b7355',fontSize:11},
             axisLabel:{ interval:0, rotate:40, fontFamily:'STKaiti, serif', fontSize:12, color:'#8B6F3A' }}, axisStyle(), { splitLine:{show:false} }),
         yAxis: Object.assign({ type:'value' }, axisStyle()),
         series:[{ type:'bar', barWidth:14,
@@ -306,9 +331,13 @@ function renderText(d) {
     /* 叁·律：金色柱 */
     lenChart.setOption({
         animationDuration: 1500, animationEasing: 'elasticOut',
-        tooltip: Object.assign({ trigger:'axis' }, tipStyle()),
+        tooltip: Object.assign({ trigger:'axis',
+            formatter: p => {
+                const it = Array.isArray(p)?p[0]:p;
+                return `<b style="color:${C.ink};font-size:14px;">${it.name}</b><br/><span style="color:#6a6a5a;">${window.__lang==="en"?"poems":"诗词"} <b style="color:${C.cinnabar}">${it.value}</b> ${window.__lang==="en"?"pieces":"首"}</span>`;
+            }}, tipStyle()),
         grid:{ left:60, right:60, top:30, bottom:40 },
-        xAxis: Object.assign({ type:'category', data:d.ln.map(x=>x.range),
+        xAxis: Object.assign({ type:'category', data:d.ln.map(x=>(window.__lang==='en'?x.range.replace(/字/g,'chars'):x.range)), name: window.__lang==='en'?'Length':'字数', nameTextStyle:{color:'#8b7355',fontSize:11},
             axisLabel:{ fontFamily:'STKaiti, serif', fontSize:13, color:'#8B6F3A', fontWeight:'bold' }}, axisStyle(), { splitLine:{show:false} }),
         yAxis: Object.assign({ type:'value' }, axisStyle()),
         series:[{ type:'bar', barWidth:24,
@@ -348,19 +377,32 @@ window.addEventListener('scroll',()=>{
 },{passive:true});
 
 /* 飘诗：与"读书作文"相关的名句 */
-const FLY_LINES = [
-    ['读书破万卷，下笔如有神。','杜甫《奉赠韦左丞丈》'],
-    ['两句三年得，一吟双泪流。','贾岛《题诗后》'],
-    ['为人性僻耽佳句，语不惊人死不休。','杜甫《江上值水如海势》'],
-    ['笔落惊风雨，诗成泣鬼神。','杜甫《寄李十二白》'],
-    ['文章千古事，得失寸心知。','杜甫《偶题》'],
-    ['清水出芙蓉，天然去雕饰。','李白《忆旧游》'],
-    ['吟安一个字，捻断数茎须。','卢延让《苦吟》'],
-    ['此曲只应天上有，人间能得几回闻。','杜甫《赠花卿》'],
-];
+const FLY_LINES = {
+    zh: [
+        ['读书破万卷，下笔如有神。','杜甫《奉赠韦左丞丈》'],
+        ['两句三年得，一吟双泪流。','贾岛《题诗后》'],
+        ['为人性僻耽佳句，语不惊人死不休。','杜甫《江上值水如海势》'],
+        ['笔落惊风雨，诗成泣鬼神。','杜甫《寄李十二白》'],
+        ['文章千古事，得失寸心知。','杜甫《偶题》'],
+        ['清水出芙蓉，天然去雕饰。','李白《忆旧游》'],
+        ['吟安一个字，捻断数茎须。','卢延让《苦吟》'],
+        ['此曲只应天上有，人间能得几回闻。','杜甫《赠花卿》'],
+    ],
+    en: [
+        ['Read ten thousand books, write as if inspired.','Du Fu'],
+        ['Two lines took three years; reciting them brings tears.','Jia Dao'],
+        ['I dwell on perfect lines; words that astonish must be.','Du Fu'],
+        ['The pen startles wind and rain; poems move gods and ghosts.','Du Fu'],
+        ['Literature lasts a thousand years; its worth is in the heart.','Du Fu'],
+        ['Like a lotus rising from clear water, natural and unadorned.','Li Bai'],
+        ['Weighing one word till the beard is worn thin.','Lu Yanrang'],
+        ['Such music belongs to heaven; how often may mortals hear?','Du Fu'],
+    ]
+};
 function spawnFlyPoem(){
     const layer=document.getElementById('flyLayer');
-    const t=FLY_LINES[Math.floor(Math.random()*FLY_LINES.length)];
+    const set = FLY_LINES[window.__lang || 'zh'];
+    const t=set[Math.floor(Math.random()*set.length)];
     const el=document.createElement('div'); el.className='fly-poem';
     el.textContent=t[0];
     el.style.left=(5+Math.random()*85)+'%';
@@ -377,9 +419,7 @@ for(let i=0;i<3;i++) setTimeout(spawnFlyPoem, i*1200);
 /* 语言切换 */
 window.addEventListener('langchange', () => {
     applyTx2();
-    if (!DY || !Object.keys(DY).length) return;
-    fillDynSel();
-    renderDynChar(document.getElementById('dynSel').value);
+    if (window.__data) renderText(window.__data);
 });
 window.addEventListener('resize', () => charts.forEach(c=>c.resize()));
 applyTx2();
