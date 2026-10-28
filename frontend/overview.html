@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -6,105 +6,172 @@
     <script src="js/echarts.min.js?v=2"></script>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        /* 数字卡片行 */
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin-bottom: 24px;
+        /* ==== 长卷基底（与前三人统一） ==== */
+        body { background: #f0e8d0; }
+        .scroll-wrap { position:relative; max-width: 1400px; margin: 0 auto; padding: 0 40px 120px; }
+        /* 淡墨山水背景层 */
+        .ink-bg { position: fixed; inset: 0; z-index: -1; opacity:.5; pointer-events:none;
+            background:
+                radial-gradient(ellipse 80% 50% at 20% 10%, rgba(45,74,62,.08), transparent 60%),
+                radial-gradient(ellipse 60% 40% at 85% 30%, rgba(139,46,46,.06), transparent 60%),
+                radial-gradient(ellipse 70% 50% at 50% 90%, rgba(201,169,110,.10), transparent 60%),
+                linear-gradient(#f0e8d0, #ece2c8);
         }
-        .stat-card {
-            background: rgba(255, 253, 247, 0.9);
-            border: 1px solid rgba(201, 169, 110, 0.4);
-            padding: 20px;
-            text-align: center;
-            border-radius: 4px;
-            position: relative;
-        }
-        .stat-card::before, .stat-card::after {
-            content: '';
-            position: absolute;
-            width: 10px; height: 10px;
-            border: 2px solid var(--gold);
-        }
-        .stat-card::before { top: -2px; left: -2px; border-right: none; border-bottom: none; }
-        .stat-card::after { bottom: -2px; right: -2px; border-left: none; border-top: none; }
-        .stat-card .num {
-            font-size: 32px;
-            color: var(--ink-blue);
-            font-weight: bold;
-            font-family: "STKaiti", serif;
-        }
-        .stat-card .label {
-            font-size: 13px;
-            color: #8b7355;
-            margin-top: 6px;
-            letter-spacing: 2px;
-        }
-        @media (max-width: 900px) {
-            .stats-row { grid-template-columns: repeat(2, 1fr); }
-        }
+        /* 远山 SVG 固定在背景 */
+        .ink-mountains { position: fixed; left:0; right:0; bottom:0; height: 40vh; z-index:-1; opacity:.18; pointer-events:none; }
+        /* 顶部滚动进度卷轴 */
+        .progress-bar { position:fixed; top:0; left:0; height:4px; width:0; z-index:60; background:linear-gradient(90deg,#8B2E2E,#C9A96E); box-shadow:0 1px 4px rgba(139,46,46,.35); transition:width .1s linear; }
+        /* 右侧章节目录 */
+        .sec-nav { position:fixed; right:20px; top:50%; transform:translateY(-50%); z-index:55; display:flex; flex-direction:column; gap:16px; }
+        .sec-nav a { writing-mode:vertical-rl; font-family:"STKaiti",serif; font-size:14px; color:#8a7a5a; text-decoration:none; letter-spacing:3px; opacity:.6; padding:6px 2px; border-right:2px solid transparent; transition:all .3s; }
+        .sec-nav a:hover { color:#2D4A3E; opacity:1; }
+        .sec-nav a.active { color:#8B2E2E; opacity:1; border-right-color:#8B2E2E; }
+        /* Hero 诗句轮播 */
+        .hero-poem { margin-top:26px; font-family:"STKaiti",serif; font-size:17px; color:#5a6b5e; letter-spacing:2px; min-height:46px; }
+        .hero-poem .hp-src { font-size:12px; color:#9a8a70; display:block; margin-top:5px; }
+        .fade { animation:vpFade .9s ease; }
+        @keyframes vpFade { from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+        /* 指定长度区间检索栏 */
+        .len-search { display:flex; align-items:center; gap:10px; margin:6px 0 18px; flex-wrap:wrap; }
+        .len-search input { width:130px; padding:6px 10px; border:1px solid rgba(45,74,62,.4); border-radius:2px; background:rgba(253,251,244,.6); font-family:"STKaiti",serif; font-size:14px; color:#2D4A3E; outline:none; }
+        .len-search input:focus { border-color:#8B2E2E; }
+        .len-search button { padding:6px 16px; border:none; border-radius:2px; background:linear-gradient(135deg,#8B2E2E,#a44a3e); color:#F5EFE0; font-family:"STKaiti",serif; font-size:14px; cursor:pointer; letter-spacing:1px; }
+        .len-search button:hover { opacity:.9; }
+        .len-search .res { font-family:"STKaiti",serif; font-size:14px; color:#2D4A3E; margin-left:4px; }
+        .len-search .res em { color:#8B2E2E; font-style:normal; font-weight:bold; }
+        /* 卷轴上下轴 */
+        .rod { height: 14px; background: linear-gradient(#8b6f47,#5a4526,#8b6f47); border-radius:7px; margin: 30px 0; box-shadow: 0 2px 6px rgba(0,0,0,.15); }
+        /* ==== Hero ==== */
+        .hero { text-align:center; padding: 70px 0 40px; position:relative; }
+        .hero .eyebrow { font-size:12px; letter-spacing:6px; color:#8B2E2E; text-transform:uppercase; margin-bottom:20px; }
+        .hero h1 { font-family:"STKaiti","SimSun",serif; font-size:64px; color:#2D4A3E; margin:0 0 16px; letter-spacing:12px; text-shadow: 0 2px 12px rgba(45,74,62,.12); }
+        .hero .sub { font-size:20px; color:#5a6b5e; font-family:"STKaiti",serif; margin-bottom:6px; }
+        .hero .sub2 { font-size:14px; color:#9a8a70; }
+        /* 竖排诗签装饰 */
+        .ver { position:absolute; writing-mode: vertical-rl; font-family:"STKaiti",serif; font-size:16px; color:#8a7a5a; letter-spacing:8px; opacity:.6; }
+        .ver.l { left:0; top:120px; }
+        .ver.r { right:0; top:120px; }
+        /* KPI */
+        .kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin:50px 0 10px; }
+        .kpi-card { background: rgba(255,253,247,.55); border:1px solid rgba(201,169,110,.3); border-radius:2px; padding:24px 20px; text-align:center; backdrop-filter: blur(2px); }
+        .kpi-card .k-label { font-size:13px; color:#8b7355; letter-spacing:2px; margin-bottom:10px; }
+        .kpi-card .k-num { font-size:32px; color:#2D4A3E; font-weight:bold; font-family:"STKaiti",serif; }
+        .kpi-note { font-size:12px; color:#b0a080; text-align:center; margin:14px 0 30px; }
+        /* ==== 章节：淡墨晕染，不用硬卡 ==== */
+        .section { margin: 60px 0; opacity:0; transform: translateY(30px); transition: opacity .9s ease, transform .9s ease; }
+        .section.in { opacity:1; transform: translateY(0); }
+        .sec-tag { display:inline-flex; align-items:center; gap:10px; font-size:14px; color:#8B2E2E; letter-spacing:2px; margin-bottom:10px; }
+        .sec-tag::before { content:''; width:3px; height:16px; background:#8B2E2E; }
+        .sec-title { font-family:"STKaiti","SimSun",serif; font-size:30px; color:#2D4A3E; margin:0 0 8px; letter-spacing:3px; }
+        .sec-desc { font-size:14px; color:#9a8a70; margin-bottom:24px; }
+        .sec-ink { background: linear-gradient(180deg, rgba(255,253,247,.5), rgba(255,253,247,.35)); border:none; border-top:1px solid rgba(201,169,110,.2); border-bottom:1px solid rgba(201,169,110,.2); padding:28px 24px; position:relative; }
+        .sec-ink::before, .sec-ink::after { content:''; position:absolute; width:10px; height:10px; border:1px solid #C9A96E; }
+        .sec-ink::before { top:-1px; left:-1px; border-right:none; border-bottom:none; }
+        .sec-ink::after { bottom:-1px; right:-1px; border-left:none; border-top:none; }
+        .two-col { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+        .chart-box { width:100%; height:320px; }
+        .chart-box.tall { height:400px; }
+        /* 毛笔分隔 */
+        .brush { height:2px; background: linear-gradient(90deg, transparent, #C9A96E 20%, #C9A96E 80%, transparent); margin:0; opacity:.4; }
+        /* 朱砂印章 */
+        .seal { position:absolute; top:0; right:0; width:54px; height:54px; background:#8B2E2E; color:#F5EFE0;
+            font-family:"STKaiti",serif; font-size:26px; line-height:54px; text-align:center;
+            border-radius:6px; box-shadow: 0 2px 8px rgba(139,46,46,.35);
+            opacity:0; transform: scale(2.2) rotate(-12deg); transition: opacity .5s ease, transform .5s cubic-bezier(.2,1.6,.4,1); }
+        .section.in .seal { opacity:1; transform: scale(1) rotate(-6deg); }
+        .sec-ink-wrap { position:relative; }
+        /* 立轴展开 */
+        .scroll-stage { overflow: hidden; position: relative; }
+        .scroll-wrap { clip-path: inset(0 0 100% 0); animation: unroll 7.5s cubic-bezier(.3,.6,.2,1) .5s forwards; }
+        @keyframes unroll { to { clip-path: inset(0 0 0 0); } }
+        .rod.top { animation: rodTopIn .5s ease .3s backwards; }
+        @keyframes rodTopIn { from { opacity:0; } to { opacity:1; } }
+        .rod.bottom { position: absolute; left:0; right:0; z-index:5; height:14px;
+            background: linear-gradient(#8b6f47,#5a4526,#8b6f47); border-radius:7px;
+            box-shadow: 0 4px 12px rgba(0,0,0,.3);
+            animation: rollerDown 7.5s cubic-bezier(.3,.6,.2,1) .5s forwards; }
+        .rod.bottom::before, .rod.bottom::after { content:''; position:absolute; top:50%; transform:translateY(-50%);
+            width:10px; height:22px; background:#3e2a14; border-radius:3px; }
+        .rod.bottom::before { left:-4px; } .rod.bottom::after { right:-4px; }
+        @keyframes rollerDown { 0%{ top:0; } 100%{ top: calc(100% - 14px); } }
 
-        /* 朝代联动详情卡片 */
-        .detail-panel {
-            background: rgba(255, 253, 247, 0.92);
-            border: 1px solid rgba(201, 169, 110, 0.4);
-            padding: 20px 24px;
-            margin-top: 20px;
-            display: grid;
-            grid-template-columns: 1.2fr 1fr;
-            gap: 24px;
-            position: relative;
-        }
-        .detail-panel::before, .detail-panel::after {
-            content: '';
-            position: absolute;
-            width: 12px; height: 12px;
-            border: 2px solid var(--gold);
-        }
-        .detail-panel::before { top: -2px; left: -2px; border-right: none; border-bottom: none; }
-        .detail-panel::after { bottom: -2px; right: -2px; border-left: none; border-top: none; }
-        .detail-left h4 {
-            color: var(--ink-blue);
-            font-size: 20px;
-            font-family: "STKaiti", "KaiTi", serif;
-            letter-spacing: 3px;
-            margin-bottom: 10px;
-        }
-        .detail-left .total {
-            font-size: 14px;
-            color: #8b7355;
-            margin-bottom: 20px;
-        }
-        .detail-left .verse {
-            font-size: 18px;
-            color: var(--crimson);
-            font-family: "STKaiti", "KaiTi", serif;
-            letter-spacing: 2px;
-            line-height: 1.8;
-            padding-top: 15px;
-            border-top: 1px dashed rgba(201, 169, 110, 0.5);
-        }
-        .detail-left .verse .src {
-            font-size: 13px;
-            color: #8b7355;
-            display: block;
-            margin-top: 8px;
-            letter-spacing: 1px;
-        }
-        .detail-right h5 {
-            color: #5a3e2b;
-            font-size: 13px;
-            letter-spacing: 2px;
-            margin-bottom: 8px;
-        }
-        #detailChart { width: 100%; height: 195px; }
-        @media (max-width: 700px) {
-            .detail-panel { grid-template-columns: 1fr; }
-        }
-    </style>
+        /* ==== member5 搜索框 ==== */
+        .search-bar { display:flex; gap:10px; margin-bottom:20px; max-width:600px; margin-left:auto; margin-right:auto; }
+        .search-input { flex:1; padding:12px 18px; border:1px solid rgba(201,169,110,.5); background: rgba(255,253,247,.9); font-size:14px; font-family:"STKaiti","KaiTi",serif; letter-spacing:1px; outline:none; }
+        .search-input:focus { border-color:#C9A96E; }
+        .search-btn { padding:12px 28px; background:#2D4A3E; color:#fff; border:none; font-size:14px; font-family:"STKaiti","KaiTi",serif; letter-spacing:2px; cursor:pointer; transition:all .2s; }
+        .search-btn:hover { background:#8B2E2E; }
+        .hot-tags { text-align:center; margin-bottom:16px; font-size:13px; color:#8b7355; }
+        .hot-tag { display:inline-block; padding:4px 14px; margin:0 4px; background:rgba(255,253,247,.8); border:1px solid rgba(201,169,110,.4); color:#2D4A3E; font-size:12px; font-family:"STKaiti",serif; letter-spacing:1px; cursor:pointer; transition:all .2s; }
+        .hot-tag:hover { background:#C9A96E; color:#fff; border-color:#C9A96E; }
+        .refresh-btn { background:none; border:none; font-size:16px; cursor:pointer; margin-left:8px; transition:transform .3s; }
+        .refresh-btn:hover { transform:rotate(180deg); }
+        .search-result { background:rgba(255,253,247,.95); border:1px solid rgba(201,169,110,.4); padding:16px 20px; margin-bottom:20px; position:relative; }
+        .search-close { position:absolute; top:8px; right:12px; background:none; border:none; font-size:20px; color:#8b7355; cursor:pointer; line-height:1; }
+        .search-close:hover { color:#8B2E2E; }
+        .view-poems-btn { margin-top:12px; padding:8px 20px; background:#C9A96E; color:#fff; border:none; font-size:13px; font-family:"STKaiti","KaiTi",serif; letter-spacing:2px; cursor:pointer; transition:all .2s; }
+        .view-poems-btn:hover { background:#2D4A3E; }
+        .search-result::before, .search-result::after { content:''; position:absolute; width:10px; height:10px; border:2px solid #C9A96E; }
+        .search-result::before { top:-2px; left:-2px; border-right:none; border-bottom:none; }
+        .search-result::after { bottom:-2px; right:-2px; border-left:none; border-top:none; }
+        .search-result h4 { color:#2D4A3E; font-size:16px; font-family:"STKaiti",serif; letter-spacing:2px; margin-bottom:8px; }
+        .search-result p { font-size:14px; color:#5a3e2b; line-height:1.8; }
+        .search-result .highlight { color:#8B2E2E; font-weight:bold; }
+
+        /* ==== 诗句弹窗 ==== */
+        .poem-modal { display:none; position:fixed; inset:0; background:rgba(45,74,62,.7); z-index:1000; align-items:center; justify-content:center; }
+        .poem-modal-content { background:#fffdf7; width:90%; max-width:600px; max-height:80vh; display:flex; flex-direction:column; border:2px solid #C9A96E; box-shadow:0 8px 32px rgba(0,0,0,.3); }
+        .poem-modal-header { padding:16px 24px; border-bottom:1px solid rgba(201,169,110,.3); display:flex; justify-content:space-between; align-items:center; }
+        .poem-modal-header h3 { color:#2D4A3E; font-family:"STKaiti","KaiTi",serif; letter-spacing:2px; margin:0; }
+        .poem-modal-close { background:none; border:none; font-size:24px; color:#8b7355; cursor:pointer; line-height:1; }
+        .poem-modal-close:hover { color:#8B2E2E; }
+        .poem-modal-body { overflow-y:auto; padding:20px 24px; flex:1; }
+        .poem-item { padding:14px 0; border-bottom:1px dashed rgba(201,169,110,.3); }
+        .poem-item:last-child { border-bottom:none; }
+        .poem-verse { font-size:18px; color:#2D4A3E; font-family:"STKaiti","KaiTi",serif; letter-spacing:2px; line-height:1.8; margin-bottom:8px; }
+        .poem-meta { font-size:13px; color:#8b7355; }
+        .poem-author { margin-right:16px; }
+        .poem-dynasty { margin-right:16px; }
+
+        /* ==== 联动详情 ==== */
+        .detail-panel { background:rgba(255,253,247,.92); border:1px solid rgba(201,169,110,.4); padding:20px 24px; margin-top:20px; display:grid; grid-template-columns:1.2fr 1fr; gap:24px; position:relative; }
+        .detail-panel::before, .detail-panel::after { content:''; position:absolute; width:12px; height:12px; border:2px solid #C9A96E; }
+        .detail-panel::before { top:-2px; left:-2px; border-right:none; border-bottom:none; }
+        .detail-panel::after { bottom:-2px; right:-2px; border-left:none; border-top:none; }
+        .detail-left h4 { color:#2D4A3E; font-size:20px; font-family:"STKaiti","KaiTi",serif; letter-spacing:3px; margin-bottom:10px; }
+        .detail-left .total { font-size:14px; color:#8b7355; margin-bottom:20px; }
+        .detail-left .verse { font-size:18px; color:#8B2E2E; font-family:"STKaiti","KaiTi",serif; letter-spacing:2px; line-height:1.8; padding-top:15px; border-top:1px dashed rgba(201,169,110,.5); }
+        .detail-left .verse .src { font-size:13px; color:#8b7355; display:block; margin-top:8px; letter-spacing:1px; }
+        .detail-right h5 { color:#5a3e2b; font-size:13px; letter-spacing:2px; margin-bottom:8px; }
+        .detail-right .poet { font-size:26px; color:#8B2E2E; font-family:"STKaiti","KaiTi",serif; letter-spacing:6px; margin-top:6px; }
+        /* 类别贡献度叠加条 */
+        .contrib-bar { display:flex; width:100%; height:30px; border-radius:4px; overflow:hidden; margin-top:18px; background:rgba(255,253,247,.4); border:1px solid rgba(201,169,110,.3); }
+        .contrib-bar .seg { display:flex; align-items:center; justify-content:center; font-family:"STKaiti",serif; font-size:12px; color:#F5EFE0; white-space:nowrap; transition:flex-grow .6s ease; min-width:0; }
+        .contrib-bar .seg small { font-size:10px; opacity:.9; margin-left:2px; }
+        #detailChart { width:100%; height:195px; }
+        @media (max-width:900px){ .kpi-row{grid-template-columns:repeat(2,1fr)} .two-col{grid-template-columns:1fr} .hero h1{font-size:42px;letter-spacing:6px} .ver{display:none} }
+        @media (max-width:700px){ .detail-panel{grid-template-columns:1fr} }
+        /* 滚动诗词词条背景（参考2号3号 fly-poem 竖排上升） */
+        .fly-word{position:fixed;font-family:"STKaiti","KaiTi",serif;color:#2D4A3E;opacity:0;pointer-events:none;z-index:2;
+          font-size:15px;letter-spacing:4px;transition:opacity 2s;writing-mode:vertical-rl;white-space:nowrap;}
+</style>
 </head>
 <body data-page="overview">
+    <div class="progress-bar" id="progressBar"></div>
+    <nav class="sec-nav">
+        <a href="#s1" data-sec="s1">壹·类别</a>
+        <a href="#s2" data-sec="s2">贰·朝代</a>
+        <a href="#s3" data-sec="s3">叁·篇幅</a>
+    </nav>
+    <svg width="0" height="0" style="position:absolute"><defs><filter id="sealRough"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3"/></filter></defs></svg>
+    <!-- 富春山居图 淡墨背景 -->
+    <div class="ink-bg" style="background:
+        linear-gradient(rgba(240,232,208,.85), rgba(236,226,200,.9)),
+        url('img/landscape.jpg') center top/cover no-repeat fixed,
+        url('img/landscape.jpg') center bottom/cover no-repeat fixed;"></div>
+    <!-- 滚动诗词词条层（参考2号3号 fly-poem） -->
+    <div id="flyLayer" style="position:fixed;inset:0;pointer-events:none;z-index:2;overflow:hidden;"></div>
+
     <nav class="nav">
         <a href="index.html" class="logo" data-i18n="logo">千年诗境</a>
         <a href="dynasty.html" data-page="dynasty" data-i18n="nav.dynasty">朝代分析</a>
@@ -114,77 +181,105 @@
         <a href="overview.html" data-page="overview" data-i18n="nav.overview">诗词数据概览</a>
     </nav>
 
-    <div class="container">
-        <div class="page-header">
-            <h1 data-i18n="ov.title">诗词数据概览</h1>
-            <p data-i18n="ov.sub">诗词类型与结构分析</p>
+    <div class="scroll-stage"><div class="scroll-wrap">
+        <div class="rod top"></div>
+        <!-- Hero -->
+        <div class="hero">
+            <div class="ver l" data-i18n="ov.verL">百代词章</div>
+            <div class="ver r" data-i18n="ov.verR">一册尽览</div>
+            <div class="eyebrow" data-i18n="ov.eyebrow">Overview of Poetry Data</div>
+            <h1 data-i18n="ov.heroTitle">诗词数据概览</h1>
+            <p class="sub" data-i18n="ov.heroSub">类别之变，篇幅长短，皆藏于诗卷。</p>
+            <p class="sub2" data-i18n="ov.heroSub2">遍历诗卷，观类别分布、朝代变迁与篇幅气象。</p>
+            <div class="kpi-row">
+                <div class="kpi-card"><div class="k-label" data-i18n="ov.kTotal">诗词总数</div><div class="k-num" id="statTotal">—</div></div>
+                <div class="kpi-card"><div class="k-label" data-i18n="ov.kCategory">诗词类别数</div><div class="k-num" id="statCategory">—</div></div>
+                <div class="kpi-card"><div class="k-label" data-i18n="ov.kAvgLen">平均字数</div><div class="k-num" id="statAvgLen">—</div></div>
+                <div class="kpi-card"><div class="k-label" data-i18n="ov.kTopCat">最常见类别</div><div class="k-num" id="statTopCat">—</div></div>
+            </div>
+            <p class="kpi-note" data-i18n="ov.kNote">数据概览 · 实际数值由现有数据接口提供</p>
+            <div class="hero-poem fade" id="heroPoem"><span id="hpText">文章千古事，得失寸心知。</span><span class="hp-src" id="hpSrc">—— 杜甫《偶题》</span></div>
         </div>
+        <div class="brush"></div>
 
-        <!-- 数字卡片 -->
-        <div class="stats-row">
-            <div class="stat-card">
-                <div class="num" id="statTotal">—</div>
-                <div class="label" data-i18n="ov.statTotal">诗词总数</div>
-            </div>
-            <div class="stat-card">
-                <div class="num" id="statCategory">—</div>
-                <div class="label" data-i18n="ov.statCategory">诗词类别数</div>
-            </div>
-            <div class="stat-card">
-                <div class="num" id="statAvgLen">—</div>
-                <div class="label" data-i18n="ov.statAvgLen">平均字数</div>
-            </div>
-            <div class="stat-card">
-                <div class="num" id="statTopCat">—</div>
-                <div class="label" data-i18n="ov.statTopCat">最常见类别</div>
-            </div>
-        </div>
+        
 
-        <div class="grid-2">
-            <div class="card">
-                <h3 data-i18n="ov.catPie">各诗词类别数量（点击扇区下钻）</h3>
-                <div id="categoryPie" class="chart"></div>
+<!-- 壹·类别 -->
+        <div class="section" id="s1">
+            <div class="sec-tag" data-i18n="ov.s1Tag">壹 · 类别</div>
+            <h2 class="sec-title" data-i18n="ov.s1Title">诗词类别分布</h2>
+            <p class="sec-desc" data-i18n="ov.s1Desc">各诗词类别数量 · 环形图与排行</p>
+            <div class="two-col">
+                <div class="sec-ink"><div id="categoryPie" class="chart-box"></div></div>
+                <div class="sec-ink"><div id="categoryTop" class="chart-box"></div></div>
             </div>
-            <div class="card">
-                <h3 data-i18n="ov.catTop">诗词类别 TopN</h3>
-                <div id="categoryTop" class="chart"></div>
-            </div>
-        </div>
-
-        <div class="card" style="margin-top:20px;">
-            <h3 data-i18n="ov.dynCat">朝代 × 类别 分布（点击柱段，下方联动查看朝代详情）</h3>
-            <div id="dynastyCategory" class="chart" style="height:400px;"></div>
-
-            <!-- 联动详情卡片 -->
-            <div class="detail-panel">
+            <div class="contrib-bar" id="contribBar"></div>
+            <div class="detail-panel" id="catDetail">
                 <div class="detail-left">
-                    <h4 id="detailDynasty">唐代</h4>
-                    <div class="total" id="detailTotal">—</div>
+                    <h4 id="catDetailName">古体诗</h4>
+                    <div class="total" id="catDetailStat">—</div>
                     <div class="verse">
-                        <span id="detailVerse">海上生明月，天涯共此时。</span>
-                        <span class="src" id="detailVerseSrc">—— 张九龄《望月怀远》</span>
+                        <span id="catDetailVerse">落霞与孤鹜齐飞，秋水共长天一色。</span>
+                        <span class="src" id="catDetailSrc">—— 王勃《滕王阁序》</span>
                     </div>
                 </div>
                 <div class="detail-right">
-                    <h5 data-i18n="ov.detailTitle">该朝代各类别数量</h5>
-                    <div id="detailChart"></div>
+                    <h5>代表诗人</h5>
+                    <div class="poet" id="catDetailPoet">王勃</div>
                 </div>
             </div>
         </div>
 
-        <div class="card">
-            <h3 data-i18n="ov.lenRange">诗词长度区间分布（含平均线）</h3>
-            <div id="lengthRange" class="chart"></div>
+        <!-- 贰·朝代 -->
+        <div class="section" id="s2">
+            <div class="sec-tag" data-i18n="ov.s2Tag">贰 · 朝代</div>
+            <h2 class="sec-title" data-i18n="ov.s2Title">朝代 × 类别分布</h2>
+            <p class="sec-desc" data-i18n="ov.s2Desc">点击柱段，下方联动查看朝代详情</p>
+            <div class="sec-ink">
+                <div id="dynastyCategory" class="chart-box tall"></div>
+                <div class="detail-panel">
+                    <div class="detail-left">
+                        <h4 id="detailDynasty">唐代</h4>
+                        <div class="total" id="detailTotal">—</div>
+                        <div class="verse">
+                            <span id="detailVerse">海上生明月，天涯共此时。</span>
+                            <span class="src" id="detailVerseSrc">—— 张九龄《望月怀远》</span>
+                        </div>
+                    </div>
+                    <div class="detail-right">
+                        <h5 data-i18n="ov.detailTitle">该朝代各类别数量</h5>
+                        <div id="detailChart"></div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
 
-<script src="js/common.js?v=13"></script>
+        <!-- 叁·篇幅 -->
+        <div class="section" id="s3">
+            <div class="sec-tag" data-i18n="ov.s3Tag">叁 · 篇幅</div>
+            <h2 class="sec-title" data-i18n="ov.s3Title">诗词长度区间</h2>
+            <p class="sec-desc" data-i18n="ov.s3Desc">各篇幅长度分布 · 含平均线</p>
+            <div class="len-search">
+                <input type="number" id="lenSearchInput" placeholder="输入字数，如 40" min="1">
+                <button id="lenSearchBtn">检索区间</button>
+                <span class="res" id="lenSearchResult"></span>
+            </div>
+            <div class="sec-ink"><div id="lengthRange" class="chart-box tall"></div></div>
+        </div>
+
+        <div class="rod bottom"></div>
+    </div></div>
+
+    <script src="js/common.js?v=3"></script>
 <script>
 const pieChart = echarts.init(document.getElementById('categoryPie'));
 const catTopChart = echarts.init(document.getElementById('categoryTop'));
 const dynastyChart = echarts.init(document.getElementById('dynastyCategory'));
 const detailChart = echarts.init(document.getElementById('detailChart'));
 const lenChart = echarts.init(document.getElementById('lengthRange'));
+
+// 前三人统一色系（墨青/朱砂/鎏金/石青）
+const OVERVIEW_COLORS = ['#2D4A3E','#8B2E2E','#C9A96E','#8FA38A','#6b8e7f','#b8995a','#a8895a','#d4b87a'];
 
 const dynastyPoem = {
     "唐代": { verse:"海上生明月，天涯共此时。", src:"张九龄《望月怀远》" },
@@ -193,6 +288,14 @@ const dynastyPoem = {
     "清代": { verse:"九州生气恃风雷，万马齐喑究可哀。", src:"龚自珍《己亥杂诗》" },
     "东汉": { verse:"对酒当歌，人生几何。", src:"曹操《短歌行》" },
     "战国": { verse:"路漫漫其修远兮，吾将上下而求索。", src:"屈原《离骚》" }
+};
+
+const categoryPoem = {
+    "古体诗": { verse:"落霞与孤鹜齐飞，秋水共长天一色。", poet:"王勃", src:"王勃《滕王阁序》" },
+    "词": { verse:"明月几时有，把酒问青天。", poet:"苏轼", src:"苏轼《水调歌头》" },
+    "曲": { verse:"枯藤老树昏鸦，小桥流水人家。", poet:"马致远", src:"马致远《天净沙·秋思》" },
+    "古诗": { verse:"迢迢牵牛星，皎皎河汉女。", poet:"佚名", src:"《古诗十九首》" },
+    "其他": { verse:"此中有真意，欲辨已忘言。", poet:"陶渊明", src:"陶渊明《饮酒》" }
 };
 
 let CACHE = null;
@@ -212,15 +315,18 @@ function updateDetail(i, dynKeys, catKeys, matrix) {
     document.getElementById('detailDynasty').textContent = name;
     document.getElementById('detailTotal').textContent = '共 ' + total.toLocaleString() + ' 首';
     const p = dynastyPoem[name] || {};
-    document.getElementById('detailVerse').textContent = p.verse || '';
-    document.getElementById('detailVerseSrc').textContent = p.src ? '—— ' + p.src : '';
+    const vEl=document.getElementById('detailVerse'), sEl=document.getElementById('detailVerseSrc');
+    vEl.textContent = p.verse || '';
+    sEl.textContent = p.src ? '—— ' + p.src : '';
+    vEl.classList.remove('fade'); sEl.classList.remove('fade'); void vEl.offsetWidth;
+    vEl.classList.add('fade'); sEl.classList.add('fade');
     detailChart.setOption({
-        tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' } },
-        grid:{ left:40, right:20, top:10, bottom:42 },
-        xAxis:{ type:'category', data:catKeys, axisLabel:{ interval:0, fontSize:12 } },
+        tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' }, textStyle:{ fontFamily:'STKaiti,serif' } },
+        grid:{ left:40, right:20, top:12, bottom:42 },
+        xAxis:{ type:'category', data:catKeys, axisLabel:{ interval:0, fontSize:12, fontFamily:'STKaiti,serif', color:'#2D4A3E' }, axisLine:{ lineStyle:{ color:'rgba(45,74,62,.4)' } }, axisTick:{ show:false } },
         yAxis:{ type:'value', show:false },
-        color: THEME_COLORS,
-        series:[{ type:'bar', data:values, barWidth:'45%', itemStyle:{ borderRadius:[3,3,0,0] }, label:{ show:true, position:'top', fontSize:10 } }]
+        color: OVERVIEW_COLORS,
+        series:[{ type:'bar', data:values, barWidth:'45%', itemStyle:{ borderRadius:[6,6,0,0], color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#8B2E2E'},{offset:1,color:'rgba(139,46,46,.25)'}]) }, label:{ show:true, position:'top', fontSize:11, fontFamily:'STKaiti,serif', color:'#8B2E2E', fontWeight:'bold' } }]
     }, true);
 }
 
@@ -243,55 +349,89 @@ function renderOverview(data) {
     Object.keys(lengthRangeData).forEach((k,i)=>{ weighted += mid[i]*lengthRangeData[k]; totLen += lengthRangeData[k]; });
     const avgLen = totLen ? Math.round(weighted/totLen) : 0;
 
-    document.getElementById('statTotal').textContent = total.toLocaleString();
-    document.getElementById('statCategory').textContent = Object.keys(categoryCount).length;
-    document.getElementById('statAvgLen').textContent = avgLen + ' 字';
+    animateCount(document.getElementById('statTotal'), total, '');
+    animateCount(document.getElementById('statCategory'), Object.keys(categoryCount).length, '');
+    animateCount(document.getElementById('statAvgLen'), avgLen, ' 字');
     document.getElementById('statTopCat').textContent = categoryTopN[0] ? categoryTopN[0][0] : '—';
+    renderContribBar(categoryCount);
+    const firstCat = categoryTopN[0];
+    if(firstCat) updateCategory(firstCat[0], firstCat[1], total);
 
     pieChart.setOption({
-        tooltip:{ trigger:'item', formatter: p => `${p.name}: ${p.value} 首 (${p.percent}%)` },
-        legend:{ bottom:0, type:'scroll' },
-        color: THEME_COLORS,
-        series:[{ type:'pie', radius:['40%','70%'], label:{ show:true, formatter:'{b}\n{d}%' },
+        tooltip:{ trigger:'item', formatter: p => p.name + ': ' + p.value + ' 首 (' + p.percent + '%)', backgroundColor:'rgba(253,251,244,.95)', borderColor:'rgba(201,169,110,.5)', textStyle:{ color:'#2D4A3E', fontFamily:'STKaiti,serif' } },
+        legend:{ bottom:0, type:'scroll', icon:'circle', itemWidth:10, itemHeight:10, textStyle:{ fontFamily:'STKaiti,serif', color:'#2D4A3E' } },
+        color: OVERVIEW_COLORS,
+        series:[{ type:'pie', radius:['38%','72%'], center:['50%','44%'],
+            itemStyle:{ borderColor:'#F5EFE0', borderWidth:2, borderRadius:4 },
+            label:{ show:true, formatter:'{b}\n{d}%', fontFamily:'STKaiti,serif', color:'#2D4A3E' },
+            labelLine:{ lineStyle:{ color:'rgba(45,74,62,.4)' } },
+            emphasis:{ itemStyle:{ shadowBlur:14, shadowColor:'rgba(45,74,62,.4)' } },
             data:Object.entries(categoryCount).map(([name,value])=>({name,value})) }]
     }, true);
 
     catTopChart.setOption({
-        tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' } },
-        grid:{ left:100, right:40, top:10, bottom:30 },
-        xAxis:{ type:'value' },
-        yAxis:{ type:'category', data:categoryTopN.map(x=>x[0]).reverse() },
-        series:[{ type:'bar', data:categoryTopN.map(x=>x[1]).reverse(),
-            itemStyle:{ color:'#77171C', borderRadius:[0,4,4,0] }, label:{ show:true, position:'right' } }]
+        tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' }, textStyle:{ fontFamily:'STKaiti,serif' } },
+        grid:{ left:100, right:50, top:10, bottom:30 },
+        xAxis:{ type:'value', splitLine:{ lineStyle:{ color:'rgba(45,74,62,.08)' } }, axisLabel:{ fontFamily:'STKaiti,serif', color:'#2D4A3E' } },
+        yAxis:{ type:'category', data:categoryTopN.map(x=>x[0]).reverse(), axisLabel:{ fontFamily:'STKaiti,serif', color:'#2D4A3E', fontSize:14 } },
+        series:[{ type:'bar', data:categoryTopN.map(x=>x[1]).reverse(), barWidth:'60%',
+            itemStyle:{ borderRadius:[0,8,8,0], color:new echarts.graphic.LinearGradient(0,0,1,0,[{offset:0,color:'rgba(45,74,62,.2)'},{offset:1,color:'#2D4A3E'}]) },
+            label:{ show:true, position:'right', fontFamily:'STKaiti,serif', color:'#2D4A3E', fontWeight:'bold' } }]
     }, true);
 
     dynastyChart.setOption({
-        tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' } },
-        legend:{ data:catKeys, top:0, selectedMode:'multiple' },
-        grid:{ left:60, right:30, top:40, bottom:30 },
-        xAxis:{ type:'category', data:dynKeys },
-        yAxis:{ type:'value', name:'数量' },
-        color: THEME_COLORS,
-        series: catKeys.map(c => ({ name:c, type:'bar', stack:'total', data:matrix[c] }))
+        tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' }, textStyle:{ fontFamily:'STKaiti,serif' } },
+        legend:{ data:catKeys, top:0, selectedMode:'multiple', icon:'circle', itemWidth:10, itemHeight:10, textStyle:{ fontFamily:'STKaiti,serif', color:'#2D4A3E' } },
+        grid:{ left:60, right:30, top:50, bottom:40 },
+        xAxis:{ type:'category', data:dynKeys, axisLabel:{ fontFamily:'STKaiti,serif', color:'#2D4A3E', interval:0 }, axisLine:{ lineStyle:{ color:'rgba(45,74,62,.4)' } }, axisTick:{ show:false } },
+        yAxis:{ type:'value', name:'数量', splitLine:{ lineStyle:{ color:'rgba(45,74,62,.08)' } }, axisLabel:{ fontFamily:'STKaiti,serif', color:'#2D4A3E' }, nameTextStyle:{ fontFamily:'STKaiti,serif', color:'#8B6F3A' } },
+        color: OVERVIEW_COLORS,
+        series: catKeys.map(c => ({ name:c, type:'bar', stack:'total', data:matrix[c], barMaxWidth:38, itemStyle:{ borderRadius:[2,2,0,0] } }))
     }, true);
 
     lenChart.setOption({
-        tooltip:{ trigger:'axis' },
-        grid:{ left:60, right:60, top:30, bottom:30 },
-        xAxis:{ type:'category', data:Object.keys(lengthRangeData), name:'字数区间' },
-        yAxis:{ type:'value', name:'诗词数' },
-        color: THEME_COLORS,
-        series:[{ type:'bar', data:Object.values(lengthRangeData),
-            itemStyle:{ color:'#19325F', borderRadius:[4,4,0,0] }, label:{ show:true, position:'top' },
-            markLine:{ data:[{ type:'average', name:'平均' }], lineStyle:{ color:'#77171C', type:'dashed' } } }]
+        tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' }, backgroundColor:'rgba(253,251,244,.95)', borderColor:'rgba(201,169,110,.5)', textStyle:{ color:'#2D4A3E', fontFamily:'STKaiti,serif' } },
+        grid:{ left:60, right:40, top:80, bottom:50 },
+        xAxis:{ type:'category', data:Object.keys(lengthRangeData), name:'字数区间',
+            axisLine:{ lineStyle:{ color:'rgba(45,74,62,.4)' } }, axisTick:{ show:false },
+            axisLabel:{ fontFamily:'STKaiti,serif', fontSize:13, color:'#2D4A3E', interval:0 },
+            nameTextStyle:{ fontFamily:'STKaiti,serif', color:'#8B6F3A' } },
+        yAxis:{ type:'value', name:'诗词数',
+            splitLine:{ lineStyle:{ color:'rgba(45,74,62,.1)' } },
+            axisLabel:{ fontFamily:'STKaiti,serif', color:'#2D4A3E' },
+            nameTextStyle:{ fontFamily:'STKaiti,serif', color:'#8B6F3A' } },
+        color: OVERVIEW_COLORS,
+        series:[{ type:'bar', data:Object.values(lengthRangeData), barWidth:'52%',
+            itemStyle:{ borderRadius:[8,8,0,0],
+                color: new echarts.graphic.LinearGradient(0,0,0,1,[
+                    {offset:0,color:'#2D4A3E'},{offset:.6,color:'#5f7d70'},{offset:1,color:'rgba(45,74,62,.25)'}]) },
+            label:{ show:true, position:'top', fontFamily:'STKaiti,serif', color:'#2D4A3E', fontSize:12, fontWeight:'bold' },
+            markPoint:{ data:[{type:'max', name:'最盛篇幅'}], symbolSize:44, itemStyle:{ color:'#8B2E2E' },
+                label:{ fontFamily:'STKaiti,serif', color:'#F5EFE0', fontSize:10, formatter:'最盛\n{value}' } },
+            markLine:{ data:[{type:'average', name:'平均'}], lineStyle:{ color:'#8B2E2E', type:'dashed', width:1.5 },
+                label:{ fontFamily:'STKaiti,serif', color:'#8B2E2E', fontSize:12, position:'insideEnd',
+                    formatter: function(){ var vs=Object.values(lengthRangeData); var sum=0; vs.forEach(function(v){sum+=v}); return '均值 ' + Math.round(sum/vs.length).toLocaleString(); },
+                    backgroundColor:'rgba(253,251,244,.92)', borderColor:'rgba(201,169,110,.5)', borderWidth:1, borderRadius:3, padding:[3,7] } } }]
     }, true);
 
     updateDetail(0, dynKeys, catKeys, matrix);
     CACHE = { dynKeys, catKeys, matrix };
+    // 供搜索功能访问的全局数据
+    window.categoryCount = categoryCount;
+    window.dynastyCategoryData = matrix;
+    window.lengthRangeData = lengthRangeData;
+    window.dynKeys = dynKeys;
+    window.catKeys = catKeys;
 }
 
 pieChart.on('click', function(p){
-    alert(`【${p.name}】\n数量: ${p.value} 首\n占比: ${p.percent}%`);
+    var total = Object.values(window.categoryCount||{}).reduce(function(a,b){return a+b;},0);
+    updateCategory(p.name, p.value, total);
+});
+catTopChart.on('click', function(p){
+    var cnt=(window.categoryCount||{})[p.name];
+    var total = Object.values(window.categoryCount||{}).reduce(function(a,b){return a+b;},0);
+    updateCategory(p.name, cnt||0, total);
 });
 dynastyChart.on('click', function(p){
     if (CACHE) updateDetail(p.dataIndex, CACHE.dynKeys, CACHE.catKeys, CACHE.matrix);
@@ -299,9 +439,140 @@ dynastyChart.on('click', function(p){
 
 async function boot() { renderOverview(await loadData()); }
 document.addEventListener('DOMContentLoaded', boot);
+// 长卷章节入场：进入视口时显示（与前三人统一）
+const io = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in'); }),{threshold:.15});
+document.querySelectorAll('.section').forEach(s=>io.observe(s));
 window.addEventListener('resize', () => {
-    document.querySelectorAll('.chart').forEach(el => echarts.getInstanceByDom(el)?.resize());
+    document.querySelectorAll('.chart-box').forEach(el => echarts.getInstanceByDom(el)?.resize());
 });
+// 背景反向滚动（参考2号视差，方向与内容相反）
+window.addEventListener('scroll',()=>{
+    const bg=document.querySelector('.ink-bg'); if(bg) bg.style.backgroundPositionY = (-window.scrollY*0.3)+'px';
+},{passive:true});
+
+// ============ 滚动诗词词条背景（参考2号3号 fly-poem，竖排上升） ============
+const FLY_WORDS = ['古体诗','近体诗','词','曲','律诗','绝句','五言','七言','乐府','汉赋','楚辞','诗经','宋词','元曲','唐诗','慢词','小令','歌行','排律','竹枝词',
+  '李白','杜甫','白居易','王维','孟浩然','杜牧','李商隐','苏轼','李清照','辛弃疾','陆游','柳永','陶渊明','王昌龄',
+  '豪放','婉约','田园','边塞','山水','咏史','送别','思乡','月','江','山','雪','酒','梦','花','春风'];
+function spawnFlyWord(){
+  const layer=document.getElementById('flyLayer');
+  const t=FLY_WORDS[Math.floor(Math.random()*FLY_WORDS.length)];
+  const el=document.createElement('div'); el.className='fly-word'; el.textContent=t;
+  el.style.left=(5+Math.random()*85)+'%';
+  el.style.top=(100+Math.random()*20)+'vh';
+  el.style.fontSize=(13+Math.random()*8)+'px';
+  el.style.color=Math.random()>0.5?'#2D4A3E':'#8B2E2E';
+  layer.appendChild(el);
+  requestAnimationFrame(()=>{ el.style.opacity='0.4'; el.style.transition='top '+(14+Math.random()*8)+'s linear, opacity 4s'; el.style.top='-15vh'; });
+  setTimeout(()=>el.remove(),22000);
+}
+setInterval(spawnFlyWord, 3400);
+for(let i=0;i<5;i++) setTimeout(spawnFlyWord, i*1000);
+
+// ============ KPI 数字滚动动画 ============
+function animateCount(el, target, suffix){
+    if(!el || isNaN(target)) return;
+    const dur=900, start=performance.now();
+    function step(t){
+        const p=Math.min((t-start)/dur,1);
+        const eased=1-Math.pow(1-p,3);
+        el.textContent=Math.round(target*eased).toLocaleString()+suffix;
+        if(p<1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+}
+
+// ============ 顶部滚动进度卷轴 ============
+function updateProgress(){
+    const bar=document.getElementById('progressBar');
+    if(!bar) return;
+    const h=document.documentElement.scrollHeight-window.innerHeight;
+    bar.style.width=(h>0? (window.scrollY/h)*100 :0)+'%';
+}
+window.addEventListener('scroll',updateProgress,{passive:true});
+
+// ============ 右侧章节目录：点击平滑滚动 + 滚动高亮 ============
+document.querySelectorAll('.sec-nav a').forEach(a=>{
+    a.addEventListener('click',function(e){ e.preventDefault(); const t=document.querySelector(this.getAttribute('href')); if(t) t.scrollIntoView({behavior:'smooth',block:'start'}); });
+});
+function highlightSec(){
+    const sc=window.scrollY+window.innerHeight*0.4;
+    let cur='s1';
+    document.querySelectorAll('.section').forEach(s=>{ if(s.getBoundingClientRect().top+window.scrollY<=sc) cur=s.id; });
+    document.querySelectorAll('.sec-nav a').forEach(a=>a.classList.toggle('active',a.getAttribute('data-sec')===cur));
+}
+window.addEventListener('scroll',highlightSec,{passive:true});
+highlightSec();
+
+// ============ Hero 随机诗句轮播 ============
+const HERO_POEMS=[
+  {v:"文章千古事，得失寸心知。",s:"杜甫《偶题》"},
+  {v:"落霞与孤鹜齐飞，秋水共长天一色。",s:"王勃《滕王阁序》"},
+  {v:"海上生明月，天涯共此时。",s:"张九龄《望月怀远》"},
+  {v:"人生自古谁无死，留取丹心照汗青。",s:"文天祥《过零丁洋》"},
+  {v:"此情可待成追忆，只是当时已惘然。",s:"李商隐《锦瑟》"},
+  {v:"明月几时有，把酒问青天。",s:"苏轼《水调歌头》"},
+  {v:"会当凌绝顶，一览众山小。",s:"杜甫《望岳》"},
+  {v:"大漠孤烟直，长河落日圆。",s:"王维《使至塞上》"}
+];
+function rotateHeroPoem(){
+  const p=HERO_POEMS[Math.floor(Math.random()*HERO_POEMS.length)];
+  const hp=document.getElementById('heroPoem'), txt=document.getElementById('hpText'), src=document.getElementById('hpSrc');
+  if(!hp) return;
+  hp.classList.remove('fade'); void hp.offsetWidth; hp.classList.add('fade');
+  txt.textContent=p.v; src.textContent='—— '+p.s;
+}
+setInterval(rotateHeroPoem,5000);
+
+// ============ 指定长度区间检索 ============
+function matchRange(v){ if(v<=20) return 0; if(v<=50) return 1; if(v<=100) return 2; if(v<=200) return 3; return 4; }
+function doLenSearch(){
+    const v=parseInt(document.getElementById('lenSearchInput').value,10);
+    const res=document.getElementById('lenSearchResult');
+    if(!v || v<1){ res.innerHTML='请输入有效字数'; return; }
+    const data=window.lengthRangeData||{};
+    const keys=Object.keys(data);
+    const idx=matchRange(v);
+    const range=keys[idx]||(['0-20','21-50','51-100','101-200','200+'][idx]);
+    const count=data[range]||0;
+    if(lenChart) lenChart.dispatchAction({type:'highlight',seriesIndex:0,dataIndex:idx});
+    res.innerHTML='字数 '+v+' 属「<em>'+range+'</em>」区间：共 <em>'+count.toLocaleString()+'</em> 首';
+}
+const lenBtn=document.getElementById('lenSearchBtn');
+if(lenBtn) lenBtn.addEventListener('click', doLenSearch);
+const lenInp=document.getElementById('lenSearchInput');
+if(lenInp) lenInp.addEventListener('keydown', function(e){ if(e.key==='Enter') doLenSearch(); });
+
+// ============ 类别贡献度叠加条 ============
+function renderContribBar(categoryCount){
+    const bar=document.getElementById('contribBar');
+    if(!bar) return;
+    const total=Object.values(categoryCount).reduce((a,b)=>a+b,0);
+    bar.innerHTML='';
+    Object.entries(categoryCount).sort((a,b)=>b[1]-a[1]).forEach(([name,count],i)=>{
+        const seg=document.createElement('div');
+        seg.className='seg';
+        seg.style.flexGrow=count;
+        seg.style.background=OVERVIEW_COLORS[i % OVERVIEW_COLORS.length];
+        const pct=total? (count/total*100):0;
+        seg.title=name+'：'+count.toLocaleString()+' 首 ('+pct.toFixed(2)+'%)';
+        seg.innerHTML=name+' <small>'+pct.toFixed(1)+'%</small>';
+        bar.appendChild(seg);
+    });
+}
+
+// ============ 点击类别联动诗句+代表诗人 ============
+function updateCategory(name, count, total){
+    const p=categoryPoem[name]||{verse:'',poet:name,src:''};
+    document.getElementById('catDetailName').textContent=name;
+    document.getElementById('catDetailStat').textContent='共 '+count.toLocaleString()+' 首 · 占比 '+(total?(count/total*100).toFixed(2):0)+'%';
+    const vEl=document.getElementById('catDetailVerse'), sEl=document.getElementById('catDetailSrc');
+    vEl.textContent=p.verse||''; sEl.textContent=p.src?'—— '+p.src:'';
+    vEl.classList.remove('fade'); sEl.classList.remove('fade'); void vEl.offsetWidth;
+    vEl.classList.add('fade'); sEl.classList.add('fade');
+    document.getElementById('catDetailPoet').textContent=p.poet||name;
+}
+
 </script>
 </body>
 </html>
