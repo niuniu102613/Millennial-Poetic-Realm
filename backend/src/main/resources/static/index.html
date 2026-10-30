@@ -230,9 +230,9 @@
         }
         .title-wrap { margin-bottom: 0; }
         .main-content h1 {
-            font-size: clamp(50px, 5.5vw, 82px); letter-spacing: .15em;
+            font-size: clamp(36px, 4vw, 60px); letter-spacing: .12em;
             line-height: 1.25; margin: 2px 0 0; color: #263d36;
-            font-family: "Zhi Mang Xing","Ma Shan Zheng",cursive;
+            font-family: "Times New Roman", serif;
             text-shadow: 0 1px 0 rgba(255,250,239,.55);
         }
         .hero-sub {
@@ -247,7 +247,7 @@
             margin: clamp(52px, 8vh, 82px) 1vw 0 auto;
         }
         .feature-item {
-            min-height: 118px; padding: 19px 10px 16px;
+            min-height: 130px; padding: 16px 8px 14px;
             border: 1px solid rgba(194,163,107,.52);
             box-shadow: 0 5px 18px rgba(54,54,42,.045);
             color: #263d36;
@@ -380,6 +380,7 @@
         <div class="scroll-box">
             <div class="scroll-seal">诗笺</div>
             <div class="scroll-close" onclick="closePoem()">✕ 关闭</div>
+            <div id="scrollFav" style="position:absolute;top:12px;right:90px;cursor:pointer;font-size:18px;color:#8B2E2E;z-index:99;" onclick="event.stopPropagation();favCurrentPoem()">♡</div>
             <div class="scroll-dynasty" id="mDynasty">唐 · 张九龄</div>
             <div class="scroll-title" id="mTitle">望月怀远</div>
             <div class="scroll-body" id="mBody"></div>
@@ -437,7 +438,7 @@
         </div>
     </div>
 
-    <script src="js/common.js?v=13"></script>
+    <script src="js/common.js?v=17"></script>
     <script>
     // ===== 诗笺位置（布局），数据从后端 /api/poem/home 拉 =====
     const TAG_POS = [
@@ -480,7 +481,7 @@
         document.getElementById("mDynastyVal").textContent = t.dynasty + "代";
         document.getElementById("mAuthor").textContent = t.author;
         document.getElementById("mWords").textContent = t.body.replace(/[，。、？！；：]/g, "").length + " 字";
-        document.getElementById("poemModal").classList.add("show");
+        curPoem = t; document.getElementById("scrollFav").textContent="♡"; document.getElementById("poemModal").classList.add("show");
         // 一列一列渐显
         const cols = t.body.split(/(?<=[，。、？！；：])/).filter(s => s.trim());
         cols.forEach((col, idx) => {
@@ -493,7 +494,15 @@
             setTimeout(() => { span.style.opacity = "1"; }, 300 * idx);
         });
     }
+    let curPoem = null;
     function closePoem() { document.getElementById("poemModal").classList.remove("show"); }
+    function favCurrentPoem() {
+        if(!curPoem) return;
+        const favs = JSON.parse(localStorage.getItem("poetry_favs")||"[]");
+        favs.push({verse: curPoem.line || curPoem.body, source: curPoem.author + "《" + curPoem.title + "》"});
+        localStorage.setItem("poetry_favs", JSON.stringify(favs));
+        document.getElementById("scrollFav").textContent = "♥";
+    }
     function navPoem(d) { openPoem((curTagIdx + d + TAGS.length) % TAGS.length); }
     document.getElementById("poemModal").addEventListener("click", e => { if (e.target.id === "poemModal") closePoem(); });
     document.addEventListener("keydown", e => { if (e.key === "Escape") closePoem(); });

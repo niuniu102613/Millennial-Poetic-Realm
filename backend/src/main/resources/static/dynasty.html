@@ -82,7 +82,8 @@
         .dyn-dot { width:18px; height:18px; border-radius:50%; background:#F5EFE0; border:2px solid #C9A96E; transition:all .3s; }
         .dyn-node:hover .dyn-dot { border-color:#8B2E2E; transform:scale(1.25); }
         .dyn-node.active .dyn-dot { background:#8B2E2E; border-color:#8B2E2E; box-shadow:0 0 0 5px rgba(139,46,46,.2); transform:scale(1.35); }
-        .dyn-name { font-family:STKaiti,serif; font-size:14px; color:#2D4A3E; white-space:nowrap; }`n        .timeline-hint { font-size:12px; color:#b0a080; margin-top:6px; letter-spacing:1px; text-align:center; }
+        .dyn-name { font-family:STKaiti,serif; font-size:14px; color:#2D4A3E; white-space:nowrap; }
+        .timeline-hint { font-size:12px; color:#b0a080; margin-top:6px; letter-spacing:1px; text-align:center; }
         .dyn-node.active .dyn-name { color:#8B2E2E; font-weight:bold; }
         @media (max-width:760px){ .two-col{grid-template-columns:1fr} .kpi-row{grid-template-columns:1fr} .hero h1{font-size:42px;letter-spacing:6px} .ver{display:none} }
     </style>
@@ -138,7 +139,8 @@
                 <div class="kpi-card"><div class="k-label" data-i18n="dy.kDyn">统计朝代</div><div class="k-num" id="kDyn">—</div></div>
             </div>
             <p class="kpi-note" data-i18n="dy.kNote">数据概览 · 实际数值由现有数据接口提供</p>
-            <div class="dyn-bar" id="dynBar"></div>`n            <div class="timeline-hint" data-i18n="dy.timelineHint">点击朝代节点，聚焦该朝数据</div>
+            <div class="dyn-bar" id="dynBar"></div>
+            <div class="timeline-hint" data-i18n="dy.timelineHint">点击朝代节点，聚焦该朝数据</div>
         </div>
         <div class="brush"></div>
 
@@ -180,7 +182,7 @@
     </div>
 
     </div></div>
-    <script src="js/common.js?v=13"></script>
+    <script src="js/common.js?v=17"></script>
 <script>
 const charts = ['c1','c2','c3','c4'].map(id => echarts.init(document.getElementById(id)));
 let DATA = null;
@@ -384,5 +386,6 @@ document.querySelectorAll('.section').forEach(s=>io.observe(s));
 </script>
 <div class="dyn-pop" id="dynPop"></div>
 <div class="big-char" id="bigChar"></div>
-<div id="flyLayer"></div>`n</body>
+<div id="flyLayer"></div>
+</body>
 </html>

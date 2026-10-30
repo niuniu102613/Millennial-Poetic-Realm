@@ -213,7 +213,7 @@
     <div class="rod bottom"></div>
 </div>
 </div>
-<script src="js/common.js?v=13"></script>
+<script src="js/common.js?v=17"></script>
 <script>
     // 章节滚动渐入
     const io = new IntersectionObserver(entries => {
@@ -242,6 +242,7 @@
   '比翼':'Wings Together','同心':'Heart Linked','双飞':'Double Flight','千行':'Thousand Lines'
 };
 function trImg(name){ if(window.__lang==='en' && IMG_EN[name]) return IMG_EN[name]; return name; }
+function trPoet(name){ if(window.__lang==='en' && POET_EN[name]) return POET_EN[name]; return name; }
     const cloudChart = echarts.init(document.getElementById('cloudChart'));
     const top10Chart = echarts.init(document.getElementById('top10Chart'));
     const byDynChart = echarts.init(document.getElementById('byDynChart'));
@@ -301,8 +302,8 @@ function trImg(name){ if(window.__lang==='en' && IMG_EN[name]) return IMG_EN[nam
                     }
                 },
                 data: DATA.total.map(x => ({
-                    name: x.imagery,
-                    value: x.count
+                    name: trImg(x.imagery),
+                    value: x.count, orig: x.imagery
                 }))
             }]
         }, true);
@@ -368,7 +369,7 @@ function trImg(name){ if(window.__lang==='en' && IMG_EN[name]) return IMG_EN[nam
 
                 sortedArr.forEach(item => {
                     listAll.push({
-                        name: trDyn(dynName) + " · " + item.imagery,
+                        name: trDyn(dynName) + " · " + trImg(item.imagery),
                         value: item.count
                     });
                 });
@@ -494,7 +495,8 @@ function trImg(name){ if(window.__lang==='en' && IMG_EN[name]) return IMG_EN[nam
                     axisLabel: {
                         interval: 0,
                         rotate: 45,
-                        fontSize: 12
+                        fontSize: 12,
+                        color: '#2D4A3E'
                     },
                     axisLine: {
                         lineStyle: { color: '#dcd3c3' }
@@ -625,8 +627,10 @@ function trImg(name){ if(window.__lang==='en' && IMG_EN[name]) return IMG_EN[nam
                 textStyle: { fontSize: 12, color: '#5a3e2b' }
             },
             title: {
-                text: name,
+                text: trPoet(name),
                 left: '38%',
+                top: 'center',
+                textAlign: 'center',
                 top: 'center',
                 textStyle: {
                     fontSize: 20,
@@ -650,8 +654,8 @@ function trImg(name){ if(window.__lang==='en' && IMG_EN[name]) return IMG_EN[nam
                 },
                 color: ['#2D4A3E', '#8B2E2E', '#C9A96E', '#505970', '#945946', '#967859', '#746356', '#b49b77'],
                 data: list.map(x => ({
-                    name: x.imagery,
-                    value: x.count
+                    name: trImg(x.imagery),
+                    value: x.count, orig: x.imagery
                 }))
             }]
         }, true);
@@ -679,7 +683,7 @@ function trImg(name){ if(window.__lang==='en' && IMG_EN[name]) return IMG_EN[nam
     function fillPoetSelect() {
         const sel = document.getElementById('authorSel');
         const poets = Object.keys(DATA.ba);
-        allPoetOptions = poets.map(p => ({ text: p, value: p }));
+        allPoetOptions = poets.map(p => ({ text: trPoet(p), value: p }));
         sel.innerHTML = allPoetOptions.map(opt => `<option value="${opt.value}">${opt.text}</option>`).join('');
     }
 
@@ -756,8 +760,8 @@ function trImg(name){ if(window.__lang==='en' && IMG_EN[name]) return IMG_EN[nam
 
     // 饼图点击：显示诗句
     byAuthChart.on('click', function(params) {
-        if (params.seriesType === 'pie' && currentPoet && params.name) {
-            renderSentence(currentPoet, params.name);
+        if (params.seriesType === 'pie' && currentPoet && params.data && params.data.orig) {
+            renderSentence(currentPoet, params.data.orig);
         }
     });
 

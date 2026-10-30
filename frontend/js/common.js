@@ -52,12 +52,12 @@ const I18N = {
         'dyn.明代': '明代', 'dyn.清代': '清代', 'dyn.魏晋': '魏晋', 'dyn.先秦': '先秦',
         'dyn.东汉': '东汉', 'dyn.战国': '战国',
         /* 类别显示名 */
-        'cat.古体诗': '古体诗', 'cat.近体诗': '近体诗', 'cat.词': '词',
+        'cat.古体诗': '古体诗', 'cat.近体诗': '近体诗', 'cat.词': '词', 'cat.古诗': '古诗', 'cat.曲': '曲', 'cat.其他': '其他',
         'cat.绝句': '绝句', 'cat.律诗': '律诗',
         /* 诗词数据概览 */
         'ov.title': '诗词数据概览',
         'ov.sub': '诗词类型与结构分析',
-        'ov.heroTitle': '诗词数据概览',
+        'ov.heroTitle': '诗海大观',
         'ov.heroSub': '类别之变，篇幅长短，皆藏于诗卷。',
         'ov.heroSub2': '遍历诗卷，观类别分布、朝代变迁与篇幅气象。',
         'ov.eyebrow': 'Overview of Poetry Data',
@@ -67,7 +67,7 @@ const I18N = {
         'ov.kCategory': '诗词类别数',
         'ov.kAvgLen': '平均字数',
         'ov.kTopCat': '最常见类别',
-        'ov.kNote': '数据概览 · 实际数值由现有数据接口提供',
+        'ov.repPoet': '代表诗人', 'ov.lenPh': '输入字数，如 40', 'ov.lenBtn': '检索区间', 'ov.kNote': '数据概览 · 实际数值由现有数据接口提供',
         'ov.sSearchTag': '索 · 探微',
         'ov.sSearchTitle': '检索诗词',
         'ov.sSearchDesc': '按类别、朝代或篇幅区间快速检索',
@@ -80,7 +80,7 @@ const I18N = {
         'ov.s3Tag': '叁 · 篇幅',
         'ov.s3Title': '诗词长度区间',
         'ov.s3Desc': '各篇幅长度分布 · 含平均线',
-        'ov.searchPlaceholder': '搜索类别 / 朝代，如：古体诗、唐代、词...',
+        'ov.repPoet': 'Rep. Poet', 'ov.lenPh': 'Enter length, e.g. 40', 'ov.lenBtn': 'Search Range', 'ov.searchPlaceholder': '搜索类别 / 朝代，如：古体诗、唐代、词...',
         'ov.searchBtn': '搜索',
         'ov.dynastyDist': '各朝代分布',
         'ov.totalPoems': '诗词总数',
@@ -269,17 +269,17 @@ const I18N = {
         'nav.text': 'Text Analysis',
         'nav.imagery': 'Imagery',
         'nav.overview': 'Overview',
-        'home.title': 'MILLENNIAL<br>POETIC REALM',
+        'home.title': 'MILLENNIAL<br>POETIC REALM', 'home.subtitle': 'Enter through poetry · Observe through data',
         'home.card1.title': 'Dynasty Analysis',
-        'home.card1.desc': 'Works, poets & average length per dynasty',
+        'home.card1.desc': 'Works, poets, avg length by era',
         'home.card2.title': 'Poet Gallery',
-        'home.card2.desc': 'Top poets by works, representative poets',
+        'home.card2.desc': 'Top poets & representative figures',
         'home.card3.title': 'Text Analysis',
-        'home.card3.desc': 'Frequent characters & words, length distribution',
+        'home.card3.desc': 'Top chars, words & length ranges',
         'home.card4.title': 'Imagery',
-        'home.card4.desc': 'Frequency & distribution of imagery, e.g. moon & willow',
+        'home.card4.desc': 'Moon, willow, wine motifs & stats',
         'home.card5.title': 'Data Overview',
-        'home.card5.desc': 'Category stats, TopN, dynasty×category, length range',
+        'home.card5.desc': 'Categories, cross-tabs & length',
         'switchBg': 'Scene',
         'bgTitle': 'Switch background',
         'langBtn': '中文',
@@ -288,7 +288,7 @@ const I18N = {
         'dyn.明代': 'Ming', 'dyn.清代': 'Qing', 'dyn.魏晋': 'Wei-Jin', 'dyn.先秦': 'Pre-Qin',
         'dyn.东汉': 'Eastern Han', 'dyn.战国': 'Warring States',
         /* 类别显示名 */
-        'cat.古体诗': 'Ancient-style', 'cat.近体诗': 'Recent-style', 'cat.词': 'Ci',
+        'cat.古体诗': 'Ancient-style', 'cat.近体诗': 'Recent-style', 'cat.词': 'Ci', 'cat.古诗': 'Old Poetry', 'cat.曲': 'Qu', 'cat.其他': 'Other',
         'cat.绝句': 'Jueju', 'cat.律诗': 'Lushi',
         /* 诗词数据概览 */
         'ov.title': 'Data Overview',
@@ -302,7 +302,7 @@ const I18N = {
         'ov.kCategory': 'Categories',
         'ov.kAvgLen': 'Avg. Length',
         'ov.kTopCat': 'Top Category',
-        'ov.kNote': 'Overview · values provided by data APIs',
+        'ov.repPoet': '代表诗人', 'ov.lenPh': '输入字数，如 40', 'ov.lenBtn': '检索区间', 'ov.kNote': 'Overview · values provided by data APIs',
         'ov.sSearchTag': 'Search',
         'ov.sSearchTitle': 'Search Poems',
         'ov.sSearchDesc': 'Search by category, dynasty or length range',
@@ -316,7 +316,7 @@ const I18N = {
         'ov.s3Title': 'Poem Length Ranges',
         'ov.s3Desc': 'Distribution by length · with average line',
         'ov.sub': 'Poetry type & structure analysis',
-        'ov.searchPlaceholder': 'Search category / dynasty, e.g. 古体诗, Tang, 词...',
+        'ov.repPoet': 'Rep. Poet', 'ov.lenPh': 'Enter length, e.g. 40', 'ov.lenBtn': 'Search Range', 'ov.searchPlaceholder': 'Search category / dynasty, e.g. 古体诗, Tang, 词...',
         'ov.searchBtn': 'Search',
         'ov.dynastyDist': 'Distribution by dynasty',
         'ov.totalPoems': 'Total poems',
@@ -701,6 +701,60 @@ function initAuth() {
             localStorage.setItem('poetry_user', u);
             closeAuth();
             renderAuth();
+
+    // ===== 我的收藏 / 个人中心 弹窗 =====
+    function openModal(html) {
+        let m = document.getElementById('__customModal');
+        if (!m) {
+            m = document.createElement('div');
+            m.id = '__customModal';
+            m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9999;display:flex;align-items:center;justify-content:center;';
+            m.onclick = e => { if(e.target===m) m.remove(); };
+            document.body.appendChild(m);
+        }
+        m.innerHTML = '<div style="background:#F5EFE0;border-radius:12px;max-width:520px;width:90%;max-height:80vh;overflow:auto;padding:32px;box-shadow:0 8px 32px rgba(0,0,0,.2);font-family:STKaiti,serif;position:relative;">' + html + '</div>';
+    }
+    function openFavorites() {
+        const favs = JSON.parse(localStorage.getItem('poetry_favs') || '[]');
+        const title = (window.__lang==='en' ? 'My Favorites' : '我的收藏');
+        const empty = (window.__lang==='en' ? 'No favorites yet. Click the heart icon on any poem to save it here.' : '暂无收藏。在诗句旁点击 ♡ 即可收藏。');
+        let listHtml = favs.length ? favs.map((f,i) => '<div style="padding:10px 0;border-bottom:1px dashed #ccc;"><div style="color:#2D4A3E;font-size:16px;">'+f.verse+'</div><div style="color:#8B6F3A;font-size:13px;margin-top:4px;">—— '+f.source+' <a href="#" data-del="'+i+'" style="color:#8B2E2E;margin-left:12px;">'+(window.__lang==='en'?'Remove':'删除')+'</a></div></div>').join('') : '<p style="color:#888;text-align:center;padding:30px 0;">'+empty+'</p>';
+        openModal('<h2 style="color:#2D4A3E;margin:0 0 20px;">'+title+'</h2>'+listHtml+'<div style="text-align:center;margin-top:20px;"><button onclick="document.getElementById(\'__customModal\').remove()" style="padding:8px 24px;background:#2D4A3E;color:#F5EFE0;border:none;border-radius:6px;cursor:pointer;font-family:STKaiti,serif;">'+(window.__lang==='en'?'Close':'关闭')+'</button></div>');
+        m.querySelectorAll('[data-del]').forEach(a => a.onclick = e => {
+            e.preventDefault();
+            favs.splice(+a.dataset.del,1);
+            localStorage.setItem('poetry_favs', JSON.stringify(favs));
+            openFavorites();
+        });
+    }
+    function openProfile() {
+        const u = localStorage.getItem('poetry_user') || 'admin';
+        const created = localStorage.getItem('poetry_user_since') || new Date().toISOString().slice(0,10);
+        const favCount = JSON.parse(localStorage.getItem('poetry_favs')||'[]').length;
+        const title = (window.__lang==='en'?'Profile':'个人中心');
+        openModal('<h2 style="color:#2D4A3E;margin:0 0 20px;">'+title+'</h2>'+
+            '<div style="line-height:2;font-size:15px;color:#3a2a1a;">'+
+            '<p><b>'+(window.__lang==='en'?'Username':'用户名')+'</b>：'+u+'</p>'+
+            '<p><b>'+(window.__lang==='en'?'Member since':'注册日期')+'</b>：'+created+'</p>'+
+            '<p><b>'+(window.__lang==='en'?'Favorites':'收藏数')+'</b>：'+favCount+'</p>'+
+            '</div>'+
+            '<div style="text-align:center;margin-top:20px;"><button onclick="document.getElementById(\'__customModal\').remove()" style="padding:8px 24px;background:#2D4A3E;color:#F5EFE0;border:none;border-radius:6px;cursor:pointer;font-family:STKaiti,serif;">'+(window.__lang==='en'?'Close':'关闭')+'</button></div>');
+    }
+    window.openFavorites = openFavorites;
+    window.openProfile = openProfile;
+
+    // 全局收藏按钮：在诗句旁加 ♡
+    window.addFavBtn = function(verse, source) {
+        if(!verse) return '';
+        return ' <a href="#" onclick="event.preventDefault();favThis(this,\''+verse.replace(/'/g,"\\'")+'\',\''+source.replace(/'/g,"\\'")+'\')" style="color:#8B2E2E;text-decoration:none;margin-left:8px;font-size:14px;" title="收藏">♡</a>';
+    };
+    window.favThis = function(el, verse, source) {
+        const favs = JSON.parse(localStorage.getItem('poetry_favs')||'[]');
+        favs.push({verse, source});
+        localStorage.setItem('poetry_favs', JSON.stringify(favs));
+        el.textContent='♥';
+        el.style.color='#8B2E2E';
+    };
         };
     }
 
@@ -724,9 +778,9 @@ function initAuth() {
                 <div class="auth-user" id="authUserBtn">
                     <span>${cur}</span><span class="caret">▼</span>
                     <div class="auth-menu">
-                        <a href="#" data-act="fav">我的收藏</a>
-                        <a href="#" data-act="profile">个人中心</a>
-                        <a href="#" data-act="logout">登出</a>
+                        <a href="#" data-act="fav">${window.__lang==="en"?"My Favorites":"我的收藏"}</a>
+                        <a href="#" data-act="profile">${window.__lang==="en"?"Profile":"个人中心"}</a>
+                        <a href="#" data-act="logout">${window.__lang==="en"?"Logout":"登出"}</a>
                     </div>
                 </div>`;
             const btn = document.getElementById('authUserBtn');
@@ -741,9 +795,7 @@ function initAuth() {
                         localStorage.removeItem('poetry_user');
                         sessionStorage.removeItem('poetry_gate_passed');   // 清掉"已过门禁"标记，重新打开要回登录门禁
                         location.reload();   // 登出后回到登录门禁
-                    } else {
-                        alert(act === 'fav' ? '收藏功能待接入后端' : '个人中心待接入后端');
-                    }
+                    } else if (act === 'fav') { openFavorites(); } else if (act === 'profile') { openProfile(); }
                 };
             });
         } else {
@@ -758,5 +810,59 @@ function initAuth() {
     });
     window.renderAuth = renderAuth;   // 供门禁登录成功后刷新右上角
     renderAuth();
+
+    // ===== 我的收藏 / 个人中心 弹窗 =====
+    function openModal(html) {
+        let m = document.getElementById('__customModal');
+        if (!m) {
+            m = document.createElement('div');
+            m.id = '__customModal';
+            m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9999;display:flex;align-items:center;justify-content:center;';
+            m.onclick = e => { if(e.target===m) m.remove(); };
+            document.body.appendChild(m);
+        }
+        m.innerHTML = '<div style="background:#F5EFE0;border-radius:12px;max-width:520px;width:90%;max-height:80vh;overflow:auto;padding:32px;box-shadow:0 8px 32px rgba(0,0,0,.2);font-family:STKaiti,serif;position:relative;">' + html + '</div>';
+    }
+    function openFavorites() {
+        const favs = JSON.parse(localStorage.getItem('poetry_favs') || '[]');
+        const title = (window.__lang==='en' ? 'My Favorites' : '我的收藏');
+        const empty = (window.__lang==='en' ? 'No favorites yet. Click the heart icon on any poem to save it here.' : '暂无收藏。在诗句旁点击 ♡ 即可收藏。');
+        let listHtml = favs.length ? favs.map((f,i) => '<div style="padding:10px 0;border-bottom:1px dashed #ccc;"><div style="color:#2D4A3E;font-size:16px;">'+f.verse+'</div><div style="color:#8B6F3A;font-size:13px;margin-top:4px;">—— '+f.source+' <a href="#" data-del="'+i+'" style="color:#8B2E2E;margin-left:12px;">'+(window.__lang==='en'?'Remove':'删除')+'</a></div></div>').join('') : '<p style="color:#888;text-align:center;padding:30px 0;">'+empty+'</p>';
+        openModal('<h2 style="color:#2D4A3E;margin:0 0 20px;">'+title+'</h2>'+listHtml+'<div style="text-align:center;margin-top:20px;"><button onclick="document.getElementById(\'__customModal\').remove()" style="padding:8px 24px;background:#2D4A3E;color:#F5EFE0;border:none;border-radius:6px;cursor:pointer;font-family:STKaiti,serif;">'+(window.__lang==='en'?'Close':'关闭')+'</button></div>');
+        m.querySelectorAll('[data-del]').forEach(a => a.onclick = e => {
+            e.preventDefault();
+            favs.splice(+a.dataset.del,1);
+            localStorage.setItem('poetry_favs', JSON.stringify(favs));
+            openFavorites();
+        });
+    }
+    function openProfile() {
+        const u = localStorage.getItem('poetry_user') || 'admin';
+        const created = localStorage.getItem('poetry_user_since') || new Date().toISOString().slice(0,10);
+        const favCount = JSON.parse(localStorage.getItem('poetry_favs')||'[]').length;
+        const title = (window.__lang==='en'?'Profile':'个人中心');
+        openModal('<h2 style="color:#2D4A3E;margin:0 0 20px;">'+title+'</h2>'+
+            '<div style="line-height:2;font-size:15px;color:#3a2a1a;">'+
+            '<p><b>'+(window.__lang==='en'?'Username':'用户名')+'</b>：'+u+'</p>'+
+            '<p><b>'+(window.__lang==='en'?'Member since':'注册日期')+'</b>：'+created+'</p>'+
+            '<p><b>'+(window.__lang==='en'?'Favorites':'收藏数')+'</b>：'+favCount+'</p>'+
+            '</div>'+
+            '<div style="text-align:center;margin-top:20px;"><button onclick="document.getElementById(\'__customModal\').remove()" style="padding:8px 24px;background:#2D4A3E;color:#F5EFE0;border:none;border-radius:6px;cursor:pointer;font-family:STKaiti,serif;">'+(window.__lang==='en'?'Close':'关闭')+'</button></div>');
+    }
+    window.openFavorites = openFavorites;
+    window.openProfile = openProfile;
+
+    // 全局收藏按钮：在诗句旁加 ♡
+    window.addFavBtn = function(verse, source) {
+        if(!verse) return '';
+        return ' <a href="#" onclick="event.preventDefault();favThis(this,\''+verse.replace(/'/g,"\\'")+'\',\''+source.replace(/'/g,"\\'")+'\')" style="color:#8B2E2E;text-decoration:none;margin-left:8px;font-size:14px;" title="收藏">♡</a>';
+    };
+    window.favThis = function(el, verse, source) {
+        const favs = JSON.parse(localStorage.getItem('poetry_favs')||'[]');
+        favs.push({verse, source});
+        localStorage.setItem('poetry_favs', JSON.stringify(favs));
+        el.textContent='♥';
+        el.style.color='#8B2E2E';
+    };
 }
 document.addEventListener('DOMContentLoaded', initAuth);

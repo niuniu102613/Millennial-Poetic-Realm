@@ -163,7 +163,7 @@
     <div class="big-char" id="bigChar">字</div>
     <div id="flyLayer"></div>
 
-    <script src="js/common.js?v=13"></script>
+    <script src="js/common.js?v=17"></script>
 <script>
 /* ===== 本页新增文案的中英对照（不污染 common.js） ===== */
 const TX2 = {
@@ -256,8 +256,8 @@ function axisStyle(){ return {
 };}
 
 function renderKPI(d){
-    document.getElementById('kChar').innerHTML  = d.ch.length ? `${d.ch[0].char}<span class="unit">${d.ch[0].count}</span>` : '—';
-    document.getElementById('kWord').innerHTML  = d.wd.length ? `${d.wd[0].word}<span class="unit">${d.wd[0].count}</span>` : '—';
+    document.getElementById('kChar').innerHTML  = d.ch.length ? `${trChar(d.ch[0].char)}<span class="unit">${d.ch[0].count}</span>` : '—';
+    document.getElementById('kWord').innerHTML  = d.wd.length ? `${trWord(d.wd[0].word)}<span class="unit">${d.wd[0].count}</span>` : '—';
     document.getElementById('kLen').textContent  = d.ln.length;
     document.getElementById('kDyn').textContent = Object.keys(d.dc||{}).length;
 }
