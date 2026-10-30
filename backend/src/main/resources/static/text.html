@@ -290,22 +290,21 @@ function renderText(d) {
     const topCh = d.ch.slice(0, 20);
     charChart.setOption({
         animationDuration: 1500, animationEasing: 'elasticOut',
-        tooltip: Object.assign({ trigger:'axis', axisPointer:{ type:'shadow' },
+        tooltip: Object.assign({ trigger:'axis', axisPointer:{ type:'line' },
             formatter: p => {
                 const it = Array.isArray(p)?p[0]:p;
                 return `<b style="color:${C.ink};font-size:15px;">${it.name}</b><br/><span style="color:#6a6a5a;">${window.__lang==="en"?"counted":"出现"} <b style="color:${C.cinnabar}">${it.value}</b> ${window.__lang==="en"?"times":"次"}</span>`;
             }}, tipStyle()),
-        grid:{ left:40, right:60, top:10, bottom:30 },
-        xAxis: Object.assign({ type:'value', show:false }, axisStyle()),
-        yAxis: Object.assign({ type:'category', data:topCh.map(x=>trChar(x.char)), inverse:true, name: window.__lang==='en'?'Char':'字', nameTextStyle:{color:'#8b7355',fontSize:11},
-            axisLabel:{ color:C.ink, fontSize:14, fontFamily:'STKaiti, serif' },
-            axisLine:{show:false}, axisTick:{show:false} }, axisStyle(), { splitLine:{show:false} }),
-        series:[{ type:'bar', barWidth:10,
-            data:topCh.map(x=>x.count),
-            itemStyle:{ color: new echarts.graphic.LinearGradient(0,0,1,0,[
-                {offset:0,color:C.stone},{offset:1,color:C.ink}]),
-                borderRadius:[0,3,3,0] },
-            label:{ show:true, position:'right', color:'#8B6F3A', fontWeight:'bold', fontSize:11 } }]
+        grid:{ left:60, right:30, top:45, bottom:70 },
+        xAxis: Object.assign({ type:'category', data:topCh.map(x=>trChar(x.char)), name: window.__lang==='en'?'Char':'字', nameTextStyle:{color:'#8b7355',fontSize:11},
+            axisLabel:{ interval:0, rotate:40, fontFamily:'STKaiti, serif', fontSize:12, color:'#8B6F3A' }}, axisStyle(), { splitLine:{show:false} }),
+        yAxis: Object.assign({ type:'value' }, axisStyle()),
+        series:[{ type:'line', smooth:true, symbol:'circle', symbolSize:8,
+            lineStyle:{ color:C.ink, width:3 },
+            itemStyle:{ color:C.ink, borderColor:'#F5EFE0', borderWidth:2 },
+            areaStyle:{ color:C.ink, opacity:.12 },
+            label:{ show:true, position:'top', color:'#8B6F3A', fontSize:10 },
+            data:topCh.map(x=>x.count) }]
     }, true);
 
     /* 贰·词：竖向朱砂柱 Top20 */
@@ -328,7 +327,7 @@ function renderText(d) {
                 borderRadius:[4,4,0,0] } }]
     }, true);
 
-    /* 叁·律：金色柱 */
+    /* 叁·律：描金折线 */
     lenChart.setOption({
         animationDuration: 1500, animationEasing: 'elasticOut',
         tooltip: Object.assign({ trigger:'axis',
@@ -336,16 +335,16 @@ function renderText(d) {
                 const it = Array.isArray(p)?p[0]:p;
                 return `<b style="color:${C.ink};font-size:14px;">${it.name}</b><br/><span style="color:#6a6a5a;">${window.__lang==="en"?"poems":"诗词"} <b style="color:${C.cinnabar}">${it.value}</b> ${window.__lang==="en"?"pieces":"首"}</span>`;
             }}, tipStyle()),
-        grid:{ left:60, right:60, top:30, bottom:40 },
+        grid:{ left:60, right:60, top:45, bottom:40 },
         xAxis: Object.assign({ type:'category', data:d.ln.map(x=>(window.__lang==='en'?x.range.replace(/字/g,'chars'):x.range)), name: window.__lang==='en'?'Length':'字数', nameTextStyle:{color:'#8b7355',fontSize:11},
             axisLabel:{ fontFamily:'STKaiti, serif', fontSize:13, color:'#8B6F3A', fontWeight:'bold' }}, axisStyle(), { splitLine:{show:false} }),
         yAxis: Object.assign({ type:'value' }, axisStyle()),
-        series:[{ type:'bar', barWidth:24,
-            data:d.ln.map(x=>x.count),
-            itemStyle:{ color: new echarts.graphic.LinearGradient(0,0,0,1,[
-                {offset:0,color:'#d4b87a'},{offset:1,color:C.gold}]),
-                borderRadius:[4,4,0,0] },
-            label:{ show:true, position:'top', color:'#8B6F3A', fontWeight:'bold' } }]
+        series:[{ type:'line', smooth:true, symbol:'circle', symbolSize:10,
+            lineStyle:{ color:C.gold, width:3 },
+            itemStyle:{ color:C.gold, borderColor:'#F5EFE0', borderWidth:2 },
+            areaStyle:{ color:C.gold, opacity:.15 },
+            label:{ show:true, position:'top', color:'#8B6F3A', fontWeight:'bold' },
+            data:d.ln.map(x=>x.count) }]
     }, true);
 
     DY = d.dc;
